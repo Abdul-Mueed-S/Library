@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:name=".LibraryTrackerApp"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.LibraryTracker"
+        tools:targetApi="31">
+        <activity android:name=".CategoriesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LibraryTracker.NoActionBar"/>
+        <activity android:name=".CategoryDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LibraryTracker.NoActionBar"/>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.LibraryTracker.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ImportExportActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LibraryTracker.NoActionBar" />
+        <activity android:name=".ImportPreviewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LibraryTracker.NoActionBar" />
+        <activity android:name=".FavouritesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LibraryTracker.NoActionBar" />
+        <activity android:name=".DuplicateCompareActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LibraryTracker.NoActionBar" />
+        <activity android:name=".PendingDuplicatesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.LibraryTracker.NoActionBar" />
+    </application>
+
+</manifest>
