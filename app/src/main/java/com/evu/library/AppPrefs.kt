@@ -5,6 +5,15 @@ import android.content.Context
 object AppPrefs {
     private const val PREFS_NAME = "app_prefs"
     private const val KEY_SHOW_NUMBERS = "show_numbers"
+    private const val KEY_THEME = "selected_theme"
+
+    const val THEME_DEFAULT = "default"
+    const val THEME_LIGHT = "light"
+    const val THEME_TRUE_DARK = "true_dark"
+    const val THEME_OCEAN = "ocean"
+    const val THEME_FOREST = "forest"
+    const val THEME_SUNSET = "sunset"
+    const val THEME_MONOCHROME = "monochrome"
 
     fun isShowNumbers(context: Context): Boolean {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -14,5 +23,43 @@ object AppPrefs {
     fun setShowNumbers(context: Context, value: Boolean) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit().putBoolean(KEY_SHOW_NUMBERS, value).apply()
+    }
+
+    fun getSelectedTheme(context: Context): String {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_THEME, THEME_DEFAULT) ?: THEME_DEFAULT
+    }
+
+    fun setSelectedTheme(context: Context, themeKey: String) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putString(KEY_THEME, themeKey).apply()
+    }
+
+    fun getThemeStyleResId(themeKey: String): Int {
+        return when (themeKey) {
+            THEME_LIGHT -> R.style.Theme_Library_Light
+            THEME_TRUE_DARK -> R.style.Theme_Library_TrueDark
+            THEME_OCEAN -> R.style.Theme_Library_Ocean
+            THEME_FOREST -> R.style.Theme_Library_Forest
+            THEME_SUNSET -> R.style.Theme_Library_Sunset
+            THEME_MONOCHROME -> R.style.Theme_Library_Monochrome
+            else -> R.style.Theme_Library_Default
+        }
+    }
+
+    fun getThemeDisplayName(themeKey: String): String {
+        return when (themeKey) {
+            THEME_LIGHT -> "Light"
+            THEME_TRUE_DARK -> "True Dark"
+            THEME_OCEAN -> "Ocean"
+            THEME_FOREST -> "Forest"
+            THEME_SUNSET -> "Sunset"
+            THEME_MONOCHROME -> "Monochrome"
+            else -> "Default (Purple)"
+        }
+    }
+
+    fun getAllThemeKeys(): List<String> {
+        return listOf(THEME_DEFAULT, THEME_LIGHT, THEME_TRUE_DARK, THEME_OCEAN, THEME_FOREST, THEME_SUNSET, THEME_MONOCHROME)
     }
 }

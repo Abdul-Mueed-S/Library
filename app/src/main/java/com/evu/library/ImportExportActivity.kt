@@ -7,11 +7,10 @@ import android.widget.CheckBox
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
-class ImportExportActivity : AppCompatActivity() {
+class ImportExportActivity : BaseActivity() {
 
     private lateinit var db: AppDatabase
     private var pendingExportContent: String = ""

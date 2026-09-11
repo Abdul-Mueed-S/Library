@@ -5,11 +5,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
-class DuplicateCompareActivity : AppCompatActivity() {
+class DuplicateCompareActivity : BaseActivity() {
 
     private lateinit var db: AppDatabase
     private var localId: Int = -1

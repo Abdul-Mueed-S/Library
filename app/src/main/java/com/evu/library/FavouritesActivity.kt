@@ -3,14 +3,13 @@ package com.evu.library
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 
-class FavouritesActivity : AppCompatActivity() {
+class FavouritesActivity : BaseActivity() {
 
     private lateinit var db: AppDatabase
     private lateinit var adapter: BookAdapter
