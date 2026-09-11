@@ -48,11 +48,11 @@ class PendingDuplicatesActivity : AppCompatActivity() {
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, _ ->
-                        lifecycleScope.launch {
-                            db.bookDao().clearDuplicateFlag(book.id)
-                            Toast.makeText(this@PendingDuplicatesActivity, primary, Toast.LENGTH_SHORT).show()
-                            load()
-                        }
+                        // No manual clearDuplicateFlag() call here — BookDialogHelper's
+                        // saveBook() already writes the correct flaggedDuplicate value
+                        // based on whether the edited book is still a duplicate.
+                        Toast.makeText(this@PendingDuplicatesActivity, primary, Toast.LENGTH_SHORT).show()
+                        load()
                     }
                     1 -> AlertDialog.Builder(this, R.style.AppDialogTheme)
                         .setTitle("Delete Book")
