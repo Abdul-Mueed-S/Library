@@ -18,12 +18,55 @@
         <item name="appColorOnPrimary">#FFFFFF</item>
         <item name="appColorOnSurface">#212121</item>
         <item name="appColorDelete">#D32F2F</item>
-        <item name="appColorSurface">#F0F0F0</item>
-        <item name="appColorDuplicateTagBg">#E0E0E0</item>
-        <item name="appColorDuplicateTagText">#555555</item>
+        <item name="appColorSurface">#E4E0EA</item>
+        <item name="appColorDuplicateTagBg">#D6D2DE</item>
+        <item name="appColorDuplicateTagText">#4A4550</item>
         <item name="colorPrimary">?attr/appColorPrimary</item>
         <item name="colorAccent">?attr/appColorPrimary</item>
         <item name="android:statusBarColor">?attr/appColorPrimary</item>
+        <item name="android:windowBackground">#ECE9F0</item>
+    </style>
+
+    <style name="Theme.Library.LightOcean" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="appColorPrimary">#0288D1</item>
+        <item name="appColorOnPrimary">#FFFFFF</item>
+        <item name="appColorOnSurface">#1A2B33</item>
+        <item name="appColorDelete">#D32F2F</item>
+        <item name="appColorSurface">#DCEAF2</item>
+        <item name="appColorDuplicateTagBg">#CBE0EC</item>
+        <item name="appColorDuplicateTagText">#2E4A57</item>
+        <item name="colorPrimary">?attr/appColorPrimary</item>
+        <item name="colorAccent">?attr/appColorPrimary</item>
+        <item name="android:statusBarColor">?attr/appColorPrimary</item>
+        <item name="android:windowBackground">#E8F1F6</item>
+    </style>
+
+    <style name="Theme.Library.LightForest" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="appColorPrimary">#388E3C</item>
+        <item name="appColorOnPrimary">#FFFFFF</item>
+        <item name="appColorOnSurface">#1B2A1D</item>
+        <item name="appColorDelete">#D32F2F</item>
+        <item name="appColorSurface">#DCEBDD</item>
+        <item name="appColorDuplicateTagBg">#CCE1CD</item>
+        <item name="appColorDuplicateTagText">#2C452E</item>
+        <item name="colorPrimary">?attr/appColorPrimary</item>
+        <item name="colorAccent">?attr/appColorPrimary</item>
+        <item name="android:statusBarColor">?attr/appColorPrimary</item>
+        <item name="android:windowBackground">#E9F3EA</item>
+    </style>
+
+    <style name="Theme.Library.LightSunset" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="appColorPrimary">#F57C00</item>
+        <item name="appColorOnPrimary">#FFFFFF</item>
+        <item name="appColorOnSurface">#2E1F0F</item>
+        <item name="appColorDelete">#D32F2F</item>
+        <item name="appColorSurface">#F5E1CC</item>
+        <item name="appColorDuplicateTagBg">#EDD3B4</item>
+        <item name="appColorDuplicateTagText">#4A3520</item>
+        <item name="colorPrimary">?attr/appColorPrimary</item>
+        <item name="colorAccent">?attr/appColorPrimary</item>
+        <item name="android:statusBarColor">?attr/appColorPrimary</item>
+        <item name="android:windowBackground">#FBEFE3</item>
     </style>
 
     <style name="Theme.Library.TrueDark" parent="Theme.MaterialComponents.NoActionBar">
