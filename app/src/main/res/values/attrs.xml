@@ -1,6 +1,7 @@
 <resources>
     <attr name="appColorPrimary" format="color" />
     <attr name="appColorOnPrimary" format="color" />
+    <attr name="appColorOnSurface" format="color" />
     <attr name="appColorDelete" format="color" />
     <attr name="appColorSurface" format="color" />
     <attr name="appColorDuplicateTagBg" format="color" />
