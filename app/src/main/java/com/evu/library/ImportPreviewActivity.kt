@@ -16,6 +16,8 @@ class ImportPreviewActivity : BaseActivity() {
     private lateinit var db: AppDatabase
     private lateinit var adapter: ImportPreviewAdapter
     private lateinit var categoriesCheckbox: CheckBox
+    private lateinit var favoritesCheckbox: CheckBox
+    private lateinit var duplicateFlagsCheckbox: CheckBox
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,10 +25,21 @@ class ImportPreviewActivity : BaseActivity() {
         findViewById<android.widget.ImageButton>(R.id.backButton).setOnClickListener { finish() }
 
         db = AppDatabase.getDatabase(this)
+
         categoriesCheckbox = findViewById(R.id.importCategoriesCheckbox)
         val hasAnyCategory = ImportHolder.books.any { it.categoryName != null }
         categoriesCheckbox.visibility = if (hasAnyCategory) android.view.View.VISIBLE else android.view.View.GONE
         categoriesCheckbox.isChecked = ImportHolder.defaultIncludeCategories
+
+        favoritesCheckbox = findViewById(R.id.importFavoritesCheckbox)
+        val hasAnyFavorite = ImportHolder.books.any { it.favorite }
+        favoritesCheckbox.visibility = if (hasAnyFavorite) android.view.View.VISIBLE else android.view.View.GONE
+        favoritesCheckbox.isChecked = ImportHolder.defaultIncludeFavorites
+
+        duplicateFlagsCheckbox = findViewById(R.id.importDuplicateFlagsCheckbox)
+        val hasAnyDuplicateFlag = ImportHolder.books.any { it.wasFlaggedDuplicate }
+        duplicateFlagsCheckbox.visibility = if (hasAnyDuplicateFlag) android.view.View.VISIBLE else android.view.View.GONE
+        duplicateFlagsCheckbox.isChecked = ImportHolder.defaultIncludeDuplicateFlags
 
         val recyclerView = findViewById<RecyclerView>(R.id.importRecyclerView)
         adapter = ImportPreviewAdapter(
@@ -110,6 +123,8 @@ class ImportPreviewActivity : BaseActivity() {
 
     private fun performImport() {
         val includeCategories = categoriesCheckbox.isChecked
+        val includeFavorites = favoritesCheckbox.isChecked
+        val includeDuplicateFlags = duplicateFlagsCheckbox.isChecked
         val itemsToImport = ImportHolder.books.toList()
 
         lifecycleScope.launch {
@@ -127,9 +142,11 @@ class ImportPreviewActivity : BaseActivity() {
                         edition = item.edition,
                         year = item.year,
                         isbn = item.isbn,
-                        isFavorite = false,
+                        isFavorite = if (includeFavorites) item.favorite else false,
                         categoryId = categoryId,
-                        flaggedDuplicate = item.isDuplicate
+                        // If the imported file's own duplicate flag is being kept, use it;
+                        // otherwise fall back to freshly-computed detection against this library.
+                        flaggedDuplicate = if (includeDuplicateFlags) item.wasFlaggedDuplicate else item.isDuplicate
                     )
                 )
                 count++
