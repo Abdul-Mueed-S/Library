@@ -66,14 +66,16 @@ class ImportExportActivity : BaseActivity() {
     private fun startExport() {
         val isJson = findViewById<RadioGroup>(R.id.formatGroup).checkedRadioButtonId == R.id.formatJson
         val includeCategories = findViewById<CheckBox>(R.id.includeCategoriesCheckbox).isChecked
+        val includeFavorites = findViewById<CheckBox>(R.id.includeFavoritesCheckbox).isChecked
+        val includeDuplicateFlags = findViewById<CheckBox>(R.id.includeDuplicateFlagsCheckbox).isChecked
 
         lifecycleScope.launch {
             val books = db.bookDao().getAllBooks()
             val categories = db.categoryDao().getAllCategories().associate { it.id to it.name }
             pendingExportContent = if (isJson) {
-                ExportImportUtils.booksToJson(books, categories, includeCategories)
+                ExportImportUtils.booksToJson(books, categories, includeCategories, includeFavorites, includeDuplicateFlags)
             } else {
-                ExportImportUtils.booksToCsv(books, categories, includeCategories)
+                ExportImportUtils.booksToCsv(books, categories, includeCategories, includeFavorites, includeDuplicateFlags)
             }
             val extension = if (isJson) "json" else "csv"
             val count = books.size
@@ -106,6 +108,10 @@ class ImportExportActivity : BaseActivity() {
             ImportHolder.books = mutableParsed
             ImportHolder.defaultIncludeCategories =
                 findViewById<android.widget.CheckBox>(R.id.importCategoriesDefaultCheckbox)?.isChecked ?: true
+            ImportHolder.defaultIncludeFavorites =
+                findViewById<android.widget.CheckBox>(R.id.importFavoritesDefaultCheckbox)?.isChecked ?: true
+            ImportHolder.defaultIncludeDuplicateFlags =
+                findViewById<android.widget.CheckBox>(R.id.importDuplicateFlagsDefaultCheckbox)?.isChecked ?: false
             startActivity(Intent(this@ImportExportActivity, ImportPreviewActivity::class.java))
         }
     }

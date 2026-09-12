@@ -12,12 +12,19 @@ data class ImportedBook(
     var isbn: String?,
     var favorite: Boolean,
     var categoryName: String?,
+    var wasFlaggedDuplicate: Boolean = false,
     var isDuplicate: Boolean = false
 )
 
 object ExportImportUtils {
 
-    fun booksToJson(books: List<Book>, categoryNames: Map<Int, String>, includeCategories: Boolean): String {
+    fun booksToJson(
+        books: List<Book>,
+        categoryNames: Map<Int, String>,
+        includeCategories: Boolean,
+        includeFavorites: Boolean,
+        includeDuplicateFlags: Boolean
+    ): String {
         val array = JSONArray()
         for (book in books) {
             val obj = JSONObject()
@@ -26,7 +33,8 @@ object ExportImportUtils {
             obj.put("edition", book.edition ?: JSONObject.NULL)
             obj.put("year", book.year ?: JSONObject.NULL)
             obj.put("isbn", book.isbn ?: JSONObject.NULL)
-            obj.put("favorite", book.isFavorite)
+            if (includeFavorites) obj.put("favorite", book.isFavorite)
+            if (includeDuplicateFlags) obj.put("flaggedDuplicate", book.flaggedDuplicate)
             val catName = if (includeCategories) book.categoryId?.let { categoryNames[it] } else null
             obj.put("category", catName ?: JSONObject.NULL)
             array.put(obj)
@@ -34,18 +42,33 @@ object ExportImportUtils {
         return array.toString(2)
     }
 
-    fun booksToCsv(books: List<Book>, categoryNames: Map<Int, String>, includeCategories: Boolean): String {
+    fun booksToCsv(
+        books: List<Book>,
+        categoryNames: Map<Int, String>,
+        includeCategories: Boolean,
+        includeFavorites: Boolean,
+        includeDuplicateFlags: Boolean
+    ): String {
         val sb = StringBuilder()
-        sb.append("Title,Author,Edition,Year,ISBN,Favorite,Category\n")
+        val headers = mutableListOf("Title", "Author", "Edition", "Year", "ISBN")
+        if (includeFavorites) headers.add("Favorite")
+        if (includeDuplicateFlags) headers.add("FlaggedDuplicate")
+        headers.add("Category")
+        sb.append(headers.joinToString(",")).append("\n")
+
         for (book in books) {
             val catName = if (includeCategories) book.categoryId?.let { categoryNames[it] } else null
-            sb.append(csvEscape(book.title)).append(",")
-            sb.append(csvEscape(book.author ?: "")).append(",")
-            sb.append(csvEscape(book.edition ?: "")).append(",")
-            sb.append(csvEscape(book.year ?: "")).append(",")
-            sb.append(csvEscape(book.isbn ?: "")).append(",")
-            sb.append(book.isFavorite).append(",")
-            sb.append(csvEscape(catName ?: "")).append("\n")
+            val row = mutableListOf(
+                csvEscape(book.title),
+                csvEscape(book.author ?: ""),
+                csvEscape(book.edition ?: ""),
+                csvEscape(book.year ?: ""),
+                csvEscape(book.isbn ?: "")
+            )
+            if (includeFavorites) row.add(book.isFavorite.toString())
+            if (includeDuplicateFlags) row.add(book.flaggedDuplicate.toString())
+            row.add(csvEscape(catName ?: ""))
+            sb.append(row.joinToString(",")).append("\n")
         }
         return sb.toString()
     }
@@ -72,7 +95,8 @@ object ExportImportUtils {
                     year = obj.optString("year", null).takeIf { it != "null" },
                     isbn = obj.optString("isbn", null).takeIf { it != "null" },
                     favorite = obj.optBoolean("favorite", false),
-                    categoryName = obj.optString("category", null).takeIf { it != "null" && it.isNotBlank() }
+                    categoryName = obj.optString("category", null).takeIf { it != "null" && it.isNotBlank() },
+                    wasFlaggedDuplicate = obj.optBoolean("flaggedDuplicate", false)
                 )
             )
         }
@@ -82,22 +106,27 @@ object ExportImportUtils {
     fun parseCsv(content: String): List<ImportedBook> {
         val lines = content.split("\n").filter { it.isNotBlank() }
         if (lines.size < 2) return emptyList()
+        val header = parseCsvLine(lines[0]).map { it.trim() }
+        val favoriteIdx = header.indexOf("Favorite")
+        val duplicateIdx = header.indexOf("FlaggedDuplicate")
+        val categoryIdx = header.indexOf("Category")
+
         val result = mutableListOf<ImportedBook>()
         var idCounter = 0
         for (i in 1 until lines.size) {
             val fields = parseCsvLine(lines[i])
-            if (fields.size < 7) continue
-            if (fields[0].isBlank()) continue
+            if (fields.isEmpty() || fields[0].isBlank()) continue
             result.add(
                 ImportedBook(
                     localId = idCounter++,
-                    title = fields[0],
-                    author = fields[1].ifBlank { null },
-                    edition = fields[2].ifBlank { null },
-                    year = fields[3].ifBlank { null },
-                    isbn = fields[4].ifBlank { null },
-                    favorite = fields[5].trim().equals("true", ignoreCase = true),
-                    categoryName = fields[6].ifBlank { null }
+                    title = fields.getOrElse(0) { "" },
+                    author = fields.getOrNull(1)?.ifBlank { null },
+                    edition = fields.getOrNull(2)?.ifBlank { null },
+                    year = fields.getOrNull(3)?.ifBlank { null },
+                    isbn = fields.getOrNull(4)?.ifBlank { null },
+                    favorite = if (favoriteIdx >= 0) fields.getOrNull(favoriteIdx)?.trim()?.equals("true", ignoreCase = true) == true else false,
+                    categoryName = if (categoryIdx >= 0) fields.getOrNull(categoryIdx)?.ifBlank { null } else null,
+                    wasFlaggedDuplicate = if (duplicateIdx >= 0) fields.getOrNull(duplicateIdx)?.trim()?.equals("true", ignoreCase = true) == true else false
                 )
             )
         }
@@ -137,4 +166,3 @@ object ExportImportUtils {
         }
     }
 }
-

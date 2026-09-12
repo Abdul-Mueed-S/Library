@@ -65,6 +65,22 @@
             android:checked="true"
             android:layout_marginTop="8dp" />
 
+        <CheckBox
+            android:id="@+id/includeFavoritesCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Include favorites"
+            android:checked="true"
+            android:layout_marginTop="4dp" />
+
+        <CheckBox
+            android:id="@+id/includeDuplicateFlagsCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Include duplicate flags"
+            android:checked="false"
+            android:layout_marginTop="4dp" />
+
         <Button
             android:id="@+id/exportButton"
             android:layout_width="match_parent"
@@ -102,6 +118,22 @@
             android:text="Import with categories (default)"
             android:checked="true"
             android:layout_marginTop="8dp" />
+
+        <CheckBox
+            android:id="@+id/importFavoritesDefaultCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Import with favorites (default)"
+            android:checked="true"
+            android:layout_marginTop="4dp" />
+
+        <CheckBox
+            android:id="@+id/importDuplicateFlagsDefaultCheckbox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Import with duplicate flags (default)"
+            android:checked="false"
+            android:layout_marginTop="4dp" />
 
         <Button
             android:id="@+id/importButton"
