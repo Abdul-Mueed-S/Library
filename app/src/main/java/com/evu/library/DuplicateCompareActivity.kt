@@ -13,6 +13,12 @@ class DuplicateCompareActivity : BaseActivity() {
     private lateinit var db: AppDatabase
     private var localId: Int = -1
 
+    private fun resolveAttrColor(attr: Int): Int {
+        val typedValue = android.util.TypedValue()
+        theme.resolveAttribute(attr, typedValue, true)
+        return typedValue.data
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_duplicate_compare)
@@ -100,7 +106,7 @@ class DuplicateCompareActivity : BaseActivity() {
 
         val editBtn = TextView(this)
         editBtn.text = "Edit"
-        editBtn.setTextColor(android.graphics.Color.parseColor("#B085F5"))
+        editBtn.setTextColor(resolveAttrColor(R.attr.appColorPrimary))
         editBtn.setPadding(16, 6, 16, 6)
         editBtn.setOnClickListener {
             BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, secondary ->
@@ -111,7 +117,7 @@ class DuplicateCompareActivity : BaseActivity() {
 
         val deleteBtn = TextView(this)
         deleteBtn.text = "Delete"
-        deleteBtn.setTextColor(android.graphics.Color.parseColor("#E57373"))
+        deleteBtn.setTextColor(resolveAttrColor(R.attr.appColorDelete))
         deleteBtn.setPadding(16, 6, 16, 6)
         deleteBtn.setOnClickListener {
             AlertDialog.Builder(this, R.style.AppDialogTheme)
@@ -147,7 +153,7 @@ class DuplicateCompareActivity : BaseActivity() {
 
         val editBtn = TextView(this)
         editBtn.text = "Edit"
-        editBtn.setTextColor(android.graphics.Color.parseColor("#B085F5"))
+        editBtn.setTextColor(resolveAttrColor(R.attr.appColorPrimary))
         editBtn.setPadding(16, 6, 16, 6)
         editBtn.setOnClickListener {
             ImportEditDialogHelper.show(this, item) {
@@ -161,7 +167,7 @@ class DuplicateCompareActivity : BaseActivity() {
 
         val removeBtn = TextView(this)
         removeBtn.text = "Remove"
-        removeBtn.setTextColor(android.graphics.Color.parseColor("#E57373"))
+        removeBtn.setTextColor(resolveAttrColor(R.attr.appColorDelete))
         removeBtn.setPadding(16, 6, 16, 6)
         removeBtn.setOnClickListener {
             AlertDialog.Builder(this, R.style.AppDialogTheme)

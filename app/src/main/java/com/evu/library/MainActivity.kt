@@ -55,17 +55,8 @@ class MainActivity : BaseActivity() {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        updateNumberToggleLabel()
-
         binding.navView.setNavigationItemSelectedListener { item ->
             val itemId = item.itemId
-            if (itemId == R.id.nav_toggle_numbers) {
-                val newValue = !AppPrefs.isShowNumbers(this)
-                AppPrefs.setShowNumbers(this, newValue)
-                updateNumberToggleLabel()
-                adapter.notifyDataSetChanged()
-                return@setNavigationItemSelectedListener true
-            }
 
             Handler(Looper.getMainLooper()).postDelayed({
                 when (itemId) {
@@ -83,6 +74,7 @@ class MainActivity : BaseActivity() {
                         intent.putExtra("mode", "import")
                         startActivity(intent)
                     }
+                    R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
                     else -> Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show()
                 }
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
@@ -119,6 +111,7 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         loadChips()
+        adapter.notifyDataSetChanged() // picks up numbered-list toggle changed in Settings
     }
 
     private fun loadChips() {
@@ -303,11 +296,5 @@ class MainActivity : BaseActivity() {
             Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
             refreshCurrentView()
         }
-    }
-
-    private fun updateNumberToggleLabel() {
-        val isOn = AppPrefs.isShowNumbers(this)
-        binding.navView.menu.findItem(R.id.nav_toggle_numbers).title =
-            if (isOn) "Numbered List: On" else "Numbered List: Off"
     }
 }

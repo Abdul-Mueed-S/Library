@@ -59,6 +59,18 @@ object AppPrefs {
         }
     }
 
+    fun getThemeSwatchColor(themeKey: String): Int {
+        return when (themeKey) {
+            THEME_LIGHT -> android.graphics.Color.parseColor("#7C4DFF")
+            THEME_TRUE_DARK -> android.graphics.Color.parseColor("#00E5FF")
+            THEME_OCEAN -> android.graphics.Color.parseColor("#4FC3F7")
+            THEME_FOREST -> android.graphics.Color.parseColor("#81C784")
+            THEME_SUNSET -> android.graphics.Color.parseColor("#FFB74D")
+            THEME_MONOCHROME -> android.graphics.Color.parseColor("#B0B0B0")
+            else -> android.graphics.Color.parseColor("#B085F5")
+        }
+    }
+
     fun getAllThemeKeys(): List<String> {
         return listOf(THEME_DEFAULT, THEME_LIGHT, THEME_TRUE_DARK, THEME_OCEAN, THEME_FOREST, THEME_SUNSET, THEME_MONOCHROME)
     }

@@ -16,6 +16,12 @@ class CategoryDetailActivity : BaseActivity() {
     private var categoryId: Int = -1
     private var categoryName: String = ""
 
+    private fun resolveAttrColor(attr: Int): Int {
+        val typedValue = android.util.TypedValue()
+        theme.resolveAttribute(attr, typedValue, true)
+        return typedValue.data
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_category_detail)
@@ -96,7 +102,7 @@ class CategoryDetailActivity : BaseActivity() {
             optionView.text = label
             optionView.textSize = 16f
             optionView.setPadding(16, 24, 16, 24)
-            optionView.setTextColor(android.graphics.Color.WHITE)
+            optionView.setTextColor(resolveAttrColor(R.attr.appColorOnSurface))
             val outValue = android.util.TypedValue()
             theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
             optionView.setBackgroundResource(outValue.resourceId)
