@@ -50,6 +50,9 @@
         <activity android:name=".ThemesActivity"
             android:exported="false"
             android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".LibrariesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
     </application>
 
 </manifest>
