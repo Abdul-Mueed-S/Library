@@ -75,6 +75,7 @@ class MainActivity : BaseActivity() {
                         intent.putExtra("mode", "import")
                         startActivity(intent)
                     }
+                    R.id.nav_check_location -> checkLocationSuggestion(silent = false)
                     R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
                     else -> Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show()
                 }
@@ -117,30 +118,46 @@ class MainActivity : BaseActivity() {
         adapter.notifyDataSetChanged()
     }
 
-    private fun checkLocationSuggestion() {
-        if (!LocationUtils.hasLocationPermission(this)) return
-
-        val location = LocationUtils.getLastKnownLocation(this) ?: return
-        val activeVault = VaultManager.getActiveVault(this)
-        val allVaults = VaultManager.getAllVaults(this)
-
-        val closerVault = allVaults
-            .filter { it.id != activeVault.id && it.latitude != null && it.longitude != null }
-            .minByOrNull { LocationUtils.distanceMeters(location.latitude, location.longitude, it.latitude!!, it.longitude!!) }
-            ?: return
-
-        val distance = LocationUtils.distanceMeters(location.latitude, location.longitude, closerVault.latitude!!, closerVault.longitude!!)
-        if (distance > LocationUtils.SUGGESTION_RADIUS_METERS) return
-
-        AlertDialog.Builder(this, R.style.AppDialogTheme)
-            .setTitle("Switch Library?")
-            .setMessage("You appear to be at \"${closerVault.name}\". Switch to it now?")
-            .setPositiveButton("Switch") { _, _ ->
-                VaultManager.setActiveVault(this, closerVault.id)
-                recreate()
+    private fun checkLocationSuggestion(silent: Boolean = true) {
+        if (!LocationUtils.hasLocationPermission(this)) {
+            if (!silent) Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT).show()
+            return
+        }
+        LocationUtils.requestFreshLocation(this) { location ->
+            if (location == null) {
+                if (!silent) Toast.makeText(this, "Couldn't get current location", Toast.LENGTH_SHORT).show()
+                return@requestFreshLocation
             }
-            .setNegativeButton("Not Now", null)
-            .show()
+            val activeVault = VaultManager.getActiveVault(this)
+            val allVaults = VaultManager.getAllVaults(this)
+
+            val closerVault = allVaults
+                .filter { it.id != activeVault.id && it.latitude != null && it.longitude != null }
+                .minByOrNull { LocationUtils.distanceMeters(location.latitude, location.longitude, it.latitude!!, it.longitude!!) }
+
+            if (closerVault == null) {
+                if (!silent) Toast.makeText(this, "No other library has a saved location", Toast.LENGTH_SHORT).show()
+                return@requestFreshLocation
+            }
+
+            val radius = closerVault.radiusMeters ?: LocationUtils.SUGGESTION_RADIUS_METERS
+            val distance = LocationUtils.distanceMeters(location.latitude, location.longitude, closerVault.latitude!!, closerVault.longitude!!)
+
+            if (distance > radius) {
+                if (!silent) Toast.makeText(this, "You're not near any other saved library", Toast.LENGTH_SHORT).show()
+                return@requestFreshLocation
+            }
+
+            AlertDialog.Builder(this, R.style.AppDialogTheme)
+                .setTitle("Switch Library?")
+                .setMessage("You appear to be at \"${closerVault.locationName ?: closerVault.name}\". Switch to \"${closerVault.name}\"?")
+                .setPositiveButton("Switch") { _, _ ->
+                    VaultManager.setActiveVault(this, closerVault.id)
+                    recreate()
+                }
+                .setNegativeButton("Not Now", null)
+                .show()
+        }
     }
 
     private fun loadChips() {

@@ -15,6 +15,7 @@ class VaultAdapter(
 
     class VaultViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.vaultNameText)
+        val location: TextView = view.findViewById(R.id.vaultLocationText)
         val activeLabel: TextView = view.findViewById(R.id.vaultActiveText)
         val options: TextView = view.findViewById(R.id.vaultOptionsText)
     }
@@ -28,6 +29,17 @@ class VaultAdapter(
         val vault = vaults[position]
         holder.name.text = vault.name
         holder.activeLabel.visibility = if (vault.id == activeVaultId) View.VISIBLE else View.GONE
+
+        if (vault.locationName != null) {
+            holder.location.text = "📍 ${vault.locationName}"
+            holder.location.visibility = View.VISIBLE
+        } else if (vault.latitude != null) {
+            holder.location.text = "📍 Location set (unnamed)"
+            holder.location.visibility = View.VISIBLE
+        } else {
+            holder.location.visibility = View.GONE
+        }
+
         holder.itemView.setOnClickListener { onSwitch(vault) }
         holder.options.setOnClickListener { onOptions(vault) }
     }

@@ -26,7 +26,10 @@ object VaultManager {
                     name = obj.getString("name"),
                     dbFileName = obj.getString("dbFileName"),
                     latitude = if (obj.isNull("latitude")) null else obj.getDouble("latitude"),
-                    longitude = if (obj.isNull("longitude")) null else obj.getDouble("longitude")
+                    longitude = if (obj.isNull("longitude")) null else obj.getDouble("longitude"),
+                    radiusMeters = if (!obj.has("radiusMeters") || obj.isNull("radiusMeters")) null else obj.getDouble("radiusMeters"),
+                    isManualLocation = obj.optBoolean("isManualLocation", false),
+                    locationName = if (!obj.has("locationName") || obj.isNull("locationName")) null else obj.getString("locationName")
                 )
             )
         }
@@ -42,14 +45,15 @@ object VaultManager {
             obj.put("dbFileName", v.dbFileName)
             obj.put("latitude", v.latitude ?: JSONObject.NULL)
             obj.put("longitude", v.longitude ?: JSONObject.NULL)
+            obj.put("radiusMeters", v.radiusMeters ?: JSONObject.NULL)
+            obj.put("isManualLocation", v.isManualLocation)
+            obj.put("locationName", v.locationName ?: JSONObject.NULL)
             array.put(obj)
         }
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .edit().putString(KEY_VAULTS, array.toString()).apply()
     }
 
-    // First-run migration: if no vault registry exists yet, wrap the existing
-    // "library_database" file into a default vault so existing users keep their data.
     private fun ensureAtLeastOneVault(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         if (prefs.contains(KEY_VAULTS)) return
@@ -94,7 +98,20 @@ object VaultManager {
         saveAllVaults(context, vaults)
     }
 
-    // Does NOT delete the underlying .db file — see AppDatabase piece for that.
+    fun setVaultLocationFromGps(context: Context, vaultId: String, latitude: Double, longitude: Double, locationName: String?) {
+        val vaults = getAllVaults(context).map {
+            if (it.id == vaultId) it.copy(latitude = latitude, longitude = longitude, isManualLocation = false, locationName = locationName) else it
+        }
+        saveAllVaults(context, vaults)
+    }
+
+    fun setVaultLocationManual(context: Context, vaultId: String, latitude: Double, longitude: Double, radiusMeters: Double, locationName: String?) {
+        val vaults = getAllVaults(context).map {
+            if (it.id == vaultId) it.copy(latitude = latitude, longitude = longitude, radiusMeters = radiusMeters, isManualLocation = true, locationName = locationName) else it
+        }
+        saveAllVaults(context, vaults)
+    }
+
     fun deleteVault(context: Context, vaultId: String) {
         val vaults = getAllVaults(context).filter { it.id != vaultId }
         saveAllVaults(context, vaults)
@@ -103,12 +120,5 @@ object VaultManager {
         if (activeId == vaultId && vaults.isNotEmpty()) {
             setActiveVault(context, vaults.first().id)
         }
-    }
-
-    fun setVaultLocation(context: Context, vaultId: String, latitude: Double, longitude: Double) {
-        val vaults = getAllVaults(context).map {
-            if (it.id == vaultId) it.copy(latitude = latitude, longitude = longitude) else it
-        }
-        saveAllVaults(context, vaults)
     }
 }
