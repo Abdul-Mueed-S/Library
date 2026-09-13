@@ -5,7 +5,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
-import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
@@ -31,7 +30,6 @@ object BookDialogHelper {
         val yearInput = dialogView.findViewById<EditText>(R.id.yearInput)
         val isbnInput = dialogView.findViewById<EditText>(R.id.isbnInput)
         val categorySpinner = dialogView.findViewById<Spinner>(R.id.categorySpinner)
-        val draftCheckbox = dialogView.findViewById<CheckBox>(R.id.draftCheckbox)
 
         if (existingBook != null) {
             titleInput.setText(existingBook.title)
@@ -39,7 +37,6 @@ object BookDialogHelper {
             editionInput.setText(existingBook.edition ?: "")
             yearInput.setText(existingBook.year ?: "")
             isbnInput.setText(existingBook.isbn ?: "")
-            draftCheckbox.isChecked = existingBook.isDraft
         }
 
         isbnInput.addTextChangedListener(object : TextWatcher {
@@ -127,49 +124,71 @@ object BookDialogHelper {
             .setView(dialogView)
             .setPositiveButton("Save", null)
             .setNegativeButton("Cancel", null)
+            .setNeutralButton("Draft", null)
             .create()
+
+        // isDraft resolution:
+        // - Pressing "Draft" always forces isDraft = true (new or existing entry).
+        // - Pressing "Save" on a NEW entry sets isDraft = false (plain add).
+        // - Pressing "Save" on an EXISTING entry PRESERVES its current isDraft value —
+        //   editing a draft to fix a duplicate conflict must not silently un-draft it;
+        //   only the explicit "Draft"/"Mark as Draft"/"Unmark as Draft" actions change that flag.
+        fun buildBookOrShowError(forceDraft: Boolean): Book? {
+            val title = Utils.toTitleCase(titleInput.text.toString())
+            if (title.isEmpty()) {
+                titleInput.error = "Title is required"
+                return null
+            }
+            val edition = Utils.clean(editionInput.text.toString()).ifEmpty { null }
+            val resolvedIsDraft = if (forceDraft) true else (existingBook?.isDraft ?: false)
+            return Book(
+                id = existingBook?.id ?: 0,
+                title = title,
+                author = Utils.toTitleCase(authorInput.text.toString()).ifEmpty { null },
+                edition = edition,
+                year = Utils.clean(yearInput.text.toString()).ifEmpty { null },
+                isbn = Utils.clean(isbnInput.text.toString()).ifEmpty { null },
+                isFavorite = existingBook?.isFavorite ?: false,
+                categoryId = selectedCategoryId,
+                isDraft = resolvedIsDraft
+            )
+        }
+
+        fun attemptSave(forceDraft: Boolean) {
+            val book = buildBookOrShowError(forceDraft) ?: return
+            val title = book.title
+
+            scope.launch {
+                val allBooks = db.bookDao().getAllBooks()
+                val hasDuplicate = allBooks.any {
+                    it.id != book.id && Utils.isDuplicate(it.title, it.edition, book.title, book.edition)
+                }
+                if (hasDuplicate) {
+                    AlertDialog.Builder(activity, R.style.AppDialogTheme)
+                        .setTitle("Possible Duplicate")
+                        .setMessage("This looks like a duplicate of a book already in your library. Save anyway?")
+                        .setPositiveButton("Save Anyway") { _, _ ->
+                            val flaggedBook = book.copy(flaggedDuplicate = true)
+                            scope.launch { saveBook(db, flaggedBook, existingBook, newCategoryCreatedThisSession, selectedCategoryId, selectedCategoryName, title, onResult) }
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                } else {
+                    // Not a duplicate — either genuinely unique or resolved by this edit.
+                    // flaggedDuplicate is correctly false here regardless of prior state.
+                    saveBook(db, book, existingBook, newCategoryCreatedThisSession, selectedCategoryId, selectedCategoryName, title, onResult)
+                    dialog.dismiss()
+                }
+            }
+        }
 
         dialog.setOnShowListener {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val title = Utils.toTitleCase(titleInput.text.toString())
-                if (title.isEmpty()) {
-                    titleInput.error = "Title is required"
-                    return@setOnClickListener
-                }
-                val edition = Utils.clean(editionInput.text.toString()).ifEmpty { null }
-                val book = Book(
-                    id = existingBook?.id ?: 0,
-                    title = title,
-                    author = Utils.toTitleCase(authorInput.text.toString()).ifEmpty { null },
-                    edition = edition,
-                    year = Utils.clean(yearInput.text.toString()).ifEmpty { null },
-                    isbn = Utils.clean(isbnInput.text.toString()).ifEmpty { null },
-                    isFavorite = existingBook?.isFavorite ?: false,
-                    categoryId = selectedCategoryId,
-                    isDraft = draftCheckbox.isChecked
-                )
-
-                scope.launch {
-                    val allBooks = db.bookDao().getAllBooks()
-                    val hasDuplicate = allBooks.any {
-                        it.id != book.id && Utils.isDuplicate(it.title, it.edition, book.title, book.edition)
-                    }
-                    if (hasDuplicate) {
-                        AlertDialog.Builder(activity, R.style.AppDialogTheme)
-                            .setTitle("Possible Duplicate")
-                            .setMessage("This looks like a duplicate of a book already in your library. Save anyway?")
-                            .setPositiveButton("Save Anyway") { _, _ ->
-                                val flaggedBook = book.copy(flaggedDuplicate = true)
-                                scope.launch { saveBook(db, flaggedBook, existingBook, newCategoryCreatedThisSession, selectedCategoryId, selectedCategoryName, title, onResult) }
-                                dialog.dismiss()
-                            }
-                            .setNegativeButton("Cancel", null)
-                            .show()
-                    } else {
-                        saveBook(db, book, existingBook, newCategoryCreatedThisSession, selectedCategoryId, selectedCategoryName, title, onResult)
-                        dialog.dismiss()
-                    }
-                }
+                attemptSave(forceDraft = false)
+            }
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                attemptSave(forceDraft = true)
             }
         }
         dialog.show()
@@ -187,16 +206,15 @@ object BookDialogHelper {
     ) {
         if (existingBook == null) {
             db.bookDao().insertBook(book)
-            if (newCategoryCreated) {
-                onResult("Book Added", "Book Added to $selectedCategoryName")
-            } else if (selectedCategoryId != null) {
-                onResult("$title Added to $selectedCategoryName", null)
-            } else {
-                onResult("$title Added", null)
+            when {
+                book.isDraft -> onResult("$title Saved as Draft", null)
+                newCategoryCreated -> onResult("Book Added", "Book Added to $selectedCategoryName")
+                selectedCategoryId != null -> onResult("$title Added to $selectedCategoryName", null)
+                else -> onResult("$title Added", null)
             }
         } else {
             db.bookDao().updateBook(book)
-            onResult("$title Edited", null)
+            onResult(if (book.isDraft) "$title Edited (still a Draft)" else "$title Edited", null)
         }
     }
 }

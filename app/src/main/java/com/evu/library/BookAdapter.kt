@@ -37,7 +37,11 @@ class BookAdapter(
         holder.numberText.visibility = if (showNumbers) View.VISIBLE else View.GONE
         holder.numberText.text = "${position + 1}."
 
-        holder.titleText.text = if (book.isFavorite) "★ ${book.title}" else book.title
+        val titlePrefix = buildString {
+            if (book.isFavorite) append("★ ")
+            if (book.isDraft) append("📝 ")
+        }
+        holder.titleText.text = "$titlePrefix${book.title}"
 
         val hasAuthor = !book.author.isNullOrBlank()
         val hasEditionYear = !book.edition.isNullOrBlank() || !book.year.isNullOrBlank()

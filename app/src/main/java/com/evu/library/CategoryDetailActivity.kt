@@ -119,7 +119,7 @@ class CategoryDetailActivity : BaseActivity() {
 
     private fun loadBooks() {
         lifecycleScope.launch {
-            fullList = db.bookDao().getBooksByCategory(categoryId)
+            fullList = db.bookDao().getBooksByCategory(categoryId).filter { !it.isDraft && !it.flaggedDuplicate }
             applyFilterAndSort()
         }
     }

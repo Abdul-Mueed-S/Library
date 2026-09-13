@@ -121,7 +121,7 @@ class PendingDuplicatesActivity : BaseActivity() {
 
     private fun showOptions(book: Book) {
         val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
-        val options = arrayOf("Edit", "Delete", "Mark as Reviewed", draftLabel)
+        val options = arrayOf("Edit", "Delete", draftLabel)
         AlertDialog.Builder(this, R.style.AppDialogTheme)
             .setTitle(book.title)
             .setItems(options) { _, which ->
@@ -143,11 +143,6 @@ class PendingDuplicatesActivity : BaseActivity() {
                         .setNegativeButton("Cancel", null)
                         .show()
                     2 -> lifecycleScope.launch {
-                        db.bookDao().clearDuplicateFlag(book.id)
-                        Toast.makeText(this@PendingDuplicatesActivity, "${book.title} Marked as Reviewed", Toast.LENGTH_SHORT).show()
-                        load()
-                    }
-                    3 -> lifecycleScope.launch {
                         val newState = !book.isDraft
                         db.bookDao().updateBook(book.copy(isDraft = newState))
                         val msg = if (newState) "${book.title} Marked as Draft" else "${book.title} Unmarked as Draft"

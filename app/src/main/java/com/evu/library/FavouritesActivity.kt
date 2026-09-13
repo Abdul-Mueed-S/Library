@@ -96,7 +96,7 @@ class FavouritesActivity : BaseActivity() {
 
     private fun loadFavourites() {
         lifecycleScope.launch {
-            fullList = db.bookDao().getFavoriteBooks()
+            fullList = db.bookDao().getFavoriteBooks().filter { !it.isDraft && !it.flaggedDuplicate }
             applyFilterAndSort()
         }
     }

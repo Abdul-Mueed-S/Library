@@ -226,7 +226,11 @@ class MainActivity : BaseActivity() {
                 is ChipItem.CategoryChip -> db.bookDao().getBooksByCategory(chip.category.id)
                 else -> db.bookDao().getAllBooks()
             }
-            adapter.updateList(applySort(results))
+            // Drafts and flagged duplicates are excluded from all main library views —
+            // drafts live only in the Drafts screen, duplicates only in the Duplicates screen,
+            // until resolved (unmarked / edited into uniqueness respectively).
+            val filtered = results.filter { !it.isDraft && !it.flaggedDuplicate }
+            adapter.updateList(applySort(filtered))
         }
     }
 
@@ -302,7 +306,8 @@ class MainActivity : BaseActivity() {
                 is ChipItem.CategoryChip -> baseResults.filter { it.categoryId == chip.category.id }
                 else -> baseResults
             }
-            adapter.updateList(applySort(scoped))
+            val filtered = scoped.filter { !it.isDraft && !it.flaggedDuplicate }
+            adapter.updateList(applySort(filtered))
         }
     }
 
