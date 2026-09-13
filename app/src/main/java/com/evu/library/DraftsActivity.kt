@@ -120,9 +120,10 @@ class DraftsActivity : BaseActivity() {
     }
 
     private fun showOptions(book: Book) {
+        val dialogTitle = if (book.flaggedDuplicate) "${book.title} (Also a Duplicate)" else book.title
         val options = arrayOf("Edit", "Delete", "Mark as Published (remove from Drafts)")
         AlertDialog.Builder(this, R.style.AppDialogTheme)
-            .setTitle(book.title)
+            .setTitle(dialogTitle)
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, _ ->
