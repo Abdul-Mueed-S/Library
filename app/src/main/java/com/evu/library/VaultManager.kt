@@ -104,4 +104,11 @@ object VaultManager {
             setActiveVault(context, vaults.first().id)
         }
     }
+
+    fun setVaultLocation(context: Context, vaultId: String, latitude: Double, longitude: Double) {
+        val vaults = getAllVaults(context).map {
+            if (it.id == vaultId) it.copy(latitude = latitude, longitude = longitude) else it
+        }
+        saveAllVaults(context, vaults)
+    }
 }

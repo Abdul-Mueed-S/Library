@@ -1,9 +1,11 @@
 package com.evu.library
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +13,19 @@ import androidx.recyclerview.widget.RecyclerView
 class LibrariesActivity : BaseActivity() {
 
     private lateinit var adapter: VaultAdapter
+    private var pendingLocationVaultId: String? = null
+
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val vaultId = pendingLocationVaultId
+        pendingLocationVaultId = null
+        if (granted && vaultId != null) {
+            saveCurrentLocationForVault(vaultId)
+        } else if (!granted) {
+            Toast.makeText(this, "Location permission needed to set a library's location", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,8 +65,6 @@ class LibrariesActivity : BaseActivity() {
         if (vault.id == current.id) return
 
         VaultManager.setActiveVault(this, vault.id)
-        // Restart the whole task fresh so every activity picks up the new
-        // active database, same pattern used for theme switching.
         val intent = Intent(this, MainActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
@@ -76,16 +89,38 @@ class LibrariesActivity : BaseActivity() {
     }
 
     private fun showVaultOptions(vault: LibraryVault) {
-        val options = arrayOf("Rename", "Delete")
+        val locationLabel = if (vault.latitude != null) "Update Location (set to here)" else "Set Location (to here)"
+        val options = arrayOf("Rename", locationLabel, "Delete")
         AlertDialog.Builder(this, R.style.AppDialogTheme)
             .setTitle(vault.name)
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> showRenameDialog(vault)
-                    1 -> confirmDeleteVault(vault)
+                    1 -> requestLocationForVault(vault)
+                    2 -> confirmDeleteVault(vault)
                 }
             }
             .show()
+    }
+
+    private fun requestLocationForVault(vault: LibraryVault) {
+        if (LocationUtils.hasLocationPermission(this)) {
+            saveCurrentLocationForVault(vault.id)
+        } else {
+            pendingLocationVaultId = vault.id
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+    }
+
+    private fun saveCurrentLocationForVault(vaultId: String) {
+        val location = LocationUtils.getLastKnownLocation(this)
+        if (location == null) {
+            Toast.makeText(this, "Couldn't get current location — try again in a moment", Toast.LENGTH_SHORT).show()
+            return
+        }
+        VaultManager.setVaultLocation(this, vaultId, location.latitude, location.longitude)
+        Toast.makeText(this, "Location saved for this library", Toast.LENGTH_SHORT).show()
+        refresh()
     }
 
     private fun showRenameDialog(vault: LibraryVault) {

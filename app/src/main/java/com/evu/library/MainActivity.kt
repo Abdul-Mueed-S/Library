@@ -107,12 +107,40 @@ class MainActivity : BaseActivity() {
             override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
             override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
         })
+
+        checkLocationSuggestion()
     }
 
     override fun onResume() {
         super.onResume()
         loadChips()
-        adapter.notifyDataSetChanged() // picks up numbered-list toggle changed in Settings
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun checkLocationSuggestion() {
+        if (!LocationUtils.hasLocationPermission(this)) return
+
+        val location = LocationUtils.getLastKnownLocation(this) ?: return
+        val activeVault = VaultManager.getActiveVault(this)
+        val allVaults = VaultManager.getAllVaults(this)
+
+        val closerVault = allVaults
+            .filter { it.id != activeVault.id && it.latitude != null && it.longitude != null }
+            .minByOrNull { LocationUtils.distanceMeters(location.latitude, location.longitude, it.latitude!!, it.longitude!!) }
+            ?: return
+
+        val distance = LocationUtils.distanceMeters(location.latitude, location.longitude, closerVault.latitude!!, closerVault.longitude!!)
+        if (distance > LocationUtils.SUGGESTION_RADIUS_METERS) return
+
+        AlertDialog.Builder(this, R.style.AppDialogTheme)
+            .setTitle("Switch Library?")
+            .setMessage("You appear to be at \"${closerVault.name}\". Switch to it now?")
+            .setPositiveButton("Switch") { _, _ ->
+                VaultManager.setActiveVault(this, closerVault.id)
+                recreate()
+            }
+            .setNegativeButton("Not Now", null)
+            .show()
     }
 
     private fun loadChips() {
@@ -246,12 +274,18 @@ class MainActivity : BaseActivity() {
             return
         }
         lifecycleScope.launch {
-            val results = when (searchFilterIndex) {
+            val baseResults = when (searchFilterIndex) {
                 1 -> db.bookDao().searchByIsbn(query)
                 2 -> db.bookDao().searchByAuthor(query)
                 else -> db.bookDao().searchAny(query)
             }
-            adapter.updateList(applySort(results))
+            val chip = chips.getOrNull(selectedChipIndex)
+            val scoped = when (chip) {
+                is ChipItem.Favourites -> baseResults.filter { it.isFavorite }
+                is ChipItem.CategoryChip -> baseResults.filter { it.categoryId == chip.category.id }
+                else -> baseResults
+            }
+            adapter.updateList(applySort(scoped))
         }
     }
 
