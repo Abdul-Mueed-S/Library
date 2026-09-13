@@ -63,6 +63,7 @@ class MainActivity : BaseActivity() {
                     R.id.nav_home -> { }
                     R.id.nav_categories -> startActivity(Intent(this, CategoriesActivity::class.java))
                     R.id.nav_favourites -> startActivity(Intent(this, FavouritesActivity::class.java))
+                    R.id.nav_drafts -> startActivity(Intent(this, DraftsActivity::class.java))
                     R.id.nav_duplicates -> startActivity(Intent(this, PendingDuplicatesActivity::class.java))
                     R.id.nav_export -> {
                         val intent = Intent(this, ImportExportActivity::class.java)
@@ -256,7 +257,8 @@ class MainActivity : BaseActivity() {
 
     private fun showBookOptionsDialog(book: Book) {
         val favLabel = if (book.isFavorite) "Remove from Favorites" else "Add to Favorites"
-        val options = arrayOf("Edit", "Delete", favLabel)
+        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
+        val options = arrayOf("Edit", "Delete", favLabel, draftLabel)
 
         AlertDialog.Builder(this, R.style.AppDialogTheme)
             .setTitle(book.title)
@@ -268,9 +270,20 @@ class MainActivity : BaseActivity() {
                     }
                     1 -> confirmDelete(book)
                     2 -> toggleFavorite(book)
+                    3 -> toggleDraft(book)
                 }
             }
             .show()
+    }
+
+    private fun toggleDraft(book: Book) {
+        lifecycleScope.launch {
+            val newState = !book.isDraft
+            db.bookDao().updateBook(book.copy(isDraft = newState))
+            val msg = if (newState) "${book.title} Marked as Draft" else "${book.title} Unmarked as Draft"
+            Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
+            refreshCurrentView()
+        }
     }
 
     private fun confirmDelete(book: Book) {

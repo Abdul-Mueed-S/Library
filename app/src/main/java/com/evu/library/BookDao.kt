@@ -54,6 +54,12 @@ interface BookDao {
     @androidx.room.Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     suspend fun insertBookWithId(book: Book)
 
+    @Query("SELECT * FROM books WHERE isDraft = 1")
+    suspend fun getDraftBooks(): List<Book>
+
+    @Query("UPDATE books SET isDraft = 0 WHERE id = :id")
+    suspend fun clearDraftFlag(id: Int)
+
     @Delete
     suspend fun deleteBook(book: Book)
 }

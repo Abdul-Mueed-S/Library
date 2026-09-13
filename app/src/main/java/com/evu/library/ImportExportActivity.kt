@@ -151,7 +151,8 @@ class ImportExportActivity : BaseActivity() {
                         isbn = book.isbn,
                         isFavorite = book.isFavorite,
                         categoryId = book.categoryId,
-                        flaggedDuplicate = book.flaggedDuplicate
+                        flaggedDuplicate = book.flaggedDuplicate,
+                        isDraft = book.isDraft
                     )
                 )
             }

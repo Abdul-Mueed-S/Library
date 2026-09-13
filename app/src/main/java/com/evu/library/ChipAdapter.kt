@@ -25,7 +25,7 @@ class ChipAdapter(
         val chip = chips[position]
         holder.text.text = when (chip) {
             is ChipItem.All -> "All"
-            is ChipItem.Favourites -> "Favourites"
+            is ChipItem.Favourites -> "Favorites"
             is ChipItem.CategoryChip -> chip.category.name
             is ChipItem.AddNew -> "+"
         }

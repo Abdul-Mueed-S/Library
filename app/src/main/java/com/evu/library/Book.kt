@@ -14,5 +14,6 @@ data class Book(
     val isbn: String? = null,
     val isFavorite: Boolean = false,
     val categoryId: Int? = null,
-    val flaggedDuplicate: Boolean = false
+    val flaggedDuplicate: Boolean = false,
+    val isDraft: Boolean = false
 )

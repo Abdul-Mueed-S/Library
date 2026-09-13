@@ -191,6 +191,7 @@ object ExportImportUtils {
             obj.put("isFavorite", book.isFavorite)
             obj.put("categoryId", book.categoryId ?: JSONObject.NULL)
             obj.put("flaggedDuplicate", book.flaggedDuplicate)
+            obj.put("isDraft", book.isDraft)
             obj.put("libraryId", JSONObject.NULL) // reserved for future multi-library support
             bookArray.put(obj)
         }
@@ -224,6 +225,7 @@ object ExportImportUtils {
                         isFavorite = obj.optBoolean("isFavorite", false),
                         categoryId = if (obj.isNull("categoryId")) null else obj.getInt("categoryId"),
                         flaggedDuplicate = obj.optBoolean("flaggedDuplicate", false),
+                        isDraft = obj.optBoolean("isDraft", false),
                         libraryId = if (obj.has("libraryId") && !obj.isNull("libraryId")) obj.getInt("libraryId") else null
                     )
                 )

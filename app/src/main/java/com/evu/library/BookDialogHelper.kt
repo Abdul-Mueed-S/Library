@@ -5,6 +5,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
@@ -30,6 +31,7 @@ object BookDialogHelper {
         val yearInput = dialogView.findViewById<EditText>(R.id.yearInput)
         val isbnInput = dialogView.findViewById<EditText>(R.id.isbnInput)
         val categorySpinner = dialogView.findViewById<Spinner>(R.id.categorySpinner)
+        val draftCheckbox = dialogView.findViewById<CheckBox>(R.id.draftCheckbox)
 
         if (existingBook != null) {
             titleInput.setText(existingBook.title)
@@ -37,6 +39,7 @@ object BookDialogHelper {
             editionInput.setText(existingBook.edition ?: "")
             yearInput.setText(existingBook.year ?: "")
             isbnInput.setText(existingBook.isbn ?: "")
+            draftCheckbox.isChecked = existingBook.isDraft
         }
 
         isbnInput.addTextChangedListener(object : TextWatcher {
@@ -142,7 +145,8 @@ object BookDialogHelper {
                     year = Utils.clean(yearInput.text.toString()).ifEmpty { null },
                     isbn = Utils.clean(isbnInput.text.toString()).ifEmpty { null },
                     isFavorite = existingBook?.isFavorite ?: false,
-                    categoryId = selectedCategoryId
+                    categoryId = selectedCategoryId,
+                    isDraft = draftCheckbox.isChecked
                 )
 
                 scope.launch {
@@ -170,6 +174,7 @@ object BookDialogHelper {
         }
         dialog.show()
     }
+
     private suspend fun saveBook(
         db: AppDatabase,
         book: Book,

@@ -53,6 +53,9 @@
         <activity android:name=".LibrariesActivity"
             android:exported="false"
             android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".DraftsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
     </application>
 
 </manifest>

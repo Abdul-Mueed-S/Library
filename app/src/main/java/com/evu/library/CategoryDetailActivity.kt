@@ -1,6 +1,9 @@
 package com.evu.library
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
@@ -15,6 +18,7 @@ class CategoryDetailActivity : BaseActivity() {
     private lateinit var adapter: BookAdapter
     private var categoryId: Int = -1
     private var categoryName: String = ""
+    private var fullList: List<Book> = emptyList()
 
     private fun resolveAttrColor(attr: Int): Int {
         val typedValue = android.util.TypedValue()
@@ -38,6 +42,12 @@ class CategoryDetailActivity : BaseActivity() {
         recyclerView.adapter = adapter
         recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
+        findViewById<EditText>(R.id.searchEditText).addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) { applyFilter(s.toString()) }
+            override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+            override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+        })
+
         findViewById<android.widget.Button>(R.id.addNewBookButton).setOnClickListener {
             BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, null, categoryId) { primary, secondary ->
                 Toast.makeText(this, primary, Toast.LENGTH_SHORT).show()
@@ -59,8 +69,18 @@ class CategoryDetailActivity : BaseActivity() {
 
     private fun loadBooks() {
         lifecycleScope.launch {
-            adapter.updateList(db.bookDao().getBooksByCategory(categoryId))
+            fullList = db.bookDao().getBooksByCategory(categoryId)
+            applyFilter(findViewById<EditText>(R.id.searchEditText).text.toString())
         }
+    }
+
+    private fun applyFilter(query: String) {
+        val filtered = if (query.isBlank()) fullList else fullList.filter {
+            it.title.contains(query, ignoreCase = true) ||
+                    it.author?.contains(query, ignoreCase = true) == true ||
+                    it.isbn?.contains(query, ignoreCase = true) == true
+        }
+        adapter.updateList(filtered)
     }
 
     private fun showAddExistingBookDialog() {
@@ -87,7 +107,8 @@ class CategoryDetailActivity : BaseActivity() {
 
     private fun showBookOptionsDialog(book: Book) {
         val favLabel = if (book.isFavorite) "Remove from Favorites" else "Add to Favorites"
-        val options = listOf("Edit", "Remove from Category", "Delete", favLabel)
+        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
+        val options = listOf("Edit", "Remove from Category", "Delete", favLabel, draftLabel)
 
         val dialogView = layoutInflater.inflate(R.layout.dialog_book_options, null)
         dialogView.findViewById<android.widget.TextView>(R.id.optionsTitle).text = book.title
@@ -134,6 +155,13 @@ class CategoryDetailActivity : BaseActivity() {
                         val newState = !book.isFavorite
                         db.bookDao().updateBook(book.copy(isFavorite = newState))
                         val msg = if (newState) "${book.title} Added to Favorites" else "${book.title} Removed from Favorites"
+                        Toast.makeText(this@CategoryDetailActivity, msg, Toast.LENGTH_SHORT).show()
+                        loadBooks()
+                    }
+                    4 -> lifecycleScope.launch {
+                        val newState = !book.isDraft
+                        db.bookDao().updateBook(book.copy(isDraft = newState))
+                        val msg = if (newState) "${book.title} Marked as Draft" else "${book.title} Unmarked as Draft"
                         Toast.makeText(this@CategoryDetailActivity, msg, Toast.LENGTH_SHORT).show()
                         loadBooks()
                     }

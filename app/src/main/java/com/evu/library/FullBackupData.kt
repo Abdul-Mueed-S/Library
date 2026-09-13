@@ -12,6 +12,7 @@ data class FullBackupBook(
     val isFavorite: Boolean,
     val categoryId: Int?,
     val flaggedDuplicate: Boolean,
+    val isDraft: Boolean = false,
     val libraryId: Int? = null // placeholder for future multi-library support; always null until that schema exists
 )
 
