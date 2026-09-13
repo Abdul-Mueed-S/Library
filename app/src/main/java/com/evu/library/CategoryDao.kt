@@ -20,6 +20,12 @@ interface CategoryDao {
     @Update
     suspend fun updateCategory(category: Category)
 
+    @Query("DELETE FROM categories")
+    suspend fun deleteAllCategories()
+
+    @androidx.room.Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    suspend fun insertCategoryWithId(category: Category)
+
     @Delete
     suspend fun deleteCategory(category: Category)
 }

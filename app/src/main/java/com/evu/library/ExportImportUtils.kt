@@ -165,4 +165,72 @@ object ExportImportUtils {
             item.isDuplicate = matchesExisting || matchesBatch
         }
     }
+
+    fun fullBackupToJson(categories: List<Category>, books: List<Book>): String {
+        val root = JSONObject()
+        root.put("formatVersion", 1)
+
+        val catArray = JSONArray()
+        for (cat in categories) {
+            val obj = JSONObject()
+            obj.put("id", cat.id)
+            obj.put("name", cat.name)
+            catArray.put(obj)
+        }
+        root.put("categories", catArray)
+
+        val bookArray = JSONArray()
+        for (book in books) {
+            val obj = JSONObject()
+            obj.put("id", book.id)
+            obj.put("title", book.title)
+            obj.put("author", book.author ?: JSONObject.NULL)
+            obj.put("edition", book.edition ?: JSONObject.NULL)
+            obj.put("year", book.year ?: JSONObject.NULL)
+            obj.put("isbn", book.isbn ?: JSONObject.NULL)
+            obj.put("isFavorite", book.isFavorite)
+            obj.put("categoryId", book.categoryId ?: JSONObject.NULL)
+            obj.put("flaggedDuplicate", book.flaggedDuplicate)
+            obj.put("libraryId", JSONObject.NULL) // reserved for future multi-library support
+            bookArray.put(obj)
+        }
+        root.put("books", bookArray)
+
+        return root.toString(2)
+    }
+
+    fun parseFullBackupJson(content: String): FullBackupData? {
+        return try {
+            val root = JSONObject(content)
+            val catArray = root.optJSONArray("categories") ?: JSONArray()
+            val categories = mutableListOf<FullBackupCategory>()
+            for (i in 0 until catArray.length()) {
+                val obj = catArray.getJSONObject(i)
+                categories.add(FullBackupCategory(obj.getInt("id"), obj.getString("name")))
+            }
+
+            val bookArray = root.optJSONArray("books") ?: JSONArray()
+            val books = mutableListOf<FullBackupBook>()
+            for (i in 0 until bookArray.length()) {
+                val obj = bookArray.getJSONObject(i)
+                books.add(
+                    FullBackupBook(
+                        id = obj.getInt("id"),
+                        title = obj.getString("title"),
+                        author = obj.optString("author", null).takeIf { it != "null" },
+                        edition = obj.optString("edition", null).takeIf { it != "null" },
+                        year = obj.optString("year", null).takeIf { it != "null" },
+                        isbn = obj.optString("isbn", null).takeIf { it != "null" },
+                        isFavorite = obj.optBoolean("isFavorite", false),
+                        categoryId = if (obj.isNull("categoryId")) null else obj.getInt("categoryId"),
+                        flaggedDuplicate = obj.optBoolean("flaggedDuplicate", false),
+                        libraryId = if (obj.has("libraryId") && !obj.isNull("libraryId")) obj.getInt("libraryId") else null
+                    )
+                )
+            }
+            FullBackupData(categories, books)
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

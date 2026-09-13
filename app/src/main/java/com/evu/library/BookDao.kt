@@ -48,6 +48,12 @@ interface BookDao {
     @Query("UPDATE books SET flaggedDuplicate = 0 WHERE id = :id")
     suspend fun clearDuplicateFlag(id: Int)
 
+    @Query("DELETE FROM books")
+    suspend fun deleteAllBooks()
+
+    @androidx.room.Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    suspend fun insertBookWithId(book: Book)
+
     @Delete
     suspend fun deleteBook(book: Book)
 }

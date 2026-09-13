@@ -4,144 +4,201 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_height="match_parent">
 
-        <ImageButton
-            android:id="@+id/backButton"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_menu_revert"
-            android:background="?attr/selectableItemBackground"
-            android:contentDescription="Back" />
-
-        <TextView
-            android:id="@+id/pageTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/exportSection"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Export"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:orientation="vertical">
 
-        <RadioGroup
-            android:id="@+id/formatGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <RadioButton android:id="@+id/formatJson" android:text="JSON"
-                android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
-            <RadioButton android:id="@+id/formatCsv" android:text="CSV"
-                android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="24dp" />
+                <ImageButton
+                    android:id="@+id/backButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="8dp"
+                    android:src="@android:drawable/ic_menu_revert"
+                    android:background="?attr/selectableItemBackground"
+                    android:contentDescription="Back" />
 
-        </RadioGroup>
+                <TextView
+                    android:id="@+id/pageTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
-        <CheckBox
-            android:id="@+id/includeCategoriesCheckbox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Include categories"
-            android:checked="true"
-            android:layout_marginTop="8dp" />
+            </LinearLayout>
 
-        <CheckBox
-            android:id="@+id/includeFavoritesCheckbox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Include favorites"
-            android:checked="true"
-            android:layout_marginTop="4dp" />
+            <LinearLayout
+                android:id="@+id/exportSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <CheckBox
-            android:id="@+id/includeDuplicateFlagsCheckbox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Include duplicate flags"
-            android:checked="false"
-            android:layout_marginTop="4dp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="Export"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/exportButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Export Library" />
+                <RadioGroup
+                    android:id="@+id/formatGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp">
 
-    </LinearLayout>
+                    <RadioButton android:id="@+id/formatJson" android:text="JSON"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
+                    <RadioButton android:id="@+id/formatCsv" android:text="CSV"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="24dp" />
 
-    <View
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/appColorPrimary"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="24dp" />
+                </RadioGroup>
 
-    <LinearLayout
-        android:id="@+id/importSection"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+                <CheckBox
+                    android:id="@+id/includeCategoriesCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Include categories"
+                    android:checked="true"
+                    android:layout_marginTop="8dp" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Import"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+                <CheckBox
+                    android:id="@+id/includeFavoritesCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Include favorites"
+                    android:checked="true"
+                    android:layout_marginTop="4dp" />
 
-        <CheckBox
-            android:id="@+id/importCategoriesDefaultCheckbox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Import with categories (default)"
-            android:checked="true"
-            android:layout_marginTop="8dp" />
+                <CheckBox
+                    android:id="@+id/includeDuplicateFlagsCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Include duplicate flags"
+                    android:checked="false"
+                    android:layout_marginTop="4dp" />
 
-        <CheckBox
-            android:id="@+id/importFavoritesDefaultCheckbox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Import with favorites (default)"
-            android:checked="true"
-            android:layout_marginTop="4dp" />
+                <Button
+                    android:id="@+id/exportButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Export Library" />
 
-        <CheckBox
-            android:id="@+id/importDuplicateFlagsDefaultCheckbox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Import with duplicate flags (default)"
-            android:checked="false"
-            android:layout_marginTop="4dp" />
+            </LinearLayout>
 
-        <Button
-            android:id="@+id/importButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Choose File to Import" />
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/appColorPrimary"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="24dp" />
 
-    </LinearLayout>
+            <LinearLayout
+                android:id="@+id/importSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Import"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <CheckBox
+                    android:id="@+id/importCategoriesDefaultCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Import with categories (default)"
+                    android:checked="true"
+                    android:layout_marginTop="8dp" />
+
+                <CheckBox
+                    android:id="@+id/importFavoritesDefaultCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Import with favorites (default)"
+                    android:checked="true"
+                    android:layout_marginTop="4dp" />
+
+                <CheckBox
+                    android:id="@+id/importDuplicateFlagsDefaultCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Import with duplicate flags (default)"
+                    android:checked="false"
+                    android:layout_marginTop="4dp" />
+
+                <Button
+                    android:id="@+id/importButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Choose File to Import" />
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/dividerFullBackup"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/appColorDelete"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="24dp" />
+
+            <LinearLayout
+                android:id="@+id/fullBackupSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Full Backup / Restore"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="A full backup saves your entire library exactly as-is, including internal IDs. Restoring one REPLACES your current library completely — this cannot be undone."
+                    android:textSize="12sp"
+                    android:alpha="0.7" />
+
+                <Button
+                    android:id="@+id/fullBackupButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Create Full Backup" />
+
+                <Button
+                    android:id="@+id/fullRestoreButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Restore Full Backup" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>
