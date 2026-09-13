@@ -20,19 +20,27 @@
             android:contentDescription="Back" />
 
         <TextView
-            android:id="@+id/categoryTitleText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:text="Drafts"
             android:textSize="20sp"
             android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/searchBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:hint="Search..."
+            android:visibility="invisible" />
 
         <ImageButton
             android:id="@+id/dropdownButton"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:padding="8dp"
-            android:layout_marginStart="8dp"
             android:src="@android:drawable/arrow_down_float"
             android:background="?attr/selectableItemBackground"
             android:visibility="gone"
@@ -48,14 +56,6 @@
             android:contentDescription="Search" />
 
     </LinearLayout>
-
-    <EditText
-        android:id="@+id/searchBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Search..."
-        android:layout_marginTop="8dp"
-        android:visibility="invisible" />
 
     <LinearLayout
         android:id="@+id/filterRow"
@@ -73,31 +73,10 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/categoryBookRecyclerView"
+        android:id="@+id/draftsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="8dp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/addExistingBookButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Add Existing" />
-
-        <Button
-            android:id="@+id/addNewBookButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Add New" />
-
-    </LinearLayout>
 
 </LinearLayout>
