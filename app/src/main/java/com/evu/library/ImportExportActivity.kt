@@ -64,22 +64,17 @@ class ImportExportActivity : BaseActivity() {
         val exportSection = findViewById<android.widget.LinearLayout>(R.id.exportSection)
         val importSection = findViewById<android.widget.LinearLayout>(R.id.importSection)
         val fullBackupSection = findViewById<android.widget.LinearLayout>(R.id.fullBackupSection)
-        val divider = findViewById<android.view.View>(R.id.divider)
-        val dividerFullBackup = findViewById<android.view.View>(R.id.dividerFullBackup)
         val pageTitle = findViewById<android.widget.TextView>(R.id.pageTitle)
 
         when (mode) {
             "export" -> {
                 importSection.visibility = android.view.View.GONE
                 fullBackupSection.visibility = android.view.View.GONE
-                divider.visibility = android.view.View.GONE
-                dividerFullBackup.visibility = android.view.View.GONE
                 pageTitle.text = "Export"
             }
             "import" -> {
                 exportSection.visibility = android.view.View.GONE
                 fullBackupSection.visibility = android.view.View.GONE
-                dividerFullBackup.visibility = android.view.View.GONE
                 pageTitle.text = "Import"
             }
             else -> pageTitle.text = "Export / Import"

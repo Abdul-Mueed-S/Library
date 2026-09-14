@@ -1,34 +1,42 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:padding="16dp"
-    android:clickable="true"
-    android:focusable="true"
-    android:background="?attr/selectableItemBackground">
+    android:orientation="vertical"
+    android:layout_marginBottom="10dp">
 
-    <View
-        android:id="@+id/themeSwatch"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:background="@drawable/theme_swatch_shape" />
-
-    <TextView
-        android:id="@+id/themeNameText"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginStart="16dp"
-        android:textSize="16sp" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="@drawable/settings_card_bg">
 
-    <TextView
-        android:id="@+id/themeCheckText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="✓"
-        android:textSize="18sp"
-        android:textColor="?attr/appColorPrimary"
-        android:visibility="gone" />
+        <View
+            android:id="@+id/themeSwatch"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/theme_swatch_shape" />
+
+        <TextView
+            android:id="@+id/themeNameText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/themeCheckText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✓"
+            android:textSize="18sp"
+            android:textColor="?attr/appColorPrimary"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
 </LinearLayout>

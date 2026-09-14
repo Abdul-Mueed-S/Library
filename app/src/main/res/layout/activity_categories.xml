@@ -8,7 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
 
         <ImageButton
             android:id="@+id/backButton"
@@ -24,115 +25,159 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:text="Categories"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/pinnedFavouritesRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp"
-        android:layout_marginTop="12dp">
+        android:orientation="vertical"
+        android:background="@drawable/settings_card_bg"
+        android:layout_marginBottom="16dp">
 
-        <View
-            android:layout_width="4dp"
-            android:layout_height="24dp"
-            android:background="?attr/appColorPrimary" />
-
-        <TextView
+        <LinearLayout
+            android:id="@+id/pinnedFavouritesRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:text="Favourites"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="?attr/appColorPrimary" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:padding="16dp">
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="20dp"
+                android:background="?attr/appColorPrimary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="Favourites"
+                android:textSize="16sp"
+                android:textColor="?attr/appColorPrimary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textSize="20sp"
+                android:alpha="0.5" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/appColorPrimary"
+            android:alpha="0.25"
+            android:layout_marginStart="16dp" />
+
+        <LinearLayout
+            android:id="@+id/pinnedDraftsRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:padding="16dp">
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="20dp"
+                android:background="?attr/appColorPrimary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="Drafts"
+                android:textSize="16sp"
+                android:textColor="?attr/appColorPrimary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textSize="20sp"
+                android:alpha="0.5" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/appColorPrimary"
+            android:alpha="0.25"
+            android:layout_marginStart="16dp" />
+
+        <LinearLayout
+            android:id="@+id/pinnedDuplicatesRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:padding="16dp">
+
+            <View
+                android:layout_width="4dp"
+                android:layout_height="20dp"
+                android:background="?attr/appColorPrimary" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:text="Duplicates"
+                android:textSize="16sp"
+                android:textColor="?attr/appColorPrimary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="›"
+                android:textSize="20sp"
+                android:alpha="0.5" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/pinnedDraftsRow"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp">
-
-        <View
-            android:layout_width="4dp"
-            android:layout_height="24dp"
-            android:background="?attr/appColorPrimary" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:text="Drafts"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="?attr/appColorPrimary" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/pinnedDuplicatesRow"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        android:paddingTop="14dp"
-        android:paddingBottom="14dp">
-
-        <View
-            android:layout_width="4dp"
-            android:layout_height="24dp"
-            android:background="?attr/appColorPrimary" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:text="Duplicates"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="?attr/appColorPrimary" />
-
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?attr/appColorPrimary"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="4dp" />
+        android:text="MY CATEGORIES"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        android:alpha="0.6"
+        android:layout_marginBottom="6dp"
+        android:layout_marginStart="4dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/categoryRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginTop="4dp" />
+        android:layout_weight="1" />
 
     <Button
         android:id="@+id/addCategoryButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
+        android:layout_marginTop="8dp"
         android:text="+" />
 
 </LinearLayout>

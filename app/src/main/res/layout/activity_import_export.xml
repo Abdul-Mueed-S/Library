@@ -1,63 +1,69 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/backButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_revert"
+                android:background="?attr/selectableItemBackground"
+                android:contentDescription="Back" />
+
+            <TextView
+                android:id="@+id/pageTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/exportSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="EXPORT"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:alpha="0.6"
+                android:layout_marginBottom="6dp"
+                android:layout_marginStart="4dp" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <ImageButton
-                    android:id="@+id/backButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:padding="8dp"
-                    android:src="@android:drawable/ic_menu_revert"
-                    android:background="?attr/selectableItemBackground"
-                    android:contentDescription="Back" />
-
-                <TextView
-                    android:id="@+id/pageTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/exportSection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:text="Export"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                android:orientation="vertical"
+                android:background="@drawable/settings_card_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="20dp">
 
                 <RadioGroup
                     android:id="@+id/formatGroup"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp">
+                    android:orientation="horizontal">
 
                     <RadioButton android:id="@+id/formatJson" android:text="JSON"
                         android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" />
@@ -72,13 +78,13 @@
                     android:layout_height="wrap_content"
                     android:text="Include categories"
                     android:checked="true"
-                    android:layout_marginTop="8dp" />
+                    android:layout_marginTop="12dp" />
 
                 <CheckBox
                     android:id="@+id/includeFavoritesCheckbox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Include favorites"
+                    android:text="Include favourites"
                     android:checked="true"
                     android:layout_marginTop="4dp" />
 
@@ -99,40 +105,45 @@
 
             </LinearLayout>
 
-            <View
-                android:id="@+id/divider"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?attr/appColorPrimary"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="24dp" />
+        </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/importSection"
+        <LinearLayout
+            android:id="@+id/importSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:text="IMPORT"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:alpha="0.6"
+                android:layout_marginBottom="6dp"
+                android:layout_marginStart="4dp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Import"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/settings_card_bg"
+                android:padding="16dp"
+                android:layout_marginBottom="20dp">
 
                 <CheckBox
                     android:id="@+id/importCategoriesDefaultCheckbox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Import with categories (default)"
-                    android:checked="true"
-                    android:layout_marginTop="8dp" />
+                    android:checked="true" />
 
                 <CheckBox
                     android:id="@+id/importFavoritesDefaultCheckbox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Import with favorites (default)"
+                    android:text="Import with favourites (default)"
                     android:checked="true"
                     android:layout_marginTop="4dp" />
 
@@ -153,31 +164,35 @@
 
             </LinearLayout>
 
-            <View
-                android:id="@+id/dividerFullBackup"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="?attr/appColorDelete"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="24dp" />
+        </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/fullBackupSection"
+        <LinearLayout
+            android:id="@+id/fullBackupSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:text="FULL BACKUP / RESTORE"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:alpha="0.6"
+                android:layout_marginBottom="6dp"
+                android:layout_marginStart="4dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/settings_card_bg"
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Full Backup / Restore"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     android:text="A full backup saves your entire library exactly as-is, including internal IDs. Restoring one REPLACES your current library completely — this cannot be undone."
                     android:textSize="12sp"
                     android:alpha="0.7" />
@@ -206,6 +221,7 @@
             </LinearLayout>
 
         </LinearLayout>
-    </ScrollView>
 
-</LinearLayout>
+    </LinearLayout>
+
+</ScrollView>
