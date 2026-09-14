@@ -36,6 +36,22 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        // Opens (or returns cached) database for a SPECIFIC vault, regardless of which
+        // vault is currently active — used by background backup, which must back up
+        // every vault, not just the one the user happens to have open.
+        @Synchronized
+        fun getDatabaseForVault(context: Context, vault: LibraryVault): AppDatabase {
+            return instances.getOrPut(vault.dbFileName) {
+                Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    vault.dbFileName
+                )
+                    .addMigrations(MIGRATION_3_4)
+                    .build()
+            }
+        }
+
         fun closeInstance(dbFileName: String) {
             instances[dbFileName]?.close()
             instances.remove(dbFileName)

@@ -47,6 +47,12 @@ class ImportExportActivity : BaseActivity() {
         if (uri != null) handleFullBackupFile(uri)
     }
 
+    private val openVaultMetadataLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) handleVaultMetadataFile(uri)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_import_export)
@@ -85,6 +91,9 @@ class ImportExportActivity : BaseActivity() {
         }
         findViewById<android.widget.Button>(R.id.fullBackupButton).setOnClickListener { startFullBackup() }
         findViewById<android.widget.Button>(R.id.fullRestoreButton).setOnClickListener { confirmFullRestore() }
+        findViewById<android.widget.Button>(R.id.restoreVaultMetadataButton).setOnClickListener {
+            openVaultMetadataLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
+        }
     }
 
     private fun startExport() {
@@ -157,6 +166,20 @@ class ImportExportActivity : BaseActivity() {
                 )
             }
             Toast.makeText(this@ImportExportActivity, "Library restored: ${data.books.size} books, ${data.categories.size} categories", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun handleVaultMetadataFile(uri: Uri) {
+        val content = contentResolver.openInputStream(uri)?.bufferedReader()?.readText() ?: ""
+        if (content.isBlank()) {
+            Toast.makeText(this, "Could not read file", Toast.LENGTH_SHORT).show()
+            return
+        }
+        try {
+            val count = VaultManager.restoreVaultMetadataJson(this, content)
+            Toast.makeText(this, "Restored $count librar${if (count == 1) "y" else "ies"} (name/location only — restore each library's books separately)", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Invalid vault metadata file", Toast.LENGTH_SHORT).show()
         }
     }
 

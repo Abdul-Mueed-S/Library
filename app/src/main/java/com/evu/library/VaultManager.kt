@@ -121,4 +121,61 @@ object VaultManager {
             setActiveVault(context, vaults.first().id)
         }
     }
+
+    fun exportVaultMetadataJson(context: Context): String {
+        val vaults = getAllVaults(context)
+        val array = JSONArray()
+        for (v in vaults) {
+            val obj = JSONObject()
+            obj.put("name", v.name)
+            obj.put("locationName", v.locationName ?: JSONObject.NULL)
+            obj.put("latitude", v.latitude ?: JSONObject.NULL)
+            obj.put("longitude", v.longitude ?: JSONObject.NULL)
+            obj.put("radiusMeters", v.radiusMeters ?: JSONObject.NULL)
+            obj.put("isManualLocation", v.isManualLocation)
+            array.put(obj)
+        }
+        val root = JSONObject()
+        root.put("formatVersion", 1)
+        root.put("vaults", array)
+        return root.toString(2)
+    }
+
+    // Restores vault names + locations from a metadata JSON (see exportVaultMetadataJson).
+// Matches existing vaults by name (case-insensitive); creates a new vault for any
+// name in the metadata that doesn't already exist. Does NOT touch book/category data —
+// that's restored separately per-vault via the existing full-backup restore flow.
+    fun restoreVaultMetadataJson(context: Context, json: String): Int {
+        val root = JSONObject(json)
+        val array = root.optJSONArray("vaults") ?: return 0
+        var restoredCount = 0
+
+        for (i in 0 until array.length()) {
+            val obj = array.getJSONObject(i)
+            val name = obj.getString("name")
+            val locationName = if (obj.isNull("locationName")) null else obj.getString("locationName")
+            val latitude = if (obj.isNull("latitude")) null else obj.getDouble("latitude")
+            val longitude = if (obj.isNull("longitude")) null else obj.getDouble("longitude")
+            val radiusMeters = if (!obj.has("radiusMeters") || obj.isNull("radiusMeters")) null else obj.getDouble("radiusMeters")
+            val isManual = obj.optBoolean("isManualLocation", false)
+
+            val existing = getAllVaults(context).find { it.name.equals(name, ignoreCase = true) }
+            val targetVault = existing ?: createVault(context, name)
+
+            if (latitude != null && longitude != null) {
+                val vaults = getAllVaults(context).map {
+                    if (it.id == targetVault.id) it.copy(
+                        latitude = latitude,
+                        longitude = longitude,
+                        radiusMeters = radiusMeters,
+                        isManualLocation = isManual,
+                        locationName = locationName
+                    ) else it
+                }
+                saveAllVaults(context, vaults)
+            }
+            restoredCount++
+        }
+        return restoredCount
+    }
 }
