@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.format.DateFormat
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.documentfile.provider.DocumentFile
 
@@ -21,10 +22,6 @@ class SettingsActivity : BaseActivity() {
             )
             BackupPrefs.setDestinationUri(this, uri.toString())
 
-            // Google Drive (and most SAF providers) expose folders as opaque content
-            // URIs with no real filesystem path and no reliable way to read the signed-in
-            // account's email through this API — so the closest identifying info available
-            // is the folder's own display name plus a short form of its document ID.
             val folder = DocumentFile.fromTreeUri(this, uri)
             val folderName = folder?.name ?: "Selected folder"
             val idFragment = uri.lastPathSegment?.substringAfterLast(':')?.take(24) ?: ""
@@ -69,6 +66,10 @@ class SettingsActivity : BaseActivity() {
             } else {
                 LibraryApp.cancelBackupWork(this)
             }
+        }
+
+        findViewById<android.widget.LinearLayout>(R.id.backupIntervalRow).setOnClickListener {
+            showIntervalPickerDialog()
         }
 
         findViewById<android.widget.Button>(R.id.chooseBackupFolderButton).setOnClickListener {
@@ -119,6 +120,8 @@ class SettingsActivity : BaseActivity() {
             "Last backup: $formatted — $result"
         }
         findViewById<android.widget.TextView>(R.id.lastBackupStatusText).text = lastStatusText
+
+        findViewById<android.widget.TextView>(R.id.backupIntervalText).text = BackupPrefs.getIntervalDisplayText(this)
     }
 
     private fun runManualBackupNow() {
@@ -135,5 +138,69 @@ class SettingsActivity : BaseActivity() {
                     updateBackupLabels()
                 }
             }
+    }
+
+    private fun showIntervalPickerDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_backup_interval, null)
+        val radioGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.intervalRadioGroup)
+        val radioDay = dialogView.findViewById<android.widget.RadioButton>(R.id.radioDay)
+        val radioWeek = dialogView.findViewById<android.widget.RadioButton>(R.id.radioWeek)
+        val radioMonth = dialogView.findViewById<android.widget.RadioButton>(R.id.radioMonth)
+        val radioCustom = dialogView.findViewById<android.widget.RadioButton>(R.id.radioCustom)
+        val customRow = dialogView.findViewById<android.widget.LinearLayout>(R.id.customRow)
+        val customValueInput = dialogView.findViewById<android.widget.EditText>(R.id.customValueInput)
+        val customUnitSpinner = dialogView.findViewById<android.widget.Spinner>(R.id.customUnitSpinner)
+
+        val units = listOf(
+            BackupPrefs.UNIT_HOURS to "Hour(s)",
+            BackupPrefs.UNIT_DAYS to "Day(s)",
+            BackupPrefs.UNIT_WEEKS to "Week(s)",
+            BackupPrefs.UNIT_MONTHS to "Month(s)",
+            BackupPrefs.UNIT_YEARS to "Year(s)"
+        )
+        customUnitSpinner.adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, units.map { it.second })
+
+        when (BackupPrefs.getIntervalType(this)) {
+            BackupPrefs.INTERVAL_DAY -> radioDay.isChecked = true
+            BackupPrefs.INTERVAL_WEEK -> radioWeek.isChecked = true
+            BackupPrefs.INTERVAL_MONTH -> radioMonth.isChecked = true
+            BackupPrefs.INTERVAL_CUSTOM -> {
+                radioCustom.isChecked = true
+                customRow.visibility = android.view.View.VISIBLE
+                customValueInput.setText(BackupPrefs.getCustomValue(this).toString())
+                val unitIndex = units.indexOfFirst { it.first == BackupPrefs.getCustomUnit(this) }
+                if (unitIndex >= 0) customUnitSpinner.setSelection(unitIndex)
+            }
+        }
+
+        radioGroup.setOnCheckedChangeListener { _, checkedId ->
+            customRow.visibility = if (checkedId == R.id.radioCustom) android.view.View.VISIBLE else android.view.View.GONE
+        }
+
+        AlertDialog.Builder(this, R.style.AppDialogTheme)
+            .setTitle("Backup Frequency")
+            .setView(dialogView)
+            .setPositiveButton("Save") { _, _ ->
+                when (radioGroup.checkedRadioButtonId) {
+                    R.id.radioDay -> BackupPrefs.setPresetInterval(this, BackupPrefs.INTERVAL_DAY)
+                    R.id.radioWeek -> BackupPrefs.setPresetInterval(this, BackupPrefs.INTERVAL_WEEK)
+                    R.id.radioMonth -> BackupPrefs.setPresetInterval(this, BackupPrefs.INTERVAL_MONTH)
+                    R.id.radioCustom -> {
+                        val value = customValueInput.text.toString().toIntOrNull()
+                        if (value == null || value < 1) {
+                            Toast.makeText(this, "Enter a valid number", Toast.LENGTH_SHORT).show()
+                            return@setPositiveButton
+                        }
+                        val unit = units[customUnitSpinner.selectedItemPosition].first
+                        BackupPrefs.setCustomInterval(this, value, unit)
+                    }
+                }
+                if (BackupPrefs.isEnabled(this)) {
+                    LibraryApp.scheduleBackupWork(this)
+                }
+                updateBackupLabels()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }

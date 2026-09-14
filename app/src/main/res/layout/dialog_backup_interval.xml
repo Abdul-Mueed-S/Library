@@ -1,0 +1,47 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <RadioGroup android:id="@+id/intervalRadioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RadioButton android:id="@+id/radioDay" android:text="Every 1 day"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <RadioButton android:id="@+id/radioWeek" android:text="Every 7 days"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <RadioButton android:id="@+id/radioMonth" android:text="Every 1 month"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <RadioButton android:id="@+id/radioCustom" android:text="Custom"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+    </RadioGroup>
+
+    <LinearLayout
+        android:id="@+id/customRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="12dp"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/customValueInput"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:gravity="center" />
+
+        <Spinner
+            android:id="@+id/customUnitSpinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp" />
+
+    </LinearLayout>
+
+</LinearLayout>
