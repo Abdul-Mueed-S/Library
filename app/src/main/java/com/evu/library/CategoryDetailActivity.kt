@@ -165,7 +165,7 @@ class CategoryDetailActivity : BaseActivity() {
     }
 
     private fun showBookOptionsDialog(book: Book) {
-        val favLabel = if (book.isFavorite) "Remove from Favorites" else "Add to Favorites"
+        val favLabel = if (book.isFavorite) "Remove from Favourites" else "Add to Favourites"
         val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
         val options = listOf("Edit", "Remove from Category", "Delete", favLabel, draftLabel)
 
@@ -213,7 +213,7 @@ class CategoryDetailActivity : BaseActivity() {
                     3 -> lifecycleScope.launch {
                         val newState = !book.isFavorite
                         db.bookDao().updateBook(book.copy(isFavorite = newState))
-                        val msg = if (newState) "${book.title} Added to Favorites" else "${book.title} Removed from Favorites"
+                        val msg = if (newState) "${book.title} Added to Favourites" else "${book.title} Removed from Favourites"
                         Toast.makeText(this@CategoryDetailActivity, msg, Toast.LENGTH_SHORT).show()
                         loadBooks()
                     }

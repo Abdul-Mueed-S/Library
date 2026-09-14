@@ -121,7 +121,7 @@ class FavouritesActivity : BaseActivity() {
 
     private fun showBookOptionsDialog(book: Book) {
         val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
-        val options = arrayOf("Edit", "Delete", "Remove from Favorites", draftLabel)
+        val options = arrayOf("Edit", "Delete", "Remove from Favourites", draftLabel)
 
         AlertDialog.Builder(this, R.style.AppDialogTheme)
             .setTitle(book.title)
@@ -139,7 +139,7 @@ class FavouritesActivity : BaseActivity() {
                     1 -> confirmDelete(book)
                     2 -> lifecycleScope.launch {
                         db.bookDao().updateBook(book.copy(isFavorite = false))
-                        Toast.makeText(this@FavouritesActivity, "${book.title} Removed from Favorites", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@FavouritesActivity, "${book.title} Removed from Favourites", Toast.LENGTH_SHORT).show()
                         loadFavourites()
                     }
                     3 -> lifecycleScope.launch {

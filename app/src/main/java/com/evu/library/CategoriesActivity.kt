@@ -21,6 +21,16 @@ class CategoriesActivity : BaseActivity() {
         setContentView(R.layout.activity_categories)
         findViewById<android.widget.ImageButton>(R.id.backButton).setOnClickListener { finish() }
 
+        findViewById<android.widget.LinearLayout>(R.id.pinnedFavouritesRow).setOnClickListener {
+            startActivity(Intent(this, FavouritesActivity::class.java))
+        }
+        findViewById<android.widget.LinearLayout>(R.id.pinnedDraftsRow).setOnClickListener {
+            startActivity(Intent(this, DraftsActivity::class.java))
+        }
+        findViewById<android.widget.LinearLayout>(R.id.pinnedDuplicatesRow).setOnClickListener {
+            startActivity(Intent(this, PendingDuplicatesActivity::class.java))
+        }
+
         db = AppDatabase.getDatabase(this)
         val recyclerView = findViewById<RecyclerView>(R.id.categoryRecyclerView)
         adapter = CategoryAdapter(

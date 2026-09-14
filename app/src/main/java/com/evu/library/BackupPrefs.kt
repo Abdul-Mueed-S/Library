@@ -5,6 +5,7 @@ import android.content.Context
 object BackupPrefs {
     private const val PREFS_NAME = "backup_prefs"
     private const val KEY_DEST_URI = "backup_dest_uri"
+    private const val KEY_DEST_LABEL = "backup_dest_label"
     private const val KEY_ENABLED = "backup_enabled"
     private const val KEY_LAST_TIME = "last_backup_time"
     private const val KEY_LAST_SUCCESS = "last_backup_success"
@@ -14,6 +15,13 @@ object BackupPrefs {
 
     fun setDestinationUri(context: Context, uri: String?) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putString(KEY_DEST_URI, uri).apply()
+    }
+
+    fun getDestinationLabel(context: Context): String? =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_DEST_LABEL, null)
+
+    fun setDestinationLabel(context: Context, label: String?) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putString(KEY_DEST_LABEL, label).apply()
     }
 
     fun isEnabled(context: Context): Boolean =

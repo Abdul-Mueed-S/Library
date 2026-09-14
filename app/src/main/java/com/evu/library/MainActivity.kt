@@ -62,19 +62,6 @@ class MainActivity : BaseActivity() {
                 when (itemId) {
                     R.id.nav_home -> { }
                     R.id.nav_categories -> startActivity(Intent(this, CategoriesActivity::class.java))
-                    R.id.nav_favourites -> startActivity(Intent(this, FavouritesActivity::class.java))
-                    R.id.nav_drafts -> startActivity(Intent(this, DraftsActivity::class.java))
-                    R.id.nav_duplicates -> startActivity(Intent(this, PendingDuplicatesActivity::class.java))
-                    R.id.nav_export -> {
-                        val intent = Intent(this, ImportExportActivity::class.java)
-                        intent.putExtra("mode", "export")
-                        startActivity(intent)
-                    }
-                    R.id.nav_import -> {
-                        val intent = Intent(this, ImportExportActivity::class.java)
-                        intent.putExtra("mode", "import")
-                        startActivity(intent)
-                    }
                     R.id.nav_check_location -> checkLocationSuggestion(silent = false)
                     R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
                     else -> Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show()
@@ -226,9 +213,6 @@ class MainActivity : BaseActivity() {
                 is ChipItem.CategoryChip -> db.bookDao().getBooksByCategory(chip.category.id)
                 else -> db.bookDao().getAllBooks()
             }
-            // Drafts and flagged duplicates are excluded from all main library views —
-            // drafts live only in the Drafts screen, duplicates only in the Duplicates screen,
-            // until resolved (unmarked / edited into uniqueness respectively).
             val filtered = results.filter { !it.isDraft && !it.flaggedDuplicate }
             adapter.updateList(applySort(filtered))
         }
@@ -312,7 +296,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showBookOptionsDialog(book: Book) {
-        val favLabel = if (book.isFavorite) "Remove from Favorites" else "Add to Favorites"
+        val favLabel = if (book.isFavorite) "Remove from Favourites" else "Add to Favourites"
         val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
         val options = arrayOf("Edit", "Delete", favLabel, draftLabel)
 
@@ -361,7 +345,7 @@ class MainActivity : BaseActivity() {
         lifecycleScope.launch {
             val newState = !book.isFavorite
             db.bookDao().updateBook(book.copy(isFavorite = newState))
-            val msg = if (newState) "${book.title} Added to Favorites" else "${book.title} Removed from Favorites"
+            val msg = if (newState) "${book.title} Added to Favourites" else "${book.title} Removed from Favourites"
             Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
             refreshCurrentView()
         }

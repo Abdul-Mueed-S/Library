@@ -7,6 +7,7 @@ import android.text.format.DateFormat
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.SwitchCompat
+import androidx.documentfile.provider.DocumentFile
 
 class SettingsActivity : BaseActivity() {
 
@@ -19,6 +20,17 @@ class SettingsActivity : BaseActivity() {
                 android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
             BackupPrefs.setDestinationUri(this, uri.toString())
+
+            // Google Drive (and most SAF providers) expose folders as opaque content
+            // URIs with no real filesystem path and no reliable way to read the signed-in
+            // account's email through this API — so the closest identifying info available
+            // is the folder's own display name plus a short form of its document ID.
+            val folder = DocumentFile.fromTreeUri(this, uri)
+            val folderName = folder?.name ?: "Selected folder"
+            val idFragment = uri.lastPathSegment?.substringAfterLast(':')?.take(24) ?: ""
+            val label = if (idFragment.isNotBlank()) "$folderName ($idFragment)" else folderName
+            BackupPrefs.setDestinationLabel(this, label)
+
             updateBackupLabels()
             Toast.makeText(this, "Backup folder set", Toast.LENGTH_SHORT).show()
         }
@@ -31,6 +43,10 @@ class SettingsActivity : BaseActivity() {
 
         findViewById<android.widget.LinearLayout>(R.id.librariesRow).setOnClickListener {
             startActivity(Intent(this, LibrariesActivity::class.java))
+        }
+
+        findViewById<android.widget.LinearLayout>(R.id.exportImportRow).setOnClickListener {
+            startActivity(Intent(this, ImportExportActivity::class.java))
         }
 
         val numberedSwitch = findViewById<SwitchCompat>(R.id.numberedListSwitch)
@@ -87,8 +103,12 @@ class SettingsActivity : BaseActivity() {
 
     private fun updateBackupLabels() {
         val destUri = BackupPrefs.getDestinationUri(this)
-        findViewById<android.widget.TextView>(R.id.backupFolderStatusText).text =
-            if (destUri != null) "Folder set" else "No folder chosen yet"
+        val destLabel = BackupPrefs.getDestinationLabel(this)
+        findViewById<android.widget.TextView>(R.id.backupFolderStatusText).text = when {
+            destUri == null -> "No folder chosen yet"
+            destLabel != null -> "Folder set: $destLabel"
+            else -> "Folder set"
+        }
 
         val lastTime = BackupPrefs.getLastBackupTime(this)
         val lastStatusText = if (lastTime < 0) {

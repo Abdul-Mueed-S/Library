@@ -1,11 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/nav_home" android:title="Home" />
     <item android:id="@+id/nav_categories" android:title="Categories" />
-    <item android:id="@+id/nav_favourites" android:title="Favorites" />
-    <item android:id="@+id/nav_drafts" android:title="Drafts" />
-    <item android:id="@+id/nav_duplicates" android:title="Duplicates" />
-    <item android:id="@+id/nav_export" android:title="Export" />
-    <item android:id="@+id/nav_import" android:title="Import" />
     <item android:id="@+id/nav_check_location" android:title="Check Location" />
     <item android:id="@+id/nav_settings" android:title="Settings" />
 </menu>
