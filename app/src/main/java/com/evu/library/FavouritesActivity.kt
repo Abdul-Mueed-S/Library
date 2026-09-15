@@ -19,6 +19,7 @@ class FavouritesActivity : BaseActivity() {
 
     private lateinit var db: AppDatabase
     private lateinit var adapter: BookAdapter
+    private lateinit var recyclerView: RecyclerView
     private var fullList: List<Book> = emptyList()
 
     private var isSearchExpanded = false
@@ -32,7 +33,7 @@ class FavouritesActivity : BaseActivity() {
 
         db = AppDatabase.getDatabase(this)
         adapter = BookAdapter(emptyList()) { book -> showBookOptionsDialog(book) }
-        val recyclerView = findViewById<RecyclerView>(R.id.favouritesRecyclerView)
+        recyclerView = findViewById(R.id.favouritesRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
         recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
@@ -117,11 +118,12 @@ class FavouritesActivity : BaseActivity() {
             else -> filtered.sortedByDescending { it.id }
         }
         adapter.updateList(sorted)
+        recyclerView.scheduleLayoutAnimation()
     }
 
     private fun showBookOptionsDialog(book: Book) {
-        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
-        val options = arrayOf("Edit", "Delete", "Remove from Favourites", draftLabel)
+        val draftLabel = if (book.isDraft) "📕  Unmark as Draft" else "📝  Mark as Draft"
+        val options = arrayOf("✏️  Edit", "🗑️  Delete", "☆  Remove from Favourites", draftLabel)
 
         AlertDialog.Builder(this, R.style.AppDialogTheme)
             .setTitle(book.title)

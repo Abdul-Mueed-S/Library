@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/optionsTitle"
@@ -11,18 +10,19 @@
         android:layout_height="wrap_content"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:paddingBottom="12dp" />
+        android:paddingBottom="14dp" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#B085F5" />
+        android:background="?attr/appColorPrimary"
+        android:alpha="0.3" />
 
     <LinearLayout
         android:id="@+id/optionsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="8dp" />
+        android:paddingTop="6dp" />
 
 </LinearLayout>

@@ -19,6 +19,7 @@ class CategoryDetailActivity : BaseActivity() {
 
     private lateinit var db: AppDatabase
     private lateinit var adapter: BookAdapter
+    private lateinit var recyclerView: RecyclerView
     private var categoryId: Int = -1
     private var categoryName: String = ""
     private var fullList: List<Book> = emptyList()
@@ -44,7 +45,7 @@ class CategoryDetailActivity : BaseActivity() {
 
         db = AppDatabase.getDatabase(this)
         adapter = BookAdapter(emptyList()) { book -> showBookOptionsDialog(book) }
-        val recyclerView = findViewById<RecyclerView>(R.id.categoryBookRecyclerView)
+        recyclerView = findViewById(R.id.categoryBookRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
         recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
@@ -140,6 +141,7 @@ class CategoryDetailActivity : BaseActivity() {
             else -> filtered.sortedByDescending { it.id }
         }
         adapter.updateList(sorted)
+        recyclerView.scheduleLayoutAnimation()
     }
 
     private fun showAddExistingBookDialog() {
@@ -165,9 +167,9 @@ class CategoryDetailActivity : BaseActivity() {
     }
 
     private fun showBookOptionsDialog(book: Book) {
-        val favLabel = if (book.isFavorite) "Remove from Favourites" else "Add to Favourites"
-        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
-        val options = listOf("Edit", "Remove from Category", "Delete", favLabel, draftLabel)
+        val favLabel = if (book.isFavorite) "☆  Remove from Favourites" else "★  Add to Favourites"
+        val draftLabel = if (book.isDraft) "📕  Unmark as Draft" else "📝  Mark as Draft"
+        val options = listOf("✏️  Edit", "🗂️  Remove from Category", "🗑️  Delete", favLabel, draftLabel)
 
         val dialogView = layoutInflater.inflate(R.layout.dialog_book_options, null)
         dialogView.findViewById<android.widget.TextView>(R.id.optionsTitle).text = book.title
@@ -181,7 +183,7 @@ class CategoryDetailActivity : BaseActivity() {
             val optionView = android.widget.TextView(this)
             optionView.text = label
             optionView.textSize = 16f
-            optionView.setPadding(16, 24, 16, 24)
+            optionView.setPadding(16, 26, 16, 26)
             optionView.setTextColor(resolveAttrColor(R.attr.appColorOnSurface))
             val outValue = android.util.TypedValue()
             theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)

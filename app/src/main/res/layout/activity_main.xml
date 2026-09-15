@@ -88,7 +88,8 @@
             android:id="@+id/addBookButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Add Book" />
+            android:text="Add Book"
+            android:layoutAnimation="@anim/layout_animation_fade_slide"/>
 
     </LinearLayout>
 

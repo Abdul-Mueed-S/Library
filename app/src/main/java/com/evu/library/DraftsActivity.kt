@@ -19,6 +19,7 @@ class DraftsActivity : BaseActivity() {
 
     private lateinit var db: AppDatabase
     private lateinit var adapter: BookAdapter
+    private lateinit var recyclerView: RecyclerView
     private var fullList: List<Book> = emptyList()
 
     private var isSearchExpanded = false
@@ -32,7 +33,7 @@ class DraftsActivity : BaseActivity() {
 
         db = AppDatabase.getDatabase(this)
         adapter = BookAdapter(emptyList()) { book -> showOptions(book) }
-        val recyclerView = findViewById<RecyclerView>(R.id.draftsRecyclerView)
+        recyclerView = findViewById(R.id.draftsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
         recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
@@ -117,11 +118,12 @@ class DraftsActivity : BaseActivity() {
             else -> filtered.sortedByDescending { it.id }
         }
         adapter.updateList(sorted)
+        recyclerView.scheduleLayoutAnimation()
     }
 
     private fun showOptions(book: Book) {
         val dialogTitle = if (book.flaggedDuplicate) "${book.title} (Also a Duplicate)" else book.title
-        val options = arrayOf("Edit", "Delete", "Mark as Published (remove from Drafts)")
+        val options = arrayOf("✏️  Edit", "🗑️  Delete", "📕  Mark as Published (remove from Drafts)")
         AlertDialog.Builder(this, R.style.AppDialogTheme)
             .setTitle(dialogTitle)
             .setItems(options) { _, which ->

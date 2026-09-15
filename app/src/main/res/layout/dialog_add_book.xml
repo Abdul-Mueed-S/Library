@@ -7,23 +7,27 @@
     <EditText android:id="@+id/titleInput" android:hint="Title *"
         android:layout_width="match_parent" android:layout_height="wrap_content" />
     <EditText android:id="@+id/authorInput" android:hint="Author (optional)"
-        android:layout_width="match_parent" android:layout_height="wrap_content" />
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" />
     <EditText android:id="@+id/editionInput" android:hint="Edition (optional)"
-        android:layout_width="match_parent" android:layout_height="wrap_content" />
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" />
     <EditText android:id="@+id/yearInput" android:hint="Year (optional)"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:inputType="number" />
+        android:inputType="number"
+        android:layout_marginTop="10dp" />
     <EditText android:id="@+id/isbnInput" android:hint="ISBN (optional)"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:inputType="number" />
+        android:inputType="number"
+        android:layout_marginTop="10dp" />
 
     <Spinner android:id="@+id/categorySpinner"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="14dp" />
 
     <TextView
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="8dp" android:text="* Required field"
+        android:layout_marginTop="10dp" android:text="* Required field"
         android:textSize="12sp" android:textStyle="italic" android:alpha="0.6" />
 
 </LinearLayout>

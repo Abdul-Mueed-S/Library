@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -17,10 +16,9 @@ class BookAdapter(
         val numberText: TextView = view.findViewById(R.id.numberText)
         val titleText: TextView = view.findViewById(R.id.titleText)
         val optionsButton: TextView = view.findViewById(R.id.optionsButton)
-        val detailsLayout: LinearLayout = view.findViewById(R.id.detailsLayout)
-        val authorText: TextView = view.findViewById(R.id.authorText)
-        val editionText: TextView = view.findViewById(R.id.editionText)
+        val subtitleText: TextView = view.findViewById(R.id.subtitleText)
         val isbnText: TextView = view.findViewById(R.id.isbnText)
+        val duplicateChipText: TextView = view.findViewById(R.id.duplicateChipText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
@@ -43,29 +41,25 @@ class BookAdapter(
         }
         holder.titleText.text = "$titlePrefix${book.title}"
 
-        val hasAuthor = !book.author.isNullOrBlank()
-        val hasEditionYear = !book.edition.isNullOrBlank() || !book.year.isNullOrBlank()
-        val hasIsbn = !book.isbn.isNullOrBlank()
-
-        holder.authorText.visibility = if (hasAuthor) View.VISIBLE else View.GONE
-        holder.authorText.text = "Author: ${book.author}"
-
-        holder.editionText.visibility = if (hasEditionYear) View.VISIBLE else View.GONE
-        val editionYearText = buildString {
-            if (!book.edition.isNullOrBlank()) append("Edition: ${book.edition}")
-            if (!book.edition.isNullOrBlank() && !book.year.isNullOrBlank()) append("\n")
-            if (!book.year.isNullOrBlank()) append("Year: ${book.year}")
+        val subtitleParts = mutableListOf<String>()
+        book.author?.takeIf { it.isNotBlank() }?.let { subtitleParts.add(it) }
+        book.edition?.takeIf { it.isNotBlank() }?.let { subtitleParts.add("Ed. $it") }
+        book.year?.takeIf { it.isNotBlank() }?.let { subtitleParts.add(it) }
+        if (subtitleParts.isNotEmpty()) {
+            holder.subtitleText.text = subtitleParts.joinToString("  •  ")
+            holder.subtitleText.visibility = View.VISIBLE
+        } else {
+            holder.subtitleText.visibility = View.GONE
         }
-        holder.editionText.text = editionYearText
 
-        holder.isbnText.visibility = if (hasIsbn) View.VISIBLE else View.GONE
-        holder.isbnText.text = "ISBN: ${book.isbn}"
-
-        holder.detailsLayout.visibility = View.GONE
-        holder.titleText.setOnClickListener {
-            holder.detailsLayout.visibility =
-                if (holder.detailsLayout.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        if (!book.isbn.isNullOrBlank()) {
+            holder.isbnText.text = "ISBN ${book.isbn}"
+            holder.isbnText.visibility = View.VISIBLE
+        } else {
+            holder.isbnText.visibility = View.GONE
         }
+
+        holder.duplicateChipText.visibility = if (book.flaggedDuplicate) View.VISIBLE else View.GONE
 
         holder.itemView.setOnLongClickListener {
             onOptions(book)

@@ -33,6 +33,15 @@ class MainActivity : BaseActivity() {
     private var chips: List<ChipItem> = listOf(ChipItem.All, ChipItem.AddNew)
     private var selectedChipIndex = 0
 
+    private val locationCheckHandler = Handler(Looper.getMainLooper())
+    private var isLocationDialogShowing = false
+    private val locationCheckRunnable = object : Runnable {
+        override fun run() {
+            checkLocationSuggestion(silent = true)
+            locationCheckHandler.postDelayed(this, LOCATION_CHECK_INTERVAL_MS)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -103,9 +112,19 @@ class MainActivity : BaseActivity() {
         super.onResume()
         loadChips()
         adapter.notifyDataSetChanged()
+        // Automatic detection ONLY while the app is actually open — starts polling
+        // here, stopped in onPause. The "Check Location" nav item just triggers
+        // one immediate check on demand (with toast feedback), same underlying logic.
+        locationCheckHandler.postDelayed(locationCheckRunnable, LOCATION_CHECK_INTERVAL_MS)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        locationCheckHandler.removeCallbacks(locationCheckRunnable)
     }
 
     private fun checkLocationSuggestion(silent: Boolean = true) {
+        if (isLocationDialogShowing) return
         if (!LocationUtils.hasLocationPermission(this)) {
             if (!silent) Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT).show()
             return
@@ -135,14 +154,19 @@ class MainActivity : BaseActivity() {
                 return@requestFreshLocation
             }
 
+            isLocationDialogShowing = true
             AlertDialog.Builder(this, R.style.AppDialogTheme)
                 .setTitle("Switch Library?")
                 .setMessage("You appear to be at \"${closerVault.locationName ?: closerVault.name}\". Switch to \"${closerVault.name}\"?")
                 .setPositiveButton("Switch") { _, _ ->
                     VaultManager.setActiveVault(this, closerVault.id)
-                    recreate()
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                 }
-                .setNegativeButton("Not Now", null)
+                .setNegativeButton("Not Now") { _, _ -> isLocationDialogShowing = false }
+                .setOnCancelListener { isLocationDialogShowing = false }
                 .show()
         }
     }
@@ -215,6 +239,7 @@ class MainActivity : BaseActivity() {
             }
             val filtered = results.filter { !it.isDraft && !it.flaggedDuplicate }
             adapter.updateList(applySort(filtered))
+            binding.bookRecyclerView.scheduleLayoutAnimation()
         }
     }
 
@@ -292,13 +317,14 @@ class MainActivity : BaseActivity() {
             }
             val filtered = scoped.filter { !it.isDraft && !it.flaggedDuplicate }
             adapter.updateList(applySort(filtered))
+            binding.bookRecyclerView.scheduleLayoutAnimation()
         }
     }
 
     private fun showBookOptionsDialog(book: Book) {
-        val favLabel = if (book.isFavorite) "Remove from Favourites" else "Add to Favourites"
-        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
-        val options = arrayOf("Edit", "Delete", favLabel, draftLabel)
+        val favLabel = if (book.isFavorite) "☆  Remove from Favourites" else "★  Add to Favourites"
+        val draftLabel = if (book.isDraft) "📕  Unmark as Draft" else "📝  Mark as Draft"
+        val options = arrayOf("✏️  Edit", "🗑️  Delete", favLabel, draftLabel)
 
         AlertDialog.Builder(this, R.style.AppDialogTheme)
             .setTitle(book.title)
@@ -349,5 +375,9 @@ class MainActivity : BaseActivity() {
             Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
             refreshCurrentView()
         }
+    }
+
+    companion object {
+        private const val LOCATION_CHECK_INTERVAL_MS = 45_000L
     }
 }
