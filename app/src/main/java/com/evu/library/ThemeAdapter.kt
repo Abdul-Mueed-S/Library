@@ -13,6 +13,7 @@ class ThemeAdapter(
 ) : RecyclerView.Adapter<ThemeAdapter.ThemeViewHolder>() {
 
     class ThemeViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val cardRow: View = view.findViewById(R.id.themeCardRow)
         val swatch: View = view.findViewById(R.id.themeSwatch)
         val name: TextView = view.findViewById(R.id.themeNameText)
         val check: TextView = view.findViewById(R.id.themeCheckText)
@@ -32,7 +33,7 @@ class ThemeAdapter(
         val drawable = holder.swatch.background.mutate()
         (drawable as? android.graphics.drawable.GradientDrawable)?.setColor(swatchColor)
 
-        holder.itemView.setOnClickListener {
+        holder.cardRow.setOnClickListener {
             val oldSelected = selectedKey
             selectedKey = key
             notifyItemChanged(themeKeys.indexOf(oldSelected))

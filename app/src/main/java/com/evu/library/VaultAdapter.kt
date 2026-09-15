@@ -14,6 +14,7 @@ class VaultAdapter(
 ) : RecyclerView.Adapter<VaultAdapter.VaultViewHolder>() {
 
     class VaultViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val cardRow: View = view.findViewById(R.id.vaultCardRow)
         val name: TextView = view.findViewById(R.id.vaultNameText)
         val location: TextView = view.findViewById(R.id.vaultLocationText)
         val activeLabel: TextView = view.findViewById(R.id.vaultActiveText)
@@ -40,7 +41,7 @@ class VaultAdapter(
             holder.location.visibility = View.GONE
         }
 
-        holder.itemView.setOnClickListener { onSwitch(vault) }
+        holder.cardRow.setOnClickListener { onSwitch(vault) }
         holder.options.setOnClickListener { onOptions(vault) }
     }
 
