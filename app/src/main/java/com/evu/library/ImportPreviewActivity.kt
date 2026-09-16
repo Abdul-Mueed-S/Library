@@ -6,7 +6,6 @@ import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
@@ -55,7 +54,6 @@ class ImportPreviewActivity : BaseActivity() {
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
         categoriesCheckbox.setOnCheckedChangeListener { _, _ -> adapter.notifyDataSetChanged() }
 
@@ -144,8 +142,6 @@ class ImportPreviewActivity : BaseActivity() {
                         isbn = item.isbn,
                         isFavorite = if (includeFavorites) item.favorite else false,
                         categoryId = categoryId,
-                        // If the imported file's own duplicate flag is being kept, use it;
-                        // otherwise fall back to freshly-computed detection against this library.
                         flaggedDuplicate = if (includeDuplicateFlags) item.wasFlaggedDuplicate else item.isDuplicate
                     )
                 )

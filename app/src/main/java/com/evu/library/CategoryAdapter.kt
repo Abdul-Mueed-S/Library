@@ -13,6 +13,7 @@ class CategoryAdapter(
 ) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
 
     class CategoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val cardRow: View = view.findViewById(R.id.categoryCardRow)
         val numberText: TextView = view.findViewById(R.id.categoryNumberText)
         val nameText: TextView = view.findViewById(R.id.categoryNameText)
     }
@@ -29,8 +30,8 @@ class CategoryAdapter(
         holder.numberText.text = "${position + 1}."
 
         holder.nameText.text = category.name
-        holder.itemView.setOnClickListener { onClick(category) }
-        holder.itemView.setOnLongClickListener {
+        holder.cardRow.setOnClickListener { onClick(category) }
+        holder.cardRow.setOnLongClickListener {
             onLongClick(category)
             true
         }

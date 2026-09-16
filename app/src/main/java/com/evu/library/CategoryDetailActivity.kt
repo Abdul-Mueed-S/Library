@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
@@ -28,12 +27,6 @@ class CategoryDetailActivity : BaseActivity() {
     private var searchFilterIndex = 0
     private var sortFilterIndex = 0
 
-    private fun resolveAttrColor(attr: Int): Int {
-        val typedValue = android.util.TypedValue()
-        theme.resolveAttribute(attr, typedValue, true)
-        return typedValue.data
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_category_detail)
@@ -48,7 +41,6 @@ class CategoryDetailActivity : BaseActivity() {
         recyclerView = findViewById(R.id.categoryBookRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
         setupSpinners()
 
@@ -167,69 +159,54 @@ class CategoryDetailActivity : BaseActivity() {
     }
 
     private fun showBookOptionsDialog(book: Book) {
-        val favLabel = if (book.isFavorite) "☆  Remove from Favourites" else "★  Add to Favourites"
-        val draftLabel = if (book.isDraft) "📕  Unmark as Draft" else "📝  Mark as Draft"
-        val options = listOf("✏️  Edit", "🗂️  Remove from Category", "🗑️  Delete", favLabel, draftLabel)
+        val favIcon = if (book.isFavorite) android.R.drawable.btn_star_big_off else android.R.drawable.btn_star_big_on
+        val favLabel = if (book.isFavorite) "Remove from Favourites" else "Add to Favourites"
+        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
 
-        val dialogView = layoutInflater.inflate(R.layout.dialog_book_options, null)
-        dialogView.findViewById<android.widget.TextView>(R.id.optionsTitle).text = book.title
-        val container = dialogView.findViewById<android.widget.LinearLayout>(R.id.optionsContainer)
+        val options = listOf(
+            DialogOption(android.R.drawable.ic_menu_edit, "Edit"),
+            DialogOption(android.R.drawable.ic_menu_close_clear_cancel, "Remove from Category"),
+            DialogOption(android.R.drawable.ic_menu_delete, "Delete"),
+            DialogOption(favIcon, favLabel),
+            DialogOption(android.R.drawable.ic_menu_agenda, draftLabel)
+        )
 
-        val dialog = AlertDialog.Builder(this, R.style.AppDialogTheme)
-            .setView(dialogView)
-            .create()
-
-        options.forEachIndexed { index, label ->
-            val optionView = android.widget.TextView(this)
-            optionView.text = label
-            optionView.textSize = 16f
-            optionView.setPadding(16, 26, 16, 26)
-            optionView.setTextColor(resolveAttrColor(R.attr.appColorOnSurface))
-            val outValue = android.util.TypedValue()
-            theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
-            optionView.setBackgroundResource(outValue.resourceId)
-            optionView.isClickable = true
-            optionView.isFocusable = true
-            optionView.setOnClickListener {
-                dialog.dismiss()
-                when (index) {
-                    0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, secondary ->
-                        Toast.makeText(this, primary, Toast.LENGTH_SHORT).show()
-                        if (secondary != null) {
-                            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                                Toast.makeText(this, secondary, Toast.LENGTH_SHORT).show()
-                            }, 1000)
-                        }
-                        loadBooks()
+        OptionsDialogHelper.show(this, book.title, options) { which ->
+            when (which) {
+                0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, secondary ->
+                    Toast.makeText(this, primary, Toast.LENGTH_SHORT).show()
+                    if (secondary != null) {
+                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            Toast.makeText(this, secondary, Toast.LENGTH_SHORT).show()
+                        }, 1000)
                     }
-                    1 -> lifecycleScope.launch {
-                        db.bookDao().updateBook(book.copy(categoryId = null))
-                        Toast.makeText(this@CategoryDetailActivity, "${book.title} Removed from Category", Toast.LENGTH_SHORT).show()
-                        loadBooks()
-                    }
-                    2 -> lifecycleScope.launch {
-                        db.bookDao().deleteBook(book)
-                        Toast.makeText(this@CategoryDetailActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
-                        loadBooks()
-                    }
-                    3 -> lifecycleScope.launch {
-                        val newState = !book.isFavorite
-                        db.bookDao().updateBook(book.copy(isFavorite = newState))
-                        val msg = if (newState) "${book.title} Added to Favourites" else "${book.title} Removed from Favourites"
-                        Toast.makeText(this@CategoryDetailActivity, msg, Toast.LENGTH_SHORT).show()
-                        loadBooks()
-                    }
-                    4 -> lifecycleScope.launch {
-                        val newState = !book.isDraft
-                        db.bookDao().updateBook(book.copy(isDraft = newState))
-                        val msg = if (newState) "${book.title} Marked as Draft" else "${book.title} Unmarked as Draft"
-                        Toast.makeText(this@CategoryDetailActivity, msg, Toast.LENGTH_SHORT).show()
-                        loadBooks()
-                    }
+                    loadBooks()
+                }
+                1 -> lifecycleScope.launch {
+                    db.bookDao().updateBook(book.copy(categoryId = null))
+                    Toast.makeText(this@CategoryDetailActivity, "${book.title} Removed from Category", Toast.LENGTH_SHORT).show()
+                    loadBooks()
+                }
+                2 -> lifecycleScope.launch {
+                    db.bookDao().deleteBook(book)
+                    Toast.makeText(this@CategoryDetailActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
+                    loadBooks()
+                }
+                3 -> lifecycleScope.launch {
+                    val newState = !book.isFavorite
+                    db.bookDao().updateBook(book.copy(isFavorite = newState))
+                    val msg = if (newState) "${book.title} Added to Favourites" else "${book.title} Removed from Favourites"
+                    Toast.makeText(this@CategoryDetailActivity, msg, Toast.LENGTH_SHORT).show()
+                    loadBooks()
+                }
+                4 -> lifecycleScope.launch {
+                    val newState = !book.isDraft
+                    db.bookDao().updateBook(book.copy(isDraft = newState))
+                    val msg = if (newState) "${book.title} Marked as Draft" else "${book.title} Unmarked as Draft"
+                    Toast.makeText(this@CategoryDetailActivity, msg, Toast.LENGTH_SHORT).show()
+                    loadBooks()
                 }
             }
-            container.addView(optionView)
         }
-        dialog.show()
     }
 }

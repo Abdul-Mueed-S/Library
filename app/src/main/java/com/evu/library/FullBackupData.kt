@@ -1,6 +1,6 @@
 package com.evu.library
 
-data class FullBackupCategory(val id: Int, val name: String)
+data class FullBackupCategory(val id: Int, val name: String, val sortOrder: Int = 0)
 
 data class FullBackupBook(
     val id: Int,

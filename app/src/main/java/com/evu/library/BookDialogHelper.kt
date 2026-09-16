@@ -96,7 +96,8 @@ object BookDialogHelper {
                                             selectedCategoryName = existing.name
                                             refreshSpinner(existing.id)
                                         } else {
-                                            val newId = db.categoryDao().insertCategory(Category(name = name)).toInt()
+                                            val maxOrder = db.categoryDao().getMaxSortOrder()
+                                            val newId = db.categoryDao().insertCategory(Category(name = name, sortOrder = maxOrder + 1)).toInt()
                                             selectedCategoryId = newId
                                             selectedCategoryName = name
                                             newCategoryCreatedThisSession = true
@@ -127,12 +128,6 @@ object BookDialogHelper {
             .setNeutralButton("Draft", null)
             .create()
 
-        // isDraft resolution:
-        // - Pressing "Draft" always forces isDraft = true (new or existing entry).
-        // - Pressing "Save" on a NEW entry sets isDraft = false (plain add).
-        // - Pressing "Save" on an EXISTING entry PRESERVES its current isDraft value —
-        //   editing a draft to fix a duplicate conflict must not silently un-draft it;
-        //   only the explicit "Draft"/"Mark as Draft"/"Unmark as Draft" actions change that flag.
         fun buildBookOrShowError(forceDraft: Boolean): Book? {
             val title = Utils.toTitleCase(titleInput.text.toString())
             if (title.isEmpty()) {
@@ -175,8 +170,6 @@ object BookDialogHelper {
                         .setNegativeButton("Cancel", null)
                         .show()
                 } else {
-                    // Not a duplicate — either genuinely unique or resolved by this edit.
-                    // flaggedDuplicate is correctly false here regardless of prior state.
                     saveBook(db, book, existingBook, newCategoryCreatedThisSession, selectedCategoryId, selectedCategoryName, title, onResult)
                     dialog.dismiss()
                 }

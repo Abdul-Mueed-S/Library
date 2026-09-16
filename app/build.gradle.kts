@@ -12,8 +12,8 @@ android {
         applicationId = "com.evu.library"
         minSdk = 26
         targetSdk = 34
-        versionCode = 38
-        versionName = "6.5.3"
+        versionCode = 41
+        versionName = "6.12.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -55,5 +55,6 @@ dependencies {
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("androidx.documentfile:documentfile:1.0.1")
+    implementation("androidx.transition:transition-ktx:1.4.1")
     ksp("androidx.room:room-compiler:2.6.1")
 }

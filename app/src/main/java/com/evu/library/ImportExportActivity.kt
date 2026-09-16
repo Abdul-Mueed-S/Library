@@ -142,7 +142,7 @@ class ImportExportActivity : BaseActivity() {
             db.bookDao().deleteAllBooks()
             db.categoryDao().deleteAllCategories()
             for (cat in data.categories) {
-                db.categoryDao().insertCategoryWithId(Category(id = cat.id, name = cat.name))
+                db.categoryDao().insertCategoryWithId(Category(id = cat.id, name = cat.name, sortOrder = cat.sortOrder))
             }
             for (book in data.books) {
                 db.bookDao().insertBookWithId(

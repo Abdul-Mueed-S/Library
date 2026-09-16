@@ -9,7 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 class ChipAdapter(
     private var chips: List<ChipItem>,
     private var selectedIndex: Int,
-    private val onSelect: (Int, ChipItem) -> Unit
+    private val onSelect: (Int, ChipItem) -> Unit,
+    private val onReorder: (List<Category>) -> Unit = {}
 ) : RecyclerView.Adapter<ChipAdapter.ChipViewHolder>() {
 
     class ChipViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -49,5 +50,24 @@ class ChipAdapter(
         chips = newChips
         selectedIndex = newSelectedIndex
         notifyDataSetChanged()
+    }
+
+    // Only real categories can be dragged — All/Favourites/AddNew stay fixed.
+    fun canDrag(position: Int): Boolean = chips.getOrNull(position) is ChipItem.CategoryChip
+
+    fun onItemMove(fromPosition: Int, toPosition: Int): Boolean {
+        if (!canDrag(fromPosition) || !canDrag(toPosition)) return false
+        val mutable = chips.toMutableList()
+        val item = mutable.removeAt(fromPosition)
+        mutable.add(toPosition, item)
+        chips = mutable
+        notifyItemMoved(fromPosition, toPosition)
+        return true
+    }
+
+    fun persistNewOrder() {
+        val categoryChips = chips.filterIsInstance<ChipItem.CategoryChip>()
+        val reordered = categoryChips.mapIndexed { index, chip -> chip.category.copy(sortOrder = index) }
+        onReorder(reordered)
     }
 }

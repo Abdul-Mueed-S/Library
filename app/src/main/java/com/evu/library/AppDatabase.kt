@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Book::class, Category::class], version = 4, exportSchema = true)
+@Database(entities = [Book::class, Category::class], version = 5, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun bookDao(): BookDao
@@ -22,6 +22,14 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE categories ADD COLUMN sortOrder INTEGER NOT NULL DEFAULT 0")
+                // Initialize existing categories' order to match creation order (by id).
+                db.execSQL("UPDATE categories SET sortOrder = id")
+            }
+        }
+
         @Synchronized
         fun getDatabase(context: Context): AppDatabase {
             val activeVault = VaultManager.getActiveVault(context)
@@ -31,14 +39,11 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     activeVault.dbFileName
                 )
-                    .addMigrations(MIGRATION_3_4)
+                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
                     .build()
             }
         }
 
-        // Opens (or returns cached) database for a SPECIFIC vault, regardless of which
-        // vault is currently active — used by background backup, which must back up
-        // every vault, not just the one the user happens to have open.
         @Synchronized
         fun getDatabaseForVault(context: Context, vault: LibraryVault): AppDatabase {
             return instances.getOrPut(vault.dbFileName) {
@@ -47,7 +52,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     vault.dbFileName
                 )
-                    .addMigrations(MIGRATION_3_4)
+                    .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
                     .build()
             }
         }

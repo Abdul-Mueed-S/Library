@@ -5,6 +5,7 @@
     android:layout_marginBottom="8dp">
 
     <LinearLayout
+        android:id="@+id/categoryCardRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -15,19 +16,17 @@
         android:clickable="true"
         android:focusable="true">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="📁"
-            android:textSize="18sp"
-            android:layout_marginEnd="12dp" />
+        <View
+            android:layout_width="4dp"
+            android:layout_height="20dp"
+            android:background="?attr/appColorPrimary" />
 
         <TextView
             android:id="@+id/categoryNumberText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:layout_marginEnd="6dp"
+            android:layout_marginStart="12dp"
             android:alpha="0.6"
             android:visibility="gone" />
 
@@ -36,6 +35,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="12dp"
             android:textSize="16sp" />
 
         <TextView

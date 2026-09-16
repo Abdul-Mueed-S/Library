@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
@@ -32,11 +31,10 @@ class PendingDuplicatesActivity : BaseActivity() {
         findViewById<android.widget.ImageButton>(R.id.backButton).setOnClickListener { finish() }
 
         db = AppDatabase.getDatabase(this)
-        adapter = BookAdapter(emptyList()) { book -> showOptions(book) }
+        adapter = BookAdapter(emptyList(), showDuplicateTag = false) { book -> showOptions(book) }
         recyclerView = findViewById(R.id.duplicatesRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
         setupSpinners()
 
@@ -122,37 +120,38 @@ class PendingDuplicatesActivity : BaseActivity() {
     }
 
     private fun showOptions(book: Book) {
-        val draftLabel = if (book.isDraft) "📕  Unmark as Draft" else "📝  Mark as Draft"
-        val options = arrayOf("✏️  Edit", "🗑️  Delete", draftLabel)
-        AlertDialog.Builder(this, R.style.AppDialogTheme)
-            .setTitle(book.title)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, _ ->
-                        Toast.makeText(this@PendingDuplicatesActivity, primary, Toast.LENGTH_SHORT).show()
-                        load()
-                    }
-                    1 -> AlertDialog.Builder(this, R.style.AppDialogTheme)
-                        .setTitle("Delete Book")
-                        .setMessage("Delete \"${book.title}\"? This cannot be undone.")
-                        .setPositiveButton("Delete") { _, _ ->
-                            lifecycleScope.launch {
-                                db.bookDao().deleteBook(book)
-                                Toast.makeText(this@PendingDuplicatesActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
-                                load()
-                            }
+        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
+        val options = listOf(
+            DialogOption(android.R.drawable.ic_menu_edit, "Edit"),
+            DialogOption(android.R.drawable.ic_menu_delete, "Delete"),
+            DialogOption(android.R.drawable.ic_menu_agenda, draftLabel)
+        )
+        OptionsDialogHelper.show(this, book.title, options) { which ->
+            when (which) {
+                0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, _ ->
+                    Toast.makeText(this@PendingDuplicatesActivity, primary, Toast.LENGTH_SHORT).show()
+                    load()
+                }
+                1 -> AlertDialog.Builder(this, R.style.AppDialogTheme)
+                    .setTitle("Delete Book")
+                    .setMessage("Delete \"${book.title}\"? This cannot be undone.")
+                    .setPositiveButton("Delete") { _, _ ->
+                        lifecycleScope.launch {
+                            db.bookDao().deleteBook(book)
+                            Toast.makeText(this@PendingDuplicatesActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
+                            load()
                         }
-                        .setNegativeButton("Cancel", null)
-                        .show()
-                    2 -> lifecycleScope.launch {
-                        val newState = !book.isDraft
-                        db.bookDao().updateBook(book.copy(isDraft = newState))
-                        val msg = if (newState) "${book.title} Marked as Draft" else "${book.title} Unmarked as Draft"
-                        Toast.makeText(this@PendingDuplicatesActivity, msg, Toast.LENGTH_SHORT).show()
-                        load()
                     }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+                2 -> lifecycleScope.launch {
+                    val newState = !book.isDraft
+                    db.bookDao().updateBook(book.copy(isDraft = newState))
+                    val msg = if (newState) "${book.title} Marked as Draft" else "${book.title} Unmarked as Draft"
+                    Toast.makeText(this@PendingDuplicatesActivity, msg, Toast.LENGTH_SHORT).show()
+                    load()
                 }
             }
-            .show()
+        }
     }
 }

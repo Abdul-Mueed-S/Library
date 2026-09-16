@@ -6,7 +6,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
@@ -45,7 +44,6 @@ class CategoriesActivity : BaseActivity() {
         )
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
         findViewById<android.widget.Button>(R.id.addCategoryButton).setOnClickListener {
             showAddCategoryDialog()
@@ -120,7 +118,8 @@ class CategoriesActivity : BaseActivity() {
                         if (existing != null) {
                             Toast.makeText(this@CategoriesActivity, "Category \"$name\" already exists", Toast.LENGTH_SHORT).show()
                         } else {
-                            db.categoryDao().insertCategory(Category(name = name))
+                            val maxOrder = db.categoryDao().getMaxSortOrder()
+                            db.categoryDao().insertCategory(Category(name = name, sortOrder = maxOrder + 1))
                             Toast.makeText(this@CategoriesActivity, "Category: $name Created", Toast.LENGTH_SHORT).show()
                             loadCategories()
                         }

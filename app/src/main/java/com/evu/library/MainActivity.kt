@@ -14,8 +14,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.evu.library.databinding.ActivityMainBinding
 import kotlinx.coroutines.launch
 
@@ -51,12 +52,41 @@ class MainActivity : BaseActivity() {
         adapter = BookAdapter(emptyList()) { book -> showBookOptionsDialog(book) }
         binding.bookRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.bookRecyclerView.adapter = adapter
-        binding.bookRecyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
-        chipAdapter = ChipAdapter(chips, selectedChipIndex) { index, chip -> onChipSelected(index, chip) }
+        chipAdapter = ChipAdapter(
+            chips, selectedChipIndex,
+            onSelect = { index, chip -> onChipSelected(index, chip) },
+            onReorder = { reorderedCategories ->
+                lifecycleScope.launch {
+                    reorderedCategories.forEach { db.categoryDao().updateCategory(it) }
+                }
+            }
+        )
         binding.chipRecyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         binding.chipRecyclerView.adapter = chipAdapter
+
+        val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0
+        ) {
+            override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
+                return if (chipAdapter.canDrag(viewHolder.bindingAdapterPosition)) {
+                    makeMovementFlags(ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT, 0)
+                } else 0
+            }
+
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                return chipAdapter.onItemMove(viewHolder.bindingAdapterPosition, target.bindingAdapterPosition)
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
+
+            override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+                super.clearView(recyclerView, viewHolder)
+                chipAdapter.persistNewOrder()
+            }
+        })
+        touchHelper.attachToRecyclerView(binding.chipRecyclerView)
 
         setupSpinners()
 
@@ -112,9 +142,6 @@ class MainActivity : BaseActivity() {
         super.onResume()
         loadChips()
         adapter.notifyDataSetChanged()
-        // Automatic detection ONLY while the app is actually open — starts polling
-        // here, stopped in onPause. The "Check Location" nav item just triggers
-        // one immediate check on demand (with toast feedback), same underlying logic.
         locationCheckHandler.postDelayed(locationCheckRunnable, LOCATION_CHECK_INTERVAL_MS)
     }
 
@@ -214,7 +241,8 @@ class MainActivity : BaseActivity() {
                         if (existing != null) {
                             Toast.makeText(this@MainActivity, "Category \"$name\" already exists", Toast.LENGTH_SHORT).show()
                         } else {
-                            db.categoryDao().insertCategory(Category(name = name))
+                            val maxOrder = db.categoryDao().getMaxSortOrder()
+                            db.categoryDao().insertCategory(Category(name = name, sortOrder = maxOrder + 1))
                             Toast.makeText(this@MainActivity, "Category: $name Created", Toast.LENGTH_SHORT).show()
                             loadChips()
                         }
@@ -322,24 +350,28 @@ class MainActivity : BaseActivity() {
     }
 
     private fun showBookOptionsDialog(book: Book) {
-        val favLabel = if (book.isFavorite) "☆  Remove from Favourites" else "★  Add to Favourites"
-        val draftLabel = if (book.isDraft) "📕  Unmark as Draft" else "📝  Mark as Draft"
-        val options = arrayOf("✏️  Edit", "🗑️  Delete", favLabel, draftLabel)
+        val favIcon = if (book.isFavorite) android.R.drawable.btn_star_big_off else android.R.drawable.btn_star_big_on
+        val favLabel = if (book.isFavorite) "Remove from Favourites" else "Add to Favourites"
+        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
 
-        AlertDialog.Builder(this, R.style.AppDialogTheme)
-            .setTitle(book.title)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, secondary ->
-                        showSequencedToast(primary, secondary)
-                        refreshCurrentView()
-                    }
-                    1 -> confirmDelete(book)
-                    2 -> toggleFavorite(book)
-                    3 -> toggleDraft(book)
+        val options = listOf(
+            DialogOption(android.R.drawable.ic_menu_edit, "Edit"),
+            DialogOption(android.R.drawable.ic_menu_delete, "Delete"),
+            DialogOption(favIcon, favLabel),
+            DialogOption(android.R.drawable.ic_menu_agenda, draftLabel)
+        )
+
+        OptionsDialogHelper.show(this, book.title, options) { which ->
+            when (which) {
+                0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, secondary ->
+                    showSequencedToast(primary, secondary)
+                    refreshCurrentView()
                 }
+                1 -> confirmDelete(book)
+                2 -> toggleFavorite(book)
+                3 -> toggleDraft(book)
             }
-            .show()
+        }
     }
 
     private fun toggleDraft(book: Book) {

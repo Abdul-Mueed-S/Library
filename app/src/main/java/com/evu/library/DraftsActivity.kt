@@ -10,7 +10,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
@@ -36,7 +35,6 @@ class DraftsActivity : BaseActivity() {
         recyclerView = findViewById(R.id.draftsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
 
         setupSpinners()
 
@@ -123,34 +121,35 @@ class DraftsActivity : BaseActivity() {
 
     private fun showOptions(book: Book) {
         val dialogTitle = if (book.flaggedDuplicate) "${book.title} (Also a Duplicate)" else book.title
-        val options = arrayOf("✏️  Edit", "🗑️  Delete", "📕  Mark as Published (remove from Drafts)")
-        AlertDialog.Builder(this, R.style.AppDialogTheme)
-            .setTitle(dialogTitle)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, _ ->
-                        Toast.makeText(this@DraftsActivity, primary, Toast.LENGTH_SHORT).show()
-                        load()
-                    }
-                    1 -> AlertDialog.Builder(this, R.style.AppDialogTheme)
-                        .setTitle("Delete Book")
-                        .setMessage("Delete \"${book.title}\"? This cannot be undone.")
-                        .setPositiveButton("Delete") { _, _ ->
-                            lifecycleScope.launch {
-                                db.bookDao().deleteBook(book)
-                                Toast.makeText(this@DraftsActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
-                                load()
-                            }
+        val options = listOf(
+            DialogOption(android.R.drawable.ic_menu_edit, "Edit"),
+            DialogOption(android.R.drawable.ic_menu_delete, "Delete"),
+            DialogOption(android.R.drawable.ic_menu_revert, "Mark as Published (remove from Drafts)")
+        )
+        OptionsDialogHelper.show(this, dialogTitle, options) { which ->
+            when (which) {
+                0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, _ ->
+                    Toast.makeText(this@DraftsActivity, primary, Toast.LENGTH_SHORT).show()
+                    load()
+                }
+                1 -> AlertDialog.Builder(this, R.style.AppDialogTheme)
+                    .setTitle("Delete Book")
+                    .setMessage("Delete \"${book.title}\"? This cannot be undone.")
+                    .setPositiveButton("Delete") { _, _ ->
+                        lifecycleScope.launch {
+                            db.bookDao().deleteBook(book)
+                            Toast.makeText(this@DraftsActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
+                            load()
                         }
-                        .setNegativeButton("Cancel", null)
-                        .show()
-                    2 -> lifecycleScope.launch {
-                        db.bookDao().clearDraftFlag(book.id)
-                        Toast.makeText(this@DraftsActivity, "${book.title} Marked as Published", Toast.LENGTH_SHORT).show()
-                        load()
                     }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+                2 -> lifecycleScope.launch {
+                    db.bookDao().clearDraftFlag(book.id)
+                    Toast.makeText(this@DraftsActivity, "${book.title} Marked as Published", Toast.LENGTH_SHORT).show()
+                    load()
                 }
             }
-            .show()
+        }
     }
 }

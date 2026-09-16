@@ -175,6 +175,7 @@ object ExportImportUtils {
             val obj = JSONObject()
             obj.put("id", cat.id)
             obj.put("name", cat.name)
+            obj.put("sortOrder", cat.sortOrder)
             catArray.put(obj)
         }
         root.put("categories", catArray)
@@ -207,7 +208,13 @@ object ExportImportUtils {
             val categories = mutableListOf<FullBackupCategory>()
             for (i in 0 until catArray.length()) {
                 val obj = catArray.getJSONObject(i)
-                categories.add(FullBackupCategory(obj.getInt("id"), obj.getString("name")))
+                categories.add(
+                    FullBackupCategory(
+                        id = obj.getInt("id"),
+                        name = obj.getString("name"),
+                        sortOrder = obj.optInt("sortOrder", 0)
+                    )
+                )
             }
 
             val bookArray = root.optJSONArray("books") ?: JSONArray()

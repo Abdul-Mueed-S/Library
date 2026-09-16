@@ -2,20 +2,24 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="22dp">
 
     <RadioGroup android:id="@+id/intervalRadioGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <RadioButton android:id="@+id/radioDay" android:text="Every 1 day"
-            android:layout_width="match_parent" android:layout_height="wrap_content" />
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingTop="6dp" android:paddingBottom="6dp" />
         <RadioButton android:id="@+id/radioWeek" android:text="Every 7 days"
-            android:layout_width="match_parent" android:layout_height="wrap_content" />
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingTop="6dp" android:paddingBottom="6dp" />
         <RadioButton android:id="@+id/radioMonth" android:text="Every 1 month"
-            android:layout_width="match_parent" android:layout_height="wrap_content" />
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingTop="6dp" android:paddingBottom="6dp" />
         <RadioButton android:id="@+id/radioCustom" android:text="Custom"
-            android:layout_width="match_parent" android:layout_height="wrap_content" />
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:paddingTop="6dp" android:paddingBottom="6dp" />
 
     </RadioGroup>
 
@@ -25,7 +29,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="14dp"
         android:visibility="gone">
 
         <EditText
@@ -40,7 +44,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="12dp" />
+            android:layout_marginStart="14dp" />
 
     </LinearLayout>
 
