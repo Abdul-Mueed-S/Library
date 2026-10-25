@@ -1,16 +1,20 @@
 package com.evu.library
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Update
-import androidx.room.Query
 import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 
 @Dao
 interface BookDao {
 
     @Insert
-    suspend fun insertBook(book: Book)
+    suspend fun insertBook(book: Book): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBookWithId(book: Book)
 
     @Update
     suspend fun updateBook(book: Book)
@@ -50,9 +54,6 @@ interface BookDao {
 
     @Query("DELETE FROM books")
     suspend fun deleteAllBooks()
-
-    @androidx.room.Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
-    suspend fun insertBookWithId(book: Book)
 
     @Query("SELECT * FROM books WHERE isDraft = 1")
     suspend fun getDraftBooks(): List<Book>
