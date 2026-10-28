@@ -8,7 +8,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,6 +34,7 @@ class FavouritesActivity : BaseActivity() {
         recyclerView = findViewById(R.id.favouritesRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+        BookSelectionController(this, db, adapter, recyclerView) { loadFavourites() }
 
         setupSpinners()
 
@@ -120,14 +120,12 @@ class FavouritesActivity : BaseActivity() {
     }
 
     private fun showBookOptionsDialog(book: Book) {
-        val favIcon = if (book.isFavorite) android.R.drawable.btn_star_big_off else android.R.drawable.btn_star_big_on
-        val favLabel = "Remove from Favourites"
         val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
 
         val options = listOf(
             DialogOption(android.R.drawable.ic_menu_edit, "Edit"),
             DialogOption(android.R.drawable.ic_menu_delete, "Delete"),
-            DialogOption(favIcon, favLabel),
+            DialogOption(android.R.drawable.btn_star_big_off, "Remove from Favourites"),
             DialogOption(android.R.drawable.ic_menu_agenda, draftLabel)
         )
 
@@ -142,7 +140,7 @@ class FavouritesActivity : BaseActivity() {
                     }
                     loadFavourites()
                 }
-                1 -> confirmDelete(book)
+                1 -> UndoDeleteHelper.deleteWithUndo(this, db, lifecycleScope, listOf(book)) { loadFavourites() }
                 2 -> lifecycleScope.launch {
                     db.bookDao().updateBook(book.copy(isFavorite = false))
                     Toast.makeText(this@FavouritesActivity, "${book.title} Removed from Favourites", Toast.LENGTH_SHORT).show()
@@ -157,20 +155,5 @@ class FavouritesActivity : BaseActivity() {
                 }
             }
         }
-    }
-
-    private fun confirmDelete(book: Book) {
-        AlertDialog.Builder(this, R.style.AppDialogTheme)
-            .setTitle("Delete Book")
-            .setMessage("Delete \"${book.title}\"? This cannot be undone.")
-            .setPositiveButton("Delete") { _, _ ->
-                lifecycleScope.launch {
-                    db.bookDao().deleteBook(book)
-                    Toast.makeText(this@FavouritesActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
-                    loadFavourites()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
     }
 }

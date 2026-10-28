@@ -160,7 +160,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Backs up every library to a folder of your choice (e.g. a Google Drive folder)."
+                android:text="Backs up every library to a folder of your choice (e.g. a Google Drive folder). Backups beyond your retention limit are deleted automatically after each successful backup."
                 android:textSize="12sp"
                 android:alpha="0.7"
                 android:layout_marginTop="2dp" />
@@ -234,6 +234,55 @@
 
             </LinearLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/appColorPrimary"
+                android:alpha="0.25"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:id="@+id/backupRetentionRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Retention" />
+
+                    <TextView
+                        android:id="@+id/backupRetentionText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="13sp"
+                        android:alpha="0.7" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textSize="20sp"
+                    android:alpha="0.5" />
+
+            </LinearLayout>
+
             <Button
                 android:id="@+id/chooseBackupFolderButton"
                 android:layout_width="match_parent"
@@ -263,6 +312,13 @@
                 android:textSize="12sp"
                 android:alpha="0.7"
                 android:layout_marginTop="4dp" />
+
+            <Button
+                android:id="@+id/browseBackupsButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Browse &amp; Restore Backups" />
 
         </LinearLayout>
 

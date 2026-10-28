@@ -1,0 +1,10 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_activated="true">
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/appColorSurface" />
+            <stroke android:width="2dp" android:color="?attr/appColorPrimary" />
+            <corners android:radius="16dp" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/settings_card_bg" />
+</selector>

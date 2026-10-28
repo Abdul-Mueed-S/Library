@@ -12,6 +12,7 @@ object BackupPrefs {
     private const val KEY_INTERVAL_TYPE = "backup_interval_type"
     private const val KEY_CUSTOM_VALUE = "backup_custom_value"
     private const val KEY_CUSTOM_UNIT = "backup_custom_unit"
+    private const val KEY_RETENTION = "backup_retention_count"
 
     const val INTERVAL_DAY = "1_day"
     const val INTERVAL_WEEK = "7_days"
@@ -23,6 +24,9 @@ object BackupPrefs {
     const val UNIT_WEEKS = "weeks"
     const val UNIT_MONTHS = "months"
     const val UNIT_YEARS = "years"
+
+    const val RETENTION_ALL = 0
+    val RETENTION_OPTIONS = listOf(3, 5, 10, 20, RETENTION_ALL)
 
     fun getDestinationUri(context: Context): String? =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(KEY_DEST_URI, null)
@@ -81,6 +85,18 @@ object BackupPrefs {
             .apply()
     }
 
+    fun getRetentionCount(context: Context): Int =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getInt(KEY_RETENTION, 10)
+
+    fun setRetentionCount(context: Context, count: Int) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putInt(KEY_RETENTION, count).apply()
+    }
+
+    fun getRetentionDisplayText(context: Context): String {
+        val count = getRetentionCount(context)
+        return if (count == RETENTION_ALL) "Keep all backups" else "Keep last $count backups"
+    }
+
     private fun unitToMinutes(unit: String): Long = when (unit) {
         UNIT_HOURS -> 60L
         UNIT_DAYS -> 1440L
@@ -90,8 +106,7 @@ object BackupPrefs {
         else -> 1440L
     }
 
-    // WorkManager enforces a 15-minute minimum on periodic work regardless — this
-    // clamp just ensures our own display/logic agrees with that reality.
+    // WorkManager enforces a 15-minute minimum on periodic work regardless.
     fun getIntervalMinutes(context: Context): Long {
         val minutes = when (getIntervalType(context)) {
             INTERVAL_DAY -> 1440L

@@ -8,7 +8,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,6 +34,7 @@ class DraftsActivity : BaseActivity() {
         recyclerView = findViewById(R.id.draftsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+        BookSelectionController(this, db, adapter, recyclerView) { load() }
 
         setupSpinners()
 
@@ -132,18 +132,7 @@ class DraftsActivity : BaseActivity() {
                     Toast.makeText(this@DraftsActivity, primary, Toast.LENGTH_SHORT).show()
                     load()
                 }
-                1 -> AlertDialog.Builder(this, R.style.AppDialogTheme)
-                    .setTitle("Delete Book")
-                    .setMessage("Delete \"${book.title}\"? This cannot be undone.")
-                    .setPositiveButton("Delete") { _, _ ->
-                        lifecycleScope.launch {
-                            db.bookDao().deleteBook(book)
-                            Toast.makeText(this@DraftsActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
-                            load()
-                        }
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
+                1 -> UndoDeleteHelper.deleteWithUndo(this, db, lifecycleScope, listOf(book)) { load() }
                 2 -> lifecycleScope.launch {
                     db.bookDao().clearDraftFlag(book.id)
                     Toast.makeText(this@DraftsActivity, "${book.title} Marked as Published", Toast.LENGTH_SHORT).show()

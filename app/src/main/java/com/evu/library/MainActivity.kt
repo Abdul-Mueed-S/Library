@@ -52,6 +52,7 @@ class MainActivity : BaseActivity() {
         adapter = BookAdapter(emptyList()) { book -> showBookOptionsDialog(book) }
         binding.bookRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.bookRecyclerView.adapter = adapter
+        BookSelectionController(this, db, adapter, binding.bookRecyclerView) { refreshCurrentView() }
 
         chipAdapter = ChipAdapter(
             chips, selectedChipIndex,
@@ -367,7 +368,7 @@ class MainActivity : BaseActivity() {
                     showSequencedToast(primary, secondary)
                     refreshCurrentView()
                 }
-                1 -> confirmDelete(book)
+                1 -> UndoDeleteHelper.deleteWithUndo(this, db, lifecycleScope, listOf(book)) { refreshCurrentView() }
                 2 -> toggleFavorite(book)
                 3 -> toggleDraft(book)
             }
@@ -382,21 +383,6 @@ class MainActivity : BaseActivity() {
             Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
             refreshCurrentView()
         }
-    }
-
-    private fun confirmDelete(book: Book) {
-        AlertDialog.Builder(this, R.style.AppDialogTheme)
-            .setTitle("Delete Book")
-            .setMessage("Delete \"${book.title}\"? This cannot be undone.")
-            .setPositiveButton("Delete") { _, _ ->
-                lifecycleScope.launch {
-                    db.bookDao().deleteBook(book)
-                    Toast.makeText(this@MainActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
-                    refreshCurrentView()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
     }
 
     private fun toggleFavorite(book: Book) {

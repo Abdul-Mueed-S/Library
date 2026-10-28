@@ -16,8 +16,14 @@ interface BookDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBookWithId(book: Book)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBooksWithId(books: List<Book>)
+
     @Update
     suspend fun updateBook(book: Book)
+
+    @Update
+    suspend fun updateBooks(books: List<Book>)
 
     @Query("SELECT * FROM books")
     suspend fun getAllBooks(): List<Book>
@@ -58,9 +64,15 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE isDraft = 1")
     suspend fun getDraftBooks(): List<Book>
 
+    @Query("SELECT COUNT(*) FROM books WHERE isDraft = 1")
+    suspend fun getDraftCount(): Int
+
     @Query("UPDATE books SET isDraft = 0 WHERE id = :id")
     suspend fun clearDraftFlag(id: Int)
 
     @Delete
     suspend fun deleteBook(book: Book)
+
+    @Delete
+    suspend fun deleteBooks(books: List<Book>)
 }

@@ -11,17 +11,17 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="Library"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Library.Default"
         tools:targetApi="31">
         <activity android:name=".CategoriesActivity"
             android:exported="false"
-            android:theme="@style/Theme.Library.Default"/>
+            android:theme="@style/Theme.Library.Default" />
         <activity android:name=".CategoryDetailActivity"
             android:exported="false"
-            android:theme="@style/Theme.Library.Default"/>
+            android:theme="@style/Theme.Library.Default" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -57,6 +57,9 @@
             android:exported="false"
             android:theme="@style/Theme.Library.Default" />
         <activity android:name=".DraftsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".BackupBrowserActivity"
             android:exported="false"
             android:theme="@style/Theme.Library.Default" />
     </application>

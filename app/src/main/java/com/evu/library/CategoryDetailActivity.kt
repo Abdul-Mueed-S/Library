@@ -41,6 +41,7 @@ class CategoryDetailActivity : BaseActivity() {
         recyclerView = findViewById(R.id.categoryBookRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+        BookSelectionController(this, db, adapter, recyclerView) { loadBooks() }
 
         setupSpinners()
 
@@ -187,11 +188,7 @@ class CategoryDetailActivity : BaseActivity() {
                     Toast.makeText(this@CategoryDetailActivity, "${book.title} Removed from Category", Toast.LENGTH_SHORT).show()
                     loadBooks()
                 }
-                2 -> lifecycleScope.launch {
-                    db.bookDao().deleteBook(book)
-                    Toast.makeText(this@CategoryDetailActivity, "${book.title} Deleted", Toast.LENGTH_SHORT).show()
-                    loadBooks()
-                }
+                2 -> UndoDeleteHelper.deleteWithUndo(this, db, lifecycleScope, listOf(book)) { loadBooks() }
                 3 -> lifecycleScope.launch {
                     val newState = !book.isFavorite
                     db.bookDao().updateBook(book.copy(isFavorite = newState))

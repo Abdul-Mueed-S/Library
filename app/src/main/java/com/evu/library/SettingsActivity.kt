@@ -9,6 +9,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.documentfile.provider.DocumentFile
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 
 class SettingsActivity : BaseActivity() {
 
@@ -18,7 +21,7 @@ class SettingsActivity : BaseActivity() {
         if (uri != null) {
             contentResolver.takePersistableUriPermission(
                 uri,
-                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
             BackupPrefs.setDestinationUri(this, uri.toString())
 
@@ -72,12 +75,24 @@ class SettingsActivity : BaseActivity() {
             showIntervalPickerDialog()
         }
 
+        findViewById<android.widget.LinearLayout>(R.id.backupRetentionRow).setOnClickListener {
+            showRetentionDialog()
+        }
+
         findViewById<android.widget.Button>(R.id.chooseBackupFolderButton).setOnClickListener {
             chooseFolderLauncher.launch(null)
         }
 
         findViewById<android.widget.Button>(R.id.backupNowButton).setOnClickListener {
             runManualBackupNow()
+        }
+
+        findViewById<android.widget.Button>(R.id.browseBackupsButton).setOnClickListener {
+            if (BackupPrefs.getDestinationUri(this) == null) {
+                Toast.makeText(this, "Choose a backup folder first", Toast.LENGTH_SHORT).show()
+            } else {
+                startActivity(Intent(this, BackupBrowserActivity::class.java))
+            }
         }
 
         updateLabels()
@@ -122,6 +137,7 @@ class SettingsActivity : BaseActivity() {
         findViewById<android.widget.TextView>(R.id.lastBackupStatusText).text = lastStatusText
 
         findViewById<android.widget.TextView>(R.id.backupIntervalText).text = BackupPrefs.getIntervalDisplayText(this)
+        findViewById<android.widget.TextView>(R.id.backupRetentionText).text = BackupPrefs.getRetentionDisplayText(this)
     }
 
     private fun runManualBackupNow() {
@@ -130,14 +146,35 @@ class SettingsActivity : BaseActivity() {
             return
         }
         Toast.makeText(this, "Running backup...", Toast.LENGTH_SHORT).show()
-        val request = androidx.work.OneTimeWorkRequestBuilder<BackupWorker>().build()
-        androidx.work.WorkManager.getInstance(this).enqueue(request)
-        androidx.work.WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id)
+        // KEY_MANUAL lets "Backup Now" run even when the automatic-backup switch is off.
+        val request = OneTimeWorkRequestBuilder<BackupWorker>()
+            .setInputData(workDataOf(BackupWorker.KEY_MANUAL to true))
+            .build()
+        WorkManager.getInstance(this).enqueue(request)
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(request.id)
             .observe(this) { info ->
                 if (info != null && info.state.isFinished) {
                     updateBackupLabels()
                 }
             }
+    }
+
+    private fun showRetentionDialog() {
+        val options = BackupPrefs.RETENTION_OPTIONS
+        val labels = options.map {
+            if (it == BackupPrefs.RETENTION_ALL) "Keep all backups" else "Keep last $it backups"
+        }.toTypedArray()
+        val current = options.indexOf(BackupPrefs.getRetentionCount(this)).coerceAtLeast(0)
+
+        AlertDialog.Builder(this, R.style.AppDialogTheme)
+            .setTitle("Backup Retention")
+            .setSingleChoiceItems(labels, current) { dialog, which ->
+                BackupPrefs.setRetentionCount(this, options[which])
+                updateBackupLabels()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun showIntervalPickerDialog() {

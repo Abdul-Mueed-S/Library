@@ -2,7 +2,9 @@ package com.evu.library
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
@@ -60,6 +62,11 @@ class CategoriesActivity : BaseActivity() {
     private fun loadCategories() {
         lifecycleScope.launch {
             adapter.updateList(db.categoryDao().getAllCategories())
+
+            val draftCount = db.bookDao().getDraftCount()
+            val badge = findViewById<TextView>(R.id.draftCountBadge)
+            badge.text = draftCount.toString()
+            badge.visibility = if (draftCount > 0) View.VISIBLE else View.GONE
         }
     }
 
