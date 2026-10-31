@@ -9,8 +9,6 @@ import kotlinx.coroutines.launch
 
 object UndoDeleteHelper {
 
-    // Deletes immediately, then offers Undo for 6 seconds. Undo re-inserts the exact
-    // same rows (same ids and flags), so nothing about the books changes.
     fun deleteWithUndo(
         activity: Activity,
         db: AppDatabase,
@@ -19,16 +17,16 @@ object UndoDeleteHelper {
         onChanged: () -> Unit
     ) {
         if (books.isEmpty()) return
+        val ids = books.map { it.id }
         scope.launch {
-            db.bookDao().deleteBooks(books)
+            db.bookDao().trashBooks(ids, System.currentTimeMillis())
             onChanged()
 
-            val message = if (books.size == 1) "\"${books[0].title}\" deleted" else "${books.size} books deleted"
-            val root = activity.findViewById<View>(android.R.id.content)
-            val snackbar = Snackbar.make(root, message, 6000)
+            val message = if (books.size == 1) "\"${books[0].title}\" moved to Trash" else "${books.size} books moved to Trash"
+            val snackbar = Snackbar.make(activity.findViewById<View>(android.R.id.content), message, 6000)
             snackbar.setAction("UNDO") {
                 scope.launch {
-                    db.bookDao().insertBooksWithId(books)
+                    db.bookDao().restoreFromTrash(ids)
                     onChanged()
                 }
             }

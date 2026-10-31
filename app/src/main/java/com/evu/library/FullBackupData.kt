@@ -13,7 +13,15 @@ data class FullBackupBook(
     val categoryId: Int?,
     val flaggedDuplicate: Boolean,
     val isDraft: Boolean = false,
-    val libraryId: Int? = null // placeholder for future multi-library support; always null until that schema exists
+    val libraryId: Int? = null,
+    val copies: Int = 1,
+    val lentTo: String? = null,
+    val lentAt: Long? = null,
+    val dueAt: Long? = null,
+    val deletedAt: Long? = null,
+    val seriesName: String? = null,
+    val seriesNumber: Int? = null,
+    val seriesTotal: Int? = null
 )
 
 data class FullBackupData(

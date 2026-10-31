@@ -1,0 +1,4 @@
+<resources>
+    <string name="shortcut_ownership_short">Do I own this?</string>
+    <string name="shortcut_ownership_long">Check if I already own a book</string>
+</resources>

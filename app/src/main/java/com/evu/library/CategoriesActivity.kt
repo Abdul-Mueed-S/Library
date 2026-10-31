@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -16,21 +17,25 @@ class CategoriesActivity : BaseActivity() {
 
     private lateinit var db: AppDatabase
     private lateinit var adapter: CategoryAdapter
+    private val badges = mutableMapOf<String, TextView>()
+
+    private data class Pinned(val label: String, val target: Class<*>, val badgeKey: String? = null)
+
+    private val pinnedRows = listOf(
+        Pinned("Favourites", FavouritesActivity::class.java),
+        Pinned("Drafts", DraftsActivity::class.java, "drafts"),
+        Pinned("Duplicates", PendingDuplicatesActivity::class.java),
+        Pinned("Lent Out", LentOutActivity::class.java, "lent"),
+        Pinned("Series", SeriesActivity::class.java),
+        Pinned("Trash", TrashActivity::class.java, "trash")
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_categories)
         findViewById<android.widget.ImageButton>(R.id.backButton).setOnClickListener { finish() }
 
-        findViewById<android.widget.LinearLayout>(R.id.pinnedFavouritesRow).setOnClickListener {
-            startActivity(Intent(this, FavouritesActivity::class.java))
-        }
-        findViewById<android.widget.LinearLayout>(R.id.pinnedDraftsRow).setOnClickListener {
-            startActivity(Intent(this, DraftsActivity::class.java))
-        }
-        findViewById<android.widget.LinearLayout>(R.id.pinnedDuplicatesRow).setOnClickListener {
-            startActivity(Intent(this, PendingDuplicatesActivity::class.java))
-        }
+        buildPinnedRows()
 
         db = AppDatabase.getDatabase(this)
         val recyclerView = findViewById<RecyclerView>(R.id.categoryRecyclerView)
@@ -59,14 +64,36 @@ class CategoriesActivity : BaseActivity() {
         loadCategories()
     }
 
+    private fun buildPinnedRows() {
+        val container = findViewById<LinearLayout>(R.id.pinnedContainer)
+        pinnedRows.forEachIndexed { index, pinned ->
+            val row = layoutInflater.inflate(R.layout.item_pinned_row, container, false)
+            row.findViewById<TextView>(R.id.pinnedLabel).text = pinned.label
+            row.findViewById<View>(R.id.pinnedDivider).visibility =
+                if (index == pinnedRows.lastIndex) View.GONE else View.VISIBLE
+            pinned.badgeKey?.let { badges[it] = row.findViewById(R.id.pinnedBadge) }
+            row.findViewById<View>(R.id.pinnedRow).setOnClickListener {
+                startActivity(Intent(this, pinned.target))
+            }
+            container.addView(row)
+        }
+    }
+
+    private fun setBadge(key: String, count: Int) {
+        badges[key]?.let {
+            it.text = count.toString()
+            it.visibility = if (count > 0) View.VISIBLE else View.GONE
+        }
+    }
+
     private fun loadCategories() {
         lifecycleScope.launch {
-            adapter.updateList(db.categoryDao().getAllCategories())
+            val counts = db.bookDao().getCategoryCounts().associate { it.categoryId to it.bookCount }
+            adapter.updateList(db.categoryDao().getAllCategories(), counts)
 
-            val draftCount = db.bookDao().getDraftCount()
-            val badge = findViewById<TextView>(R.id.draftCountBadge)
-            badge.text = draftCount.toString()
-            badge.visibility = if (draftCount > 0) View.VISIBLE else View.GONE
+            setBadge("drafts", db.bookDao().getDraftCount())
+            setBadge("lent", db.bookDao().getLentCount())
+            setBadge("trash", db.bookDao().getTrashCount())
         }
     }
 

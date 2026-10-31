@@ -12,10 +12,13 @@ class CategoryAdapter(
     private val onLongClick: (Category) -> Unit
 ) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
 
+    private var counts: Map<Int, Int> = emptyMap()
+
     class CategoryViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val cardRow: View = view.findViewById(R.id.categoryCardRow)
         val numberText: TextView = view.findViewById(R.id.categoryNumberText)
         val nameText: TextView = view.findViewById(R.id.categoryNameText)
+        val countBadge: TextView = view.findViewById(R.id.categoryCountBadge)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
@@ -30,6 +33,7 @@ class CategoryAdapter(
         holder.numberText.text = "${position + 1}."
 
         holder.nameText.text = category.name
+        holder.countBadge.text = (counts[category.id] ?: 0).toString()
         holder.cardRow.setOnClickListener { onClick(category) }
         holder.cardRow.setOnLongClickListener {
             onLongClick(category)
@@ -39,8 +43,9 @@ class CategoryAdapter(
 
     override fun getItemCount() = categories.size
 
-    fun updateList(newList: List<Category>) {
+    fun updateList(newList: List<Category>, newCounts: Map<Int, Int> = emptyMap()) {
         categories = newList
+        counts = newCounts
         notifyDataSetChanged()
     }
 }

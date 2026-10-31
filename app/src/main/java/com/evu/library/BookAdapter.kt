@@ -1,8 +1,10 @@
 package com.evu.library
 
 import android.content.Context
+import android.text.format.DateFormat
 import android.transition.AutoTransition
 import android.transition.TransitionManager
+import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +22,6 @@ class BookAdapter(
     private val expandedIds = mutableSetOf<Int>()
     private val selectedIds = mutableSetOf<Int>()
 
-    // Reports the current number of selected books (0 = selection mode ended).
     var onSelectionChanged: ((Int) -> Unit)? = null
 
     class BookViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -28,12 +29,16 @@ class BookAdapter(
         val card: View = view.findViewById(R.id.bookCard)
         val numberText: TextView = view.findViewById(R.id.numberText)
         val titleText: TextView = view.findViewById(R.id.titleText)
+        val copiesBadge: TextView = view.findViewById(R.id.copiesBadge)
+        val lentBadge: TextView = view.findViewById(R.id.lentBadge)
         val expandButton: TextView = view.findViewById(R.id.expandButton)
         val selectIndicator: TextView = view.findViewById(R.id.selectIndicator)
         val optionsButton: TextView = view.findViewById(R.id.optionsButton)
         val detailsContainer: LinearLayout = view.findViewById(R.id.detailsContainer)
         val subtitleText: TextView = view.findViewById(R.id.subtitleText)
+        val seriesText: TextView = view.findViewById(R.id.seriesText)
         val isbnText: TextView = view.findViewById(R.id.isbnText)
+        val lentText: TextView = view.findViewById(R.id.lentText)
         val duplicateChipText: TextView = view.findViewById(R.id.duplicateChipText)
     }
 
@@ -42,19 +47,49 @@ class BookAdapter(
         return BookViewHolder(view)
     }
 
+    private fun attrColor(context: Context, attr: Int): Int {
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(attr, typedValue, true)
+        return typedValue.data
+    }
+
+    private fun fmt(millis: Long): String = DateFormat.format("MMM d, yyyy", millis).toString()
+
     override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
         val book = books[position]
         val context: Context = holder.itemView.context
         val selecting = selectedIds.isNotEmpty()
         val isSelected = selectedIds.contains(book.id)
 
-        val showNumbers = AppPrefs.isShowNumbers(context)
-        holder.numberText.visibility = if (showNumbers) View.VISIBLE else View.GONE
+        holder.numberText.visibility = if (AppPrefs.isShowNumbers(context)) View.VISIBLE else View.GONE
         holder.numberText.text = "${position + 1}."
 
         val titlePrefix = if (book.isFavorite) "★ " else ""
         val titleSuffix = if (book.isDraft) " (Draft)" else ""
         holder.titleText.text = "$titlePrefix${book.title}$titleSuffix"
+
+        // Copies badge — only when you own more than one.
+        holder.copiesBadge.visibility = if (book.copies > 1) View.VISIBLE else View.GONE
+        holder.copiesBadge.text = "×${book.copies}"
+
+        // Lending badge + line.
+        if (book.lentTo != null) {
+            val overdue = book.dueAt != null && book.dueAt < System.currentTimeMillis()
+            holder.lentBadge.text = if (overdue) "Overdue" else "Lent"
+            holder.lentBadge.setBackgroundResource(if (overdue) R.drawable.badge_delete_bg else R.drawable.badge_outline_bg)
+            holder.lentBadge.setTextColor(attrColor(context, if (overdue) R.attr.appColorOnPrimary else R.attr.appColorPrimary))
+            holder.lentBadge.visibility = View.VISIBLE
+            holder.lentText.text = buildString {
+                append("Lent to ${book.lentTo}")
+                book.lentAt?.let { append(" · since ${fmt(it)}") }
+                book.dueAt?.let { append(" · due ${fmt(it)}") }
+                if (overdue) append(" (overdue)")
+            }
+            holder.lentText.visibility = View.VISIBLE
+        } else {
+            holder.lentBadge.visibility = View.GONE
+            holder.lentText.visibility = View.GONE
+        }
 
         val subtitleParts = mutableListOf<String>()
         book.author?.takeIf { it.isNotBlank() }?.let { subtitleParts.add(it) }
@@ -65,6 +100,19 @@ class BookAdapter(
             holder.subtitleText.visibility = View.VISIBLE
         } else {
             holder.subtitleText.visibility = View.GONE
+        }
+
+        if (!book.seriesName.isNullOrBlank()) {
+            holder.seriesText.text = buildString {
+                append("Series: ${book.seriesName}")
+                book.seriesNumber?.let {
+                    append(" · #$it")
+                    book.seriesTotal?.let { total -> append(" of $total") }
+                }
+            }
+            holder.seriesText.visibility = View.VISIBLE
+        } else {
+            holder.seriesText.visibility = View.GONE
         }
 
         if (!book.isbn.isNullOrBlank()) {
@@ -94,7 +142,6 @@ class BookAdapter(
             }
         }
 
-        // Selection visuals: highlighted border, ⋮ replaced by a check / empty circle.
         holder.card.isActivated = isSelected
         holder.optionsButton.visibility = if (selecting) View.GONE else View.VISIBLE
         holder.selectIndicator.visibility = if (selecting) View.VISIBLE else View.GONE
@@ -141,7 +188,7 @@ class BookAdapter(
         if (!selectedIds.remove(book.id)) selectedIds.add(book.id)
         val isSelecting = selectedIds.isNotEmpty()
         if (wasSelecting != isSelecting) {
-            notifyDataSetChanged() // entering/leaving selection mode changes every row
+            notifyDataSetChanged()
         } else {
             val index = books.indexOfFirst { it.id == book.id }
             if (index >= 0) notifyItemChanged(index)

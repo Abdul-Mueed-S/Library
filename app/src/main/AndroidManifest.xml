@@ -31,6 +31,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
         <activity android:name=".ImportExportActivity"
             android:exported="false"
@@ -60,6 +63,21 @@
             android:exported="false"
             android:theme="@style/Theme.Library.Default" />
         <activity android:name=".BackupBrowserActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".LentOutActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".TrashActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".SeriesActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".OwnershipCheckActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".SnapshotsActivity"
             android:exported="false"
             android:theme="@style/Theme.Library.Default" />
     </application>

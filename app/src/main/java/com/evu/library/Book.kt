@@ -15,5 +15,13 @@ data class Book(
     val isFavorite: Boolean = false,
     val categoryId: Int? = null,
     val flaggedDuplicate: Boolean = false,
-    val isDraft: Boolean = false
+    val isDraft: Boolean = false,
+    val copies: Int = 1,
+    val lentTo: String? = null,
+    val lentAt: Long? = null,
+    val dueAt: Long? = null,
+    val deletedAt: Long? = null,
+    val seriesName: String? = null,
+    val seriesNumber: Int? = null,
+    val seriesTotal: Int? = null
 )

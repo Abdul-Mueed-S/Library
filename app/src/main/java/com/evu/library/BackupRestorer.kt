@@ -16,18 +16,15 @@ object BackupRestorer {
                 )
             }
             db.bookDao().insertBooksWithId(
-                data.books.map { book ->
+                data.books.map { b ->
                     Book(
-                        id = book.id,
-                        title = book.title,
-                        author = book.author,
-                        edition = book.edition,
-                        year = book.year,
-                        isbn = book.isbn,
-                        isFavorite = book.isFavorite,
-                        categoryId = book.categoryId,
-                        flaggedDuplicate = book.flaggedDuplicate,
-                        isDraft = book.isDraft
+                        id = b.id, title = b.title, author = b.author, edition = b.edition,
+                        year = b.year, isbn = b.isbn, isFavorite = b.isFavorite,
+                        categoryId = b.categoryId, flaggedDuplicate = b.flaggedDuplicate,
+                        isDraft = b.isDraft, copies = b.copies, lentTo = b.lentTo,
+                        lentAt = b.lentAt, dueAt = b.dueAt, deletedAt = b.deletedAt,
+                        seriesName = b.seriesName, seriesNumber = b.seriesNumber,
+                        seriesTotal = b.seriesTotal
                     )
                 }
             )

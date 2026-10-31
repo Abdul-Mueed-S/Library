@@ -1,6 +1,7 @@
 package com.evu.library
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,6 +12,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
@@ -18,7 +20,12 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.evu.library.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : BaseActivity() {
 
@@ -26,6 +33,7 @@ class MainActivity : BaseActivity() {
     private lateinit var db: AppDatabase
     private lateinit var adapter: BookAdapter
     private lateinit var chipAdapter: ChipAdapter
+    private lateinit var actions: BookActions
 
     private var searchFilterIndex = 0
     private var sortFilterIndex = 0
@@ -43,13 +51,36 @@ class MainActivity : BaseActivity() {
         }
     }
 
+    private val createCatalogueLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/pdf")
+    ) { uri: Uri? ->
+        if (uri != null) writeCatalogue(uri)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         db = AppDatabase.getDatabase(this)
-        adapter = BookAdapter(emptyList()) { book -> showBookOptionsDialog(book) }
+        actions = BookActions(this, db) { refreshCurrentView() }
+
+        // Quietly drop anything that has been in Trash longer than the retention period.
+        lifecycleScope.launch {
+            db.bookDao().purgeTrashedBefore(
+                System.currentTimeMillis() - TrashPurgeWorker.RETENTION_DAYS * TrashPurgeWorker.DAY_MS
+            )
+        }
+
+        adapter = BookAdapter(emptyList()) { book ->
+            actions.show(
+                book.title,
+                listOf(
+                    actions.edit(book), actions.delete(book), actions.favourite(book),
+                    actions.draft(book), actions.lend(book)
+                )
+            )
+        }
         binding.bookRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.bookRecyclerView.adapter = adapter
         BookSelectionController(this, db, adapter, binding.bookRecyclerView) { refreshCurrentView() }
@@ -102,6 +133,9 @@ class MainActivity : BaseActivity() {
                 when (itemId) {
                     R.id.nav_home -> { }
                     R.id.nav_categories -> startActivity(Intent(this, CategoriesActivity::class.java))
+                    R.id.nav_ownership -> startActivity(Intent(this, OwnershipCheckActivity::class.java))
+                    R.id.nav_snapshots -> startActivity(Intent(this, SnapshotsActivity::class.java))
+                    R.id.nav_catalogue -> createCatalogueLauncher.launch(catalogueFileName())
                     R.id.nav_check_location -> checkLocationSuggestion(silent = false)
                     R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
                     else -> Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show()
@@ -121,10 +155,7 @@ class MainActivity : BaseActivity() {
 
         binding.addBookButton.setOnClickListener {
             val defaultCategoryId = (chips.getOrNull(selectedChipIndex) as? ChipItem.CategoryChip)?.category?.id
-            BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, null, defaultCategoryId) { primary, secondary ->
-                showSequencedToast(primary, secondary)
-                refreshCurrentView()
-            }
+            actions.addBook(defaultCategoryId)
         }
 
         binding.searchBar.addTextChangedListener(object : TextWatcher {
@@ -149,6 +180,35 @@ class MainActivity : BaseActivity() {
     override fun onPause() {
         super.onPause()
         locationCheckHandler.removeCallbacks(locationCheckRunnable)
+    }
+
+    private fun catalogueFileName(): String {
+        val vaultName = BackupFiles.safeVaultName(VaultManager.getActiveVault(this).name)
+        val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        return "Library_catalogue_${vaultName}_$date.pdf"
+    }
+
+    private fun writeCatalogue(uri: Uri) {
+        lifecycleScope.launch {
+            val books = db.bookDao().getAllBooks().filter { !it.isDraft }
+            val categoryNames = db.categoryDao().getAllCategories().associate { it.id to it.name }
+            val vaultName = VaultManager.getActiveVault(this@MainActivity).name
+            val ok = withContext(Dispatchers.IO) {
+                try {
+                    contentResolver.openOutputStream(uri)?.use {
+                        CatalogueGenerator.write(it, vaultName, books, categoryNames)
+                        true
+                    } ?: false
+                } catch (e: Exception) {
+                    false
+                }
+            }
+            Toast.makeText(
+                this@MainActivity,
+                if (ok) "Catalogue saved (${books.size} entries)" else "Couldn't create the catalogue",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun checkLocationSuggestion(silent: Boolean = true) {
@@ -282,15 +342,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun showSequencedToast(primary: String, secondary: String?) {
-        Toast.makeText(this, primary, Toast.LENGTH_SHORT).show()
-        if (secondary != null) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                Toast.makeText(this, secondary, Toast.LENGTH_SHORT).show()
-            }, 1000)
-        }
-    }
-
     private fun toggleSearch() {
         isSearchExpanded = !isSearchExpanded
         binding.searchBar.visibility = if (isSearchExpanded) View.VISIBLE else View.INVISIBLE
@@ -347,51 +398,6 @@ class MainActivity : BaseActivity() {
             val filtered = scoped.filter { !it.isDraft && !it.flaggedDuplicate }
             adapter.updateList(applySort(filtered))
             binding.bookRecyclerView.scheduleLayoutAnimation()
-        }
-    }
-
-    private fun showBookOptionsDialog(book: Book) {
-        val favIcon = if (book.isFavorite) android.R.drawable.btn_star_big_off else android.R.drawable.btn_star_big_on
-        val favLabel = if (book.isFavorite) "Remove from Favourites" else "Add to Favourites"
-        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
-
-        val options = listOf(
-            DialogOption(android.R.drawable.ic_menu_edit, "Edit"),
-            DialogOption(android.R.drawable.ic_menu_delete, "Delete"),
-            DialogOption(favIcon, favLabel),
-            DialogOption(android.R.drawable.ic_menu_agenda, draftLabel)
-        )
-
-        OptionsDialogHelper.show(this, book.title, options) { which ->
-            when (which) {
-                0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, secondary ->
-                    showSequencedToast(primary, secondary)
-                    refreshCurrentView()
-                }
-                1 -> UndoDeleteHelper.deleteWithUndo(this, db, lifecycleScope, listOf(book)) { refreshCurrentView() }
-                2 -> toggleFavorite(book)
-                3 -> toggleDraft(book)
-            }
-        }
-    }
-
-    private fun toggleDraft(book: Book) {
-        lifecycleScope.launch {
-            val newState = !book.isDraft
-            db.bookDao().updateBook(book.copy(isDraft = newState))
-            val msg = if (newState) "${book.title} Marked as Draft" else "${book.title} Unmarked as Draft"
-            Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
-            refreshCurrentView()
-        }
-    }
-
-    private fun toggleFavorite(book: Book) {
-        lifecycleScope.launch {
-            val newState = !book.isFavorite
-            db.bookDao().updateBook(book.copy(isFavorite = newState))
-            val msg = if (newState) "${book.title} Added to Favourites" else "${book.title} Removed from Favourites"
-            Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
-            refreshCurrentView()
         }
     }
 

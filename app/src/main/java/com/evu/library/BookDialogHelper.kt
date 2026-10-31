@@ -24,9 +24,7 @@ object BookDialogHelper {
     private const val NEW_CATEGORY_OPTION = "+ New Category"
     private const val UNTITLED_TITLE = "Untitled"
 
-    // Auto-saved drafts must survive the dialog/activity being torn down (back press,
-    // rotation, app switch), so they run on their own scope instead of the caller's
-    // lifecycleScope, which is cancelled when the activity is destroyed.
+    // Auto-saved drafts run on their own scope so they survive the activity being torn down.
     private val draftScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private data class FormValues(
@@ -35,6 +33,10 @@ object BookDialogHelper {
         val edition: String?,
         val year: String?,
         val isbn: String?,
+        val copies: Int,
+        val seriesName: String?,
+        val seriesNumber: Int?,
+        val seriesTotal: Int?,
         val categoryId: Int?
     )
 
@@ -52,14 +54,23 @@ object BookDialogHelper {
         val editionInput = dialogView.findViewById<EditText>(R.id.editionInput)
         val yearInput = dialogView.findViewById<EditText>(R.id.yearInput)
         val isbnInput = dialogView.findViewById<EditText>(R.id.isbnInput)
+        val copiesInput = dialogView.findViewById<EditText>(R.id.copiesInput)
+        val seriesNameInput = dialogView.findViewById<EditText>(R.id.seriesNameInput)
+        val seriesNumberInput = dialogView.findViewById<EditText>(R.id.seriesNumberInput)
+        val seriesTotalInput = dialogView.findViewById<EditText>(R.id.seriesTotalInput)
         val categorySpinner = dialogView.findViewById<Spinner>(R.id.categorySpinner)
 
+        copiesInput.setText("1")
         if (existingBook != null) {
             titleInput.setText(existingBook.title)
             authorInput.setText(existingBook.author ?: "")
             editionInput.setText(existingBook.edition ?: "")
             yearInput.setText(existingBook.year ?: "")
             isbnInput.setText(existingBook.isbn ?: "")
+            copiesInput.setText(existingBook.copies.toString())
+            seriesNameInput.setText(existingBook.seriesName ?: "")
+            seriesNumberInput.setText(existingBook.seriesNumber?.toString() ?: "")
+            seriesTotalInput.setText(existingBook.seriesTotal?.toString() ?: "")
         }
 
         isbnInput.addTextChangedListener(object : TextWatcher {
@@ -144,10 +155,10 @@ object BookDialogHelper {
         }
 
         // ---------- Draft / auto-save state ----------
-        var explicitlySaved = false          // Save or Draft button completed
-        var discarded = false                // Discard button pressed
-        var autoSavedBook: Book? = null      // row created/updated by auto-save, if any
-        val saveMutex = Mutex()              // serialises auto-save, discard and explicit save
+        var explicitlySaved = false
+        var discarded = false
+        var autoSavedBook: Book? = null
+        val saveMutex = Mutex()
 
         fun readForm(): FormValues = FormValues(
             title = Utils.toTitleCase(titleInput.text.toString()),
@@ -155,19 +166,39 @@ object BookDialogHelper {
             edition = Utils.clean(editionInput.text.toString()).ifEmpty { null },
             year = Utils.clean(yearInput.text.toString()).ifEmpty { null },
             isbn = Utils.clean(isbnInput.text.toString()).ifEmpty { null },
+            copies = copiesInput.text.toString().trim().toIntOrNull()?.coerceIn(1, 9999) ?: 1,
+            seriesName = Utils.toTitleCase(seriesNameInput.text.toString()).ifEmpty { null },
+            seriesNumber = seriesNumberInput.text.toString().trim().toIntOrNull()?.takeIf { it > 0 },
+            seriesTotal = seriesTotalInput.text.toString().trim().toIntOrNull()?.takeIf { it > 0 },
             categoryId = selectedCategoryId
         )
 
-        // Saves whatever has been typed as a draft when the dialog is left without
-        // Save / Draft / Discard (back, tap outside, app switch, rotation).
+        // Copies the form onto the base row, so lending, favourite and other untouched fields survive an edit.
+        fun compose(base: Book?, form: FormValues, title: String, isDraft: Boolean, flagged: Boolean): Book =
+            (base ?: Book(title = title)).copy(
+                id = base?.id ?: 0,
+                title = title,
+                author = form.author,
+                edition = form.edition,
+                year = form.year,
+                isbn = form.isbn,
+                categoryId = form.categoryId,
+                copies = form.copies,
+                seriesName = form.seriesName,
+                seriesNumber = form.seriesNumber,
+                seriesTotal = form.seriesTotal,
+                flaggedDuplicate = flagged,
+                isDraft = isDraft
+            )
+
         fun autoSaveDraft() {
             if (explicitlySaved || discarded) return
             // Never silently modify a published book — only new entries and existing drafts.
             if (existingBook != null && !existingBook.isDraft) return
 
             val form = readForm()
-            val hasContent = form.title.isNotEmpty() || form.author != null ||
-                    form.edition != null || form.year != null || form.isbn != null
+            val hasContent = form.title.isNotEmpty() || form.author != null || form.edition != null ||
+                    form.year != null || form.isbn != null || form.seriesName != null
             if (!hasContent) return
 
             draftScope.launch {
@@ -179,12 +210,11 @@ object BookDialogHelper {
                     val title = if (titleWasBlank) UNTITLED_TITLE else form.title
 
                     val unchanged = baseline != null &&
-                            baseline.title == title &&
-                            baseline.author == form.author &&
-                            baseline.edition == form.edition &&
-                            baseline.year == form.year &&
-                            baseline.isbn == form.isbn &&
-                            baseline.categoryId == form.categoryId
+                            baseline.title == title && baseline.author == form.author &&
+                            baseline.edition == form.edition && baseline.year == form.year &&
+                            baseline.isbn == form.isbn && baseline.categoryId == form.categoryId &&
+                            baseline.copies == form.copies && baseline.seriesName == form.seriesName &&
+                            baseline.seriesNumber == form.seriesNumber && baseline.seriesTotal == form.seriesTotal
                     if (unchanged) return@withLock
 
                     val rowId = baseline?.id ?: 0
@@ -192,22 +222,9 @@ object BookDialogHelper {
                         it.id != rowId && Utils.isDuplicate(it.title, it.edition, title, form.edition)
                     }
 
-                    val draft = Book(
-                        id = rowId,
-                        title = title,
-                        author = form.author,
-                        edition = form.edition,
-                        year = form.year,
-                        isbn = form.isbn,
-                        isFavorite = baseline?.isFavorite ?: false,
-                        categoryId = form.categoryId,
-                        flaggedDuplicate = isDuplicate,
-                        isDraft = true
-                    )
-
+                    val draft = compose(baseline, form, title, isDraft = true, flagged = isDuplicate)
                     autoSavedBook = if (baseline == null) {
-                        val newId = db.bookDao().insertBook(draft).toInt()
-                        draft.copy(id = newId)
+                        draft.copy(id = db.bookDao().insertBook(draft).toInt())
                     } else {
                         db.bookDao().updateBook(draft)
                         draft
@@ -218,8 +235,6 @@ object BookDialogHelper {
             }
         }
 
-        // Discard throws the typed work away. If auto-save already persisted something
-        // (e.g. the user switched apps and came back), undo that too.
         fun discardWork() {
             discarded = true
             draftScope.launch {
@@ -239,21 +254,9 @@ object BookDialogHelper {
         suspend fun persistExplicit(form: FormValues, isDraft: Boolean, flagged: Boolean) {
             saveMutex.withLock {
                 explicitlySaved = true
-                // Reuse the auto-saved row (if any) so Save never creates a second copy.
-                val rowId = existingBook?.id ?: autoSavedBook?.id
-                val book = Book(
-                    id = rowId ?: 0,
-                    title = form.title,
-                    author = form.author,
-                    edition = form.edition,
-                    year = form.year,
-                    isbn = form.isbn,
-                    isFavorite = existingBook?.isFavorite ?: autoSavedBook?.isFavorite ?: false,
-                    categoryId = form.categoryId,
-                    flaggedDuplicate = flagged,
-                    isDraft = isDraft
-                )
-                if (rowId != null) {
+                val base = existingBook ?: autoSavedBook
+                val book = compose(base, form, form.title, isDraft, flagged)
+                if (base != null) {
                     db.bookDao().updateBook(book)
                 } else {
                     db.bookDao().insertBook(book)
@@ -287,8 +290,6 @@ object BookDialogHelper {
                 titleInput.error = "Title is required"
                 return
             }
-            // "Draft" always makes it a draft. "Save" publishes a new entry, but keeps an
-            // existing entry's draft state (editing a draft must not silently un-draft it).
             val isDraft = if (forceDraft) true else (existingBook?.isDraft ?: false)
 
             scope.launch {
@@ -315,8 +316,6 @@ object BookDialogHelper {
             }
         }
 
-        // Auto-save when the app leaves the foreground while the dialog is open
-        // (app switch, screen off, rotation) — onStop always runs before the activity can be destroyed.
         val lifecycleOwner = activity as? LifecycleOwner
         val stopObserver = object : LifecycleEventObserver {
             override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
@@ -326,16 +325,10 @@ object BookDialogHelper {
         lifecycleOwner?.lifecycle?.addObserver(stopObserver)
 
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                attemptSave(forceDraft = false)
-            }
-            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-                attemptSave(forceDraft = true)
-            }
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { attemptSave(forceDraft = false) }
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener { attemptSave(forceDraft = true) }
         }
 
-        // Fires for back press, tap outside, Discard and programmatic dismiss. Explicit
-        // saves and Discard set their flags first, so autoSaveDraft() is a no-op for them.
         dialog.setOnDismissListener {
             lifecycleOwner?.lifecycle?.removeObserver(stopObserver)
             autoSaveDraft()

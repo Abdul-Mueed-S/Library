@@ -168,7 +168,7 @@ object ExportImportUtils {
 
     fun fullBackupToJson(categories: List<Category>, books: List<Book>): String {
         val root = JSONObject()
-        root.put("formatVersion", 1)
+        root.put("formatVersion", 2)
 
         val catArray = JSONArray()
         for (cat in categories) {
@@ -193,7 +193,15 @@ object ExportImportUtils {
             obj.put("categoryId", book.categoryId ?: JSONObject.NULL)
             obj.put("flaggedDuplicate", book.flaggedDuplicate)
             obj.put("isDraft", book.isDraft)
-            obj.put("libraryId", JSONObject.NULL) // reserved for future multi-library support
+            obj.put("libraryId", JSONObject.NULL)
+            obj.put("copies", book.copies)
+            obj.put("lentTo", book.lentTo ?: JSONObject.NULL)
+            obj.put("lentAt", book.lentAt ?: JSONObject.NULL)
+            obj.put("dueAt", book.dueAt ?: JSONObject.NULL)
+            obj.put("deletedAt", book.deletedAt ?: JSONObject.NULL)
+            obj.put("seriesName", book.seriesName ?: JSONObject.NULL)
+            obj.put("seriesNumber", book.seriesNumber ?: JSONObject.NULL)
+            obj.put("seriesTotal", book.seriesTotal ?: JSONObject.NULL)
             bookArray.put(obj)
         }
         root.put("books", bookArray)
@@ -233,7 +241,15 @@ object ExportImportUtils {
                         categoryId = if (obj.isNull("categoryId")) null else obj.getInt("categoryId"),
                         flaggedDuplicate = obj.optBoolean("flaggedDuplicate", false),
                         isDraft = obj.optBoolean("isDraft", false),
-                        libraryId = if (obj.has("libraryId") && !obj.isNull("libraryId")) obj.getInt("libraryId") else null
+                        libraryId = if (obj.isNull("libraryId")) null else obj.getInt("libraryId"),
+                        copies = obj.optInt("copies", 1).coerceAtLeast(1),
+                        lentTo = obj.optString("lentTo", null).takeIf { it != "null" },
+                        lentAt = if (obj.isNull("lentAt")) null else obj.getLong("lentAt"),
+                        dueAt = if (obj.isNull("dueAt")) null else obj.getLong("dueAt"),
+                        deletedAt = if (obj.isNull("deletedAt")) null else obj.getLong("deletedAt"),
+                        seriesName = obj.optString("seriesName", null).takeIf { it != "null" },
+                        seriesNumber = if (obj.isNull("seriesNumber")) null else obj.getInt("seriesNumber"),
+                        seriesTotal = if (obj.isNull("seriesTotal")) null else obj.getInt("seriesTotal")
                     )
                 )
             }

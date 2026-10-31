@@ -1,33 +1,61 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:layout_height="wrap_content">
 
-    <EditText android:id="@+id/titleInput" android:hint="Title *"
-        android:layout_width="match_parent" android:layout_height="wrap_content" />
-    <EditText android:id="@+id/authorInput" android:hint="Author (optional)"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" />
-    <EditText android:id="@+id/editionInput" android:hint="Edition (optional)"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" />
-    <EditText android:id="@+id/yearInput" android:hint="Year (optional)"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:inputType="number"
-        android:layout_marginTop="10dp" />
-    <EditText android:id="@+id/isbnInput" android:hint="ISBN (optional)"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:inputType="number"
-        android:layout_marginTop="10dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
 
-    <Spinner android:id="@+id/categorySpinner"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="14dp" />
+        <EditText android:id="@+id/titleInput" android:hint="Title *"
+            android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <EditText android:id="@+id/authorInput" android:hint="Author (optional)"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
+        <EditText android:id="@+id/editionInput" android:hint="Edition (optional)"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
+        <EditText android:id="@+id/yearInput" android:hint="Year (optional)"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:inputType="number"
+            android:layout_marginTop="10dp" />
+        <EditText android:id="@+id/isbnInput" android:hint="ISBN (optional)"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:inputType="number"
+            android:layout_marginTop="10dp" />
+        <EditText android:id="@+id/copiesInput" android:hint="Number of copies (default 1)"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:inputType="number"
+            android:layout_marginTop="10dp" />
+        <EditText android:id="@+id/seriesNameInput" android:hint="Series (optional)"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
 
-    <TextView
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" android:text="* Required field"
-        android:textSize="12sp" android:textStyle="italic" android:alpha="0.6" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-</LinearLayout>
+            <EditText android:id="@+id/seriesNumberInput" android:hint="Volume #"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:inputType="number" />
+            <EditText android:id="@+id/seriesTotalInput" android:hint="Total volumes"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:inputType="number"
+                android:layout_marginStart="10dp" />
+
+        </LinearLayout>
+
+        <Spinner android:id="@+id/categorySpinner"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" />
+
+        <TextView
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" android:text="* Required field"
+            android:textSize="12sp" android:textStyle="italic" android:alpha="0.6" />
+
+    </LinearLayout>
+
+</ScrollView>

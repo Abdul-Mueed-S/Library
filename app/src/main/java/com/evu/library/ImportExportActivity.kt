@@ -106,8 +106,7 @@ class ImportExportActivity : BaseActivity() {
                 ExportImportUtils.booksToCsv(books, categories, includeCategories, includeFavorites, includeDuplicateFlags)
             }
             val extension = if (isJson) "json" else "csv"
-            val count = books.size
-            createDocumentLauncher.launch("libraryData_export_${count}_books.$extension")
+            createDocumentLauncher.launch("libraryData_export_${books.size}_books.$extension")
         }
     }
 
@@ -123,7 +122,7 @@ class ImportExportActivity : BaseActivity() {
     private fun confirmFullRestore() {
         AlertDialog.Builder(this, R.style.AppDialogTheme)
             .setTitle("Restore Full Backup")
-            .setMessage("This will DELETE your current library and replace it entirely with the backup file's contents. This cannot be undone. Continue?")
+            .setMessage("This will REPLACE your current library with the backup file's contents. This cannot be undone — if you may want to go back, create a snapshot first (menu → Snapshots). Continue?")
             .setPositiveButton("Choose Backup File") { _, _ ->
                 openFullBackupLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
             }
@@ -139,28 +138,12 @@ class ImportExportActivity : BaseActivity() {
             return
         }
         lifecycleScope.launch {
-            db.bookDao().deleteAllBooks()
-            db.categoryDao().deleteAllCategories()
-            for (cat in data.categories) {
-                db.categoryDao().insertCategoryWithId(Category(id = cat.id, name = cat.name, sortOrder = cat.sortOrder))
+            try {
+                BackupRestorer.restoreIntoDatabase(db, data)
+                Toast.makeText(this@ImportExportActivity, "Library restored: ${data.books.size} books, ${data.categories.size} categories", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@ImportExportActivity, "Restore failed — your library was not changed", Toast.LENGTH_LONG).show()
             }
-            for (book in data.books) {
-                db.bookDao().insertBookWithId(
-                    Book(
-                        id = book.id,
-                        title = book.title,
-                        author = book.author,
-                        edition = book.edition,
-                        year = book.year,
-                        isbn = book.isbn,
-                        isFavorite = book.isFavorite,
-                        categoryId = book.categoryId,
-                        flaggedDuplicate = book.flaggedDuplicate,
-                        isDraft = book.isDraft
-                    )
-                )
-            }
-            Toast.makeText(this@ImportExportActivity, "Library restored: ${data.books.size} books, ${data.categories.size} categories", Toast.LENGTH_SHORT).show()
         }
     }
 

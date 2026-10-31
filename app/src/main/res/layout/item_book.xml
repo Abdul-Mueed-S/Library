@@ -36,6 +36,36 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/copiesBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/badge_bg"
+                android:textColor="?attr/appColorOnPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/lentBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/badge_outline_bg"
+                android:textColor="?attr/appColorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/expandButton"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
@@ -85,12 +115,30 @@
                 android:visibility="gone" />
 
             <TextView
+                android:id="@+id/seriesText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:alpha="0.75"
+                android:layout_marginTop="2dp"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/isbnText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 android:alpha="0.55"
                 android:layout_marginTop="2dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/lentText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="?attr/appColorPrimary"
+                android:layout_marginTop="4dp"
                 android:visibility="gone" />
 
             <TextView
