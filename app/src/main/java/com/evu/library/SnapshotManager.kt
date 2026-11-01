@@ -29,6 +29,9 @@ data class SnapshotInfo(
 data class SnapshotCreateResult(val info: SnapshotInfo, val folderConfigured: Boolean, val savedToFolder: Boolean)
 data class SnapshotRestoreResult(val restored: Int, val total: Int)
 
+// A snapshot is EVERYTHING except theme settings: every library's books (incl. Trash, lending, drafts,
+// duplicate flags, series, copies), categories, library names/locations, the active library, and a few
+// app settings. The backup folder and its on/off switch are not included — they belong to this phone.
 object SnapshotManager {
     private const val PREFS_NAME = "snapshot_prefs"
     private const val KEY_INDEX = "index_all"
@@ -48,6 +51,8 @@ object SnapshotManager {
         val isManual: Boolean,
         val data: FullBackupData
     )
+
+    private class ParsedSnapshot(val libraries: List<ParsedLibrary>, val settings: JSONObject?)
 
     private fun dir(context: Context) = File(context.filesDir, "snapshots")
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -168,15 +173,24 @@ object SnapshotManager {
             )
         }
 
+        val settings = JSONObject()
+            .put("showNumbers", AppPrefs.isShowNumbers(context))
+            .put("activeLibraryId", VaultManager.getActiveVault(context).id)
+            .put("backupRetention", BackupPrefs.getRetentionCount(context))
+            .put("backupIntervalType", BackupPrefs.getIntervalType(context))
+            .put("backupCustomValue", BackupPrefs.getCustomValue(context))
+            .put("backupCustomUnit", BackupPrefs.getCustomUnit(context))
+
         val id = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
         val label = name?.trim()?.takeIf { it.isNotEmpty() } ?: "Snapshot"
         val text = JSONObject()
-            .put("snapshotFormat", 1)
+            .put("snapshotFormat", 2)
             .put("id", id)
             .put("name", label)
             .put("createdAt", now)
             .put("libraries", libraries)
+            .put("settings", settings)
             .toString()
 
         val snapshotsDir = dir(context)
@@ -220,9 +234,10 @@ object SnapshotManager {
         return null
     }
 
-    private fun parse(text: String): List<ParsedLibrary>? {
+    private fun parse(text: String): ParsedSnapshot? {
         try {
-            val array = JSONObject(text).getJSONArray("libraries")
+            val root = JSONObject(text)
+            val array = root.getJSONArray("libraries")
             val result = mutableListOf<ParsedLibrary>()
             for (i in 0 until array.length()) {
                 val o = array.getJSONObject(i)
@@ -240,18 +255,37 @@ object SnapshotManager {
                     )
                 )
             }
-            return result
+            return ParsedSnapshot(result, root.optJSONObject("settings"))
         } catch (e: Exception) {
             return null
         }
     }
 
+    private fun applySettings(context: Context, s: JSONObject) {
+        if (s.has("showNumbers")) AppPrefs.setShowNumbers(context, s.getBoolean("showNumbers"))
+        if (s.has("backupRetention")) BackupPrefs.setRetentionCount(context, s.getInt("backupRetention"))
+        val type = s.optString("backupIntervalType", "")
+        if (type == BackupPrefs.INTERVAL_CUSTOM) {
+            BackupPrefs.setCustomInterval(
+                context, s.optInt("backupCustomValue", 1),
+                s.optString("backupCustomUnit", BackupPrefs.UNIT_DAYS)
+            )
+        } else if (type.isNotEmpty()) {
+            BackupPrefs.setPresetInterval(context, type)
+        }
+        if (BackupPrefs.isEnabled(context)) LibraryApp.scheduleBackupWork(context)
+        val activeId = s.optString("activeLibraryId", "")
+        if (activeId.isNotEmpty() && VaultManager.getAllVaults(context).any { it.id == activeId }) {
+            VaultManager.setActiveVault(context, activeId)
+        }
+    }
+
     suspend fun restore(context: Context, info: SnapshotInfo): SnapshotRestoreResult? = withContext(Dispatchers.IO) {
         val text = readText(context, info) ?: return@withContext null
-        val libraries = parse(text) ?: return@withContext null
+        val parsed = parse(text) ?: return@withContext null // validate everything BEFORE touching any library
 
         var restored = 0
-        for (lib in libraries) {
+        for (lib in parsed.libraries) {
             try {
                 val vaults = VaultManager.getAllVaults(context)
                 val vault = vaults.find { it.id == lib.id }
@@ -271,7 +305,8 @@ object SnapshotManager {
                 // This library's transaction rolled back; carry on with the rest.
             }
         }
-        SnapshotRestoreResult(restored, libraries.size)
+        parsed.settings?.let { applySettings(context, it) }
+        SnapshotRestoreResult(restored, parsed.libraries.size)
     }
 
     suspend fun delete(context: Context, info: SnapshotInfo) {

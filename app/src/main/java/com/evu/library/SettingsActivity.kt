@@ -49,6 +49,10 @@ class SettingsActivity : BaseActivity() {
             startActivity(Intent(this, ImportExportActivity::class.java))
         }
 
+        findViewById<android.widget.LinearLayout>(R.id.snapshotsRow).setOnClickListener {
+            startActivity(Intent(this, SnapshotsActivity::class.java))
+        }
+
         val numberedSwitch = findViewById<SwitchCompat>(R.id.numberedListSwitch)
         numberedSwitch.isChecked = AppPrefs.isShowNumbers(this)
         numberedSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -146,7 +150,6 @@ class SettingsActivity : BaseActivity() {
             return
         }
         Toast.makeText(this, "Running backup...", Toast.LENGTH_SHORT).show()
-        // KEY_MANUAL lets "Backup Now" run even when the automatic-backup switch is off.
         val request = OneTimeWorkRequestBuilder<BackupWorker>()
             .setInputData(workDataOf(BackupWorker.KEY_MANUAL to true))
             .build()

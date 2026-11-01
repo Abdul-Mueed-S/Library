@@ -19,14 +19,14 @@ class CategoriesActivity : BaseActivity() {
     private lateinit var adapter: CategoryAdapter
     private val badges = mutableMapOf<String, TextView>()
 
-    private data class Pinned(val label: String, val target: Class<*>, val badgeKey: String? = null)
+    private data class Pinned(val label: String, val target: Class<*>, val badgeKey: String)
 
     private val pinnedRows = listOf(
-        Pinned("Favourites", FavouritesActivity::class.java),
+        Pinned("Favourites", FavouritesActivity::class.java, "favourites"),
         Pinned("Drafts", DraftsActivity::class.java, "drafts"),
-        Pinned("Duplicates", PendingDuplicatesActivity::class.java),
+        Pinned("Duplicates", PendingDuplicatesActivity::class.java, "duplicates"),
         Pinned("Lent Out", LentOutActivity::class.java, "lent"),
-        Pinned("Series", SeriesActivity::class.java),
+        Pinned("Series", SeriesActivity::class.java, "series"),
         Pinned("Trash", TrashActivity::class.java, "trash")
     )
 
@@ -71,7 +71,7 @@ class CategoriesActivity : BaseActivity() {
             row.findViewById<TextView>(R.id.pinnedLabel).text = pinned.label
             row.findViewById<View>(R.id.pinnedDivider).visibility =
                 if (index == pinnedRows.lastIndex) View.GONE else View.VISIBLE
-            pinned.badgeKey?.let { badges[it] = row.findViewById(R.id.pinnedBadge) }
+            badges[pinned.badgeKey] = row.findViewById(R.id.pinnedBadge)
             row.findViewById<View>(R.id.pinnedRow).setOnClickListener {
                 startActivity(Intent(this, pinned.target))
             }
@@ -82,7 +82,7 @@ class CategoriesActivity : BaseActivity() {
     private fun setBadge(key: String, count: Int) {
         badges[key]?.let {
             it.text = count.toString()
-            it.visibility = if (count > 0) View.VISIBLE else View.GONE
+            it.visibility = View.VISIBLE
         }
     }
 
@@ -91,8 +91,11 @@ class CategoriesActivity : BaseActivity() {
             val counts = db.bookDao().getCategoryCounts().associate { it.categoryId to it.bookCount }
             adapter.updateList(db.categoryDao().getAllCategories(), counts)
 
+            setBadge("favourites", db.bookDao().getFavoriteCount())
             setBadge("drafts", db.bookDao().getDraftCount())
+            setBadge("duplicates", db.bookDao().getDuplicateCount())
             setBadge("lent", db.bookDao().getLentCount())
+            setBadge("series", db.seriesDao().getSeriesCount())
             setBadge("trash", db.bookDao().getTrashCount())
         }
     }

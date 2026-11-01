@@ -16,8 +16,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 
-// Bottom action bar for multi-select. Overlays the activity content, so no layout
-// changes are needed on any screen that hosts a BookAdapter.
 class BookSelectionController(
     private val activity: ComponentActivity,
     private val db: AppDatabase,
@@ -69,7 +67,7 @@ class BookSelectionController(
         container.setBackgroundResource(R.drawable.selection_bar_bg)
         container.elevation = dp(12).toFloat()
         container.setPadding(dp(12), dp(8), dp(12), dp(8))
-        container.isClickable = true // swallow touches so they don't reach the list underneath
+        container.isClickable = true
 
         val topRow = LinearLayout(activity)
         topRow.orientation = LinearLayout.HORIZONTAL
@@ -162,7 +160,7 @@ class BookSelectionController(
         isShowing = true
         val content = activity.findViewById<ViewGroup>(android.R.id.content)
         if (bar.parent == null) {
-            bar.translationY = dp(400).toFloat() // start off-screen so there's no one-frame flash
+            bar.translationY = dp(400).toFloat()
             content.addView(
                 bar,
                 FrameLayout.LayoutParams(
@@ -176,7 +174,6 @@ class BookSelectionController(
         bar.post {
             bar.translationY = bar.height.toFloat()
             bar.animate().translationY(0f).setDuration(180).start()
-            // Keep the last list item reachable above the bar.
             recyclerView.clipToPadding = false
             recyclerView.setPadding(
                 recyclerView.paddingLeft, recyclerView.paddingTop,
@@ -217,25 +214,35 @@ class BookSelectionController(
         val selected = adapter.getSelectedBooks()
         if (selected.isEmpty()) return
         val makeDraft = selected.any { !it.isDraft }
+        // Publishing a book in a series needs its volume number first.
+        val blocked = if (makeDraft) emptyList() else selected.filter { it.seriesId != null && it.seriesNumber == null }
+        val toChange = selected.filter { it !in blocked }
         activity.lifecycleScope.launch {
-            db.bookDao().updateBooks(selected.map { it.copy(isDraft = makeDraft) })
+            if (toChange.isNotEmpty()) db.bookDao().updateBooks(toChange.map { it.copy(isDraft = makeDraft) })
             adapter.clearSelection()
             onDataChanged()
-            toast(
-                if (makeDraft) "${selected.size} marked as Draft"
-                else "${selected.size} unmarked as Draft"
-            )
+            val base = if (makeDraft) "${toChange.size} marked as Draft" else "${toChange.size} unmarked as Draft"
+            toast(if (blocked.isEmpty()) base else "$base — ${blocked.size} need a volume number first")
         }
     }
 
     private fun moveSelected() {
         val selected = adapter.getSelectedBooks()
         if (selected.isEmpty()) return
+        AlertDialog.Builder(activity, R.style.AppDialogTheme)
+            .setTitle("Move ${selected.size} to")
+            .setItems(arrayOf("A category…", "A series…")) { _, which ->
+                if (which == 0) moveToCategory(selected) else moveToSeries(selected)
+            }
+            .show()
+    }
+
+    private fun moveToCategory(selected: List<Book>) {
         activity.lifecycleScope.launch {
             val categories = db.categoryDao().getAllCategories()
             val names = (listOf("No category") + categories.map { it.name }).toTypedArray()
             AlertDialog.Builder(activity, R.style.AppDialogTheme)
-                .setTitle("Move ${selected.size} to")
+                .setTitle("Move ${selected.size} to category")
                 .setItems(names) { _, which ->
                     val targetId = if (which == 0) null else categories[which - 1].id
                     activity.lifecycleScope.launch {
@@ -243,6 +250,36 @@ class BookSelectionController(
                         adapter.clearSelection()
                         onDataChanged()
                         toast("${selected.size} moved to ${names[which]}")
+                    }
+                }
+                .show()
+        }
+    }
+
+    private fun moveToSeries(selected: List<Book>) {
+        activity.lifecycleScope.launch {
+            val all = db.seriesDao().getAllSeries()
+            if (all.isEmpty()) {
+                toast("No series yet — add one under Categories → Series")
+                return@launch
+            }
+            AlertDialog.Builder(activity, R.style.AppDialogTheme)
+                .setTitle("Move ${selected.size} to series")
+                .setItems(all.map { it.name }.toTypedArray()) { _, which ->
+                    val target = all[which]
+                    SeriesDialogs.askVolume(
+                        activity, "Starting volume",
+                        "A volume number is required for books in a series. The ${selected.size} books are numbered in list order from this number; you can fix single ones later.",
+                        null
+                    ) { start ->
+                        activity.lifecycleScope.launch {
+                            db.bookDao().updateBooks(
+                                selected.mapIndexed { i, b -> b.copy(seriesId = target.id, seriesNumber = start + i) }
+                            )
+                            adapter.clearSelection()
+                            onDataChanged()
+                            toast("${selected.size} moved to ${target.name} (#$start–#${start + selected.size - 1})")
+                        }
                     }
                 }
                 .show()

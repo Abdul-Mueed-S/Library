@@ -9,6 +9,6 @@ class FavouritesActivity : BookListActivity() {
 
     override fun buildActions(book: Book) = listOf(
         actions.edit(book), actions.delete(book), actions.removeFromFavourites(book),
-        actions.draft(book), actions.lend(book)
+        actions.moveToSeries(book), actions.draft(book), actions.lend(book)
     )
 }

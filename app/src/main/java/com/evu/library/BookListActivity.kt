@@ -26,6 +26,11 @@ abstract class BookListActivity : BaseActivity() {
     protected open fun dialogTitle(book: Book): String = book.title
     protected open fun onSetup() {}
 
+    // Default: tapping an entry opens its detail card. Screens can override.
+    protected open fun onOpenBook(book: Book) {
+        BookDetailSheet.show(this, db, book, actions) { actions.show(dialogTitle(book), buildActions(book)) }
+    }
+
     protected lateinit var db: AppDatabase
     protected lateinit var actions: BookActions
     private lateinit var adapter: BookAdapter
@@ -46,6 +51,7 @@ abstract class BookListActivity : BaseActivity() {
         adapter = BookAdapter(emptyList(), showDuplicateTag) { book ->
             actions.show(dialogTitle(book), buildActions(book))
         }
+        adapter.onOpen = { book -> onOpenBook(book) }
         recyclerView = findViewById(recyclerViewId)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter

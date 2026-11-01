@@ -13,9 +13,6 @@
         <EditText android:id="@+id/authorInput" android:hint="Author"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="10dp" />
-        <EditText android:id="@+id/editionInput" android:hint="Edition"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" />
         <EditText android:id="@+id/yearInput" android:hint="Year"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:inputType="number"
@@ -42,7 +39,7 @@
             android:textSize="12sp" android:alpha="0.7" />
         <Spinner android:id="@+id/seriesSpinner"
             android:layout_width="match_parent" android:layout_height="wrap_content" />
-        <EditText android:id="@+id/seriesNumberInput" android:hint="Volume #"
+        <EditText android:id="@+id/seriesNumberInput" android:hint="Volume # (required for a series)"
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:inputType="number" />
 

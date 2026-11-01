@@ -66,17 +66,6 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/expandButton"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:gravity="center"
-                android:text="▾"
-                android:textSize="16sp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackground" />
-
-            <TextView
                 android:id="@+id/selectIndicator"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
@@ -98,60 +87,33 @@
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/detailsContainer"
+        <TextView
+            android:id="@+id/subtitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone"
-            android:layout_marginTop="6dp">
+            android:layout_marginTop="2dp"
+            android:textSize="13sp"
+            android:alpha="0.75"
+            android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/subtitleText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:alpha="0.75"
-                android:visibility="gone" />
+        <TextView
+            android:id="@+id/seriesText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="12sp"
+            android:textColor="?attr/appColorPrimary"
+            android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/seriesText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:alpha="0.75"
-                android:layout_marginTop="2dp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/isbnText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:alpha="0.55"
-                android:layout_marginTop="2dp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/lentText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textColor="?attr/appColorPrimary"
-                android:layout_marginTop="4dp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/duplicateChipText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Also flagged as duplicate"
-                android:textSize="11sp"
-                android:textColor="?attr/appColorDelete"
-                android:layout_marginTop="6dp"
-                android:visibility="gone" />
-
-        </LinearLayout>
+        <TextView
+            android:id="@+id/duplicateChipText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Also flagged as duplicate"
+            android:textSize="11sp"
+            android:textColor="?attr/appColorDelete"
+            android:visibility="gone" />
 
     </LinearLayout>
 

@@ -83,6 +83,9 @@
         <activity android:name=".SnapshotsActivity"
             android:exported="false"
             android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".CatalogueActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
     </application>
 
 </manifest>

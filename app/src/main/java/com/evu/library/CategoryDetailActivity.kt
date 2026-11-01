@@ -25,7 +25,7 @@ class CategoryDetailActivity : BookListActivity() {
 
     override fun buildActions(book: Book) = listOf(
         actions.edit(book), actions.removeFromCategory(book), actions.delete(book),
-        actions.favourite(book), actions.draft(book), actions.lend(book)
+        actions.favourite(book), actions.moveToSeries(book), actions.draft(book), actions.lend(book)
     )
 
     private fun showAddExistingBookDialog() {

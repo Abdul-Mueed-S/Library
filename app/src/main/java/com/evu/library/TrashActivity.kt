@@ -21,6 +21,10 @@ class TrashActivity : BookListActivity() {
         emptyButton.setOnClickListener { confirmEmpty() }
     }
 
+    override fun onOpenBook(book: Book) {
+        actions.show(dialogTitle(book), buildActions(book))
+    }
+
     override suspend fun loadBooks() = db.bookDao().getTrashedBooks()
 
     override fun dialogTitle(book: Book): String {

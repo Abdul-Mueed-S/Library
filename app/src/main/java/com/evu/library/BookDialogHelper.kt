@@ -23,14 +23,13 @@ object BookDialogHelper {
 
     private const val NEW_CATEGORY_OPTION = "+ New Category"
     private const val NEW_SERIES_OPTION = "+ New Series"
-    private const val UNTITLED_TITLE = "Untitled"
+    const val UNTITLED_TITLE = "Untitled"
 
     private val draftScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private data class FormValues(
         val title: String,
         val author: String?,
-        val edition: String?,
         val year: String?,
         val isbn: String?,
         val copies: Int,
@@ -51,7 +50,6 @@ object BookDialogHelper {
         val dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_add_book, null)
         val titleInput = dialogView.findViewById<EditText>(R.id.titleInput)
         val authorInput = dialogView.findViewById<EditText>(R.id.authorInput)
-        val editionInput = dialogView.findViewById<EditText>(R.id.editionInput)
         val yearInput = dialogView.findViewById<EditText>(R.id.yearInput)
         val isbnInput = dialogView.findViewById<EditText>(R.id.isbnInput)
         val copiesInput = dialogView.findViewById<EditText>(R.id.copiesInput)
@@ -63,7 +61,6 @@ object BookDialogHelper {
         if (existingBook != null) {
             titleInput.setText(existingBook.title)
             authorInput.setText(existingBook.author ?: "")
-            editionInput.setText(existingBook.edition ?: "")
             yearInput.setText(existingBook.year ?: "")
             isbnInput.setText(existingBook.isbn ?: "")
             copiesInput.setText(existingBook.copies.toString())
@@ -152,7 +149,7 @@ object BookDialogHelper {
             }
         }
 
-        // ---------- Series dropdown (same behaviour as Category) ----------
+        // ---------- Series dropdown ----------
         var seriesList = listOf<Series>()
         var selectedSeriesId: Int? = existingBook?.seriesId ?: defaultSeriesId
 
@@ -210,7 +207,6 @@ object BookDialogHelper {
         fun readForm(): FormValues = FormValues(
             title = Utils.toTitleCase(titleInput.text.toString()),
             author = Utils.toTitleCase(authorInput.text.toString()).ifEmpty { null },
-            edition = Utils.clean(editionInput.text.toString()).ifEmpty { null },
             year = Utils.clean(yearInput.text.toString()).ifEmpty { null },
             isbn = Utils.clean(isbnInput.text.toString()).ifEmpty { null },
             copies = copiesInput.text.toString().trim().toIntOrNull()?.coerceIn(1, 9999) ?: 1,
@@ -219,12 +215,12 @@ object BookDialogHelper {
             categoryId = selectedCategoryId
         )
 
+        // Fields the dialog no longer edits (edition, lending, favourite…) are carried over from the base row.
         fun compose(base: Book?, form: FormValues, title: String, isDraft: Boolean, flagged: Boolean): Book =
             (base ?: Book(title = title)).copy(
                 id = base?.id ?: 0,
                 title = title,
                 author = form.author,
-                edition = form.edition,
                 year = form.year,
                 isbn = form.isbn,
                 categoryId = form.categoryId,
@@ -240,8 +236,7 @@ object BookDialogHelper {
             if (existingBook != null && !existingBook.isDraft) return
 
             val form = readForm()
-            val hasContent = form.title.isNotEmpty() || form.author != null || form.edition != null ||
-                    form.year != null || form.isbn != null
+            val hasContent = form.title.isNotEmpty() || form.author != null || form.year != null || form.isbn != null
             if (!hasContent) return
 
             draftScope.launch {
@@ -254,15 +249,14 @@ object BookDialogHelper {
 
                     val unchanged = baseline != null &&
                             baseline.title == title && baseline.author == form.author &&
-                            baseline.edition == form.edition && baseline.year == form.year &&
-                            baseline.isbn == form.isbn && baseline.categoryId == form.categoryId &&
-                            baseline.copies == form.copies && baseline.seriesId == form.seriesId &&
-                            baseline.seriesNumber == form.seriesNumber
+                            baseline.year == form.year && baseline.isbn == form.isbn &&
+                            baseline.categoryId == form.categoryId && baseline.copies == form.copies &&
+                            baseline.seriesId == form.seriesId && baseline.seriesNumber == form.seriesNumber
                     if (unchanged) return@withLock
 
                     val rowId = baseline?.id ?: 0
                     val isDuplicate = !titleWasBlank && db.bookDao().getAllBooks().any {
-                        it.id != rowId && Utils.isDuplicate(it.title, it.edition, title, form.edition)
+                        it.id != rowId && DuplicateRules.isDuplicate(title, form.isbn, it.title, it.isbn)
                     }
 
                     val draft = compose(baseline, form, title, isDraft = true, flagged = isDuplicate)
@@ -335,15 +329,22 @@ object BookDialogHelper {
             }
             val isDraft = if (forceDraft) true else (existingBook?.isDraft ?: false)
 
+            // A published book in a series must say which volume it is. Drafts may stay incomplete.
+            if (!isDraft && form.seriesId != null && form.seriesNumber == null) {
+                seriesNumberInput.error = "Volume number is required for a series"
+                seriesNumberInput.requestFocus()
+                return
+            }
+
             scope.launch {
                 val rowId = saveMutex.withLock { existingBook?.id ?: autoSavedBook?.id ?: 0 }
                 val hasDuplicate = db.bookDao().getAllBooks().any {
-                    it.id != rowId && Utils.isDuplicate(it.title, it.edition, form.title, form.edition)
+                    it.id != rowId && DuplicateRules.isDuplicate(form.title, form.isbn, it.title, it.isbn)
                 }
                 if (hasDuplicate) {
                     AlertDialog.Builder(activity, R.style.AppDialogTheme)
                         .setTitle("Possible Duplicate")
-                        .setMessage("This looks like a duplicate of a book already in your library. Save anyway?")
+                        .setMessage("A book with the same title (or the same ISBN) is already in your library. Save anyway?")
                         .setPositiveButton("Save Anyway") { _, _ ->
                             scope.launch {
                                 persistExplicit(form, isDraft, flagged = true)

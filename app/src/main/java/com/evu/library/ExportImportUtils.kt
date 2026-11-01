@@ -158,9 +158,9 @@ object ExportImportUtils {
 
     fun computeDuplicateFlags(items: MutableList<ImportedBook>, existingBooks: List<Book>) {
         for (item in items) {
-            val matchesExisting = existingBooks.any { Utils.isDuplicate(it.title, it.edition, item.title, item.edition) }
+            val matchesExisting = existingBooks.any { DuplicateRules.isDuplicate(item.title, item.isbn, it.title, it.isbn) }
             val matchesBatch = items.any { other ->
-                other.localId != item.localId && Utils.isDuplicate(other.title, other.edition, item.title, item.edition)
+                other.localId != item.localId && DuplicateRules.isDuplicate(item.title, item.isbn, other.title, other.isbn)
             }
             item.isDuplicate = matchesExisting || matchesBatch
         }
@@ -232,7 +232,6 @@ object ExportImportUtils {
                 )
             }
 
-            // Backups made before series became their own table stored a name on each book; convert them.
             val legacyIds = mutableMapOf<String, Int>()
             var nextSeriesId = (seriesList.maxOfOrNull { it.id } ?: 0) + 1
 

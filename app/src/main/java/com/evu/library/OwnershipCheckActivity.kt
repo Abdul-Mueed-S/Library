@@ -136,7 +136,6 @@ class OwnershipAdapter(
         holder.title.text = book.title + (if (book.copies > 1) "  ×${book.copies}" else "") + (if (book.isDraft) " (Draft)" else "")
         holder.subtitle.text = listOfNotNull(
             book.author?.takeIf { it.isNotBlank() },
-            book.edition?.takeIf { it.isNotBlank() }?.let { "Ed. $it" },
             book.year?.takeIf { it.isNotBlank() }
         ).joinToString("  •  ").ifEmpty { "—" }
         holder.library.text = "In: ${match.libraryName}  •  " + if (match.isStrong) "Exact match" else "Similar"

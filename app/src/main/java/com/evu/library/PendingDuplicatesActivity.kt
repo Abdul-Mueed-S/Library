@@ -8,6 +8,7 @@ class PendingDuplicatesActivity : BookListActivity() {
     override suspend fun loadBooks() = db.bookDao().getFlaggedDuplicates()
 
     override fun buildActions(book: Book) = listOf(
-        actions.edit(book), actions.delete(book), actions.draft(book), actions.lend(book)
+        actions.edit(book), actions.delete(book), actions.moveToSeries(book),
+        actions.draft(book), actions.lend(book)
     )
 }

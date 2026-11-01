@@ -1,5 +1,6 @@
 package com.evu.library
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.View
@@ -25,10 +26,10 @@ class SnapshotsActivity : BaseActivity() {
         findViewById<ImageButton>(R.id.backButton).setOnClickListener { finish() }
         statusText = findViewById(R.id.statusText)
         findViewById<TextView>(R.id.introText).text =
-            "Point-in-time copies of ALL your libraries (books, categories, names and locations), " +
-                    "created only when you ask. Each is kept on this phone and also copied into your backup folder " +
-                    "when one is set. Restoring replaces the books and categories of every library in the snapshot; " +
-                    "libraries created after it are left as they are."
+            "A snapshot is a point-in-time copy of EVERYTHING in the app: all libraries with their books, " +
+                    "Trash, lending, drafts, duplicate flags, series and categories, library names and locations, " +
+                    "and your settings. Themes are not included. Snapshots are created only when you ask, kept on this " +
+                    "phone, and copied into your backup folder when one is set."
 
         adapter = SnapshotAdapter(emptyList()) { info -> showOptions(info) }
         val recycler = findViewById<RecyclerView>(R.id.snapshotsRecyclerView)
@@ -90,9 +91,9 @@ class SnapshotsActivity : BaseActivity() {
             .setTitle("Restore Snapshot")
             .setMessage(
                 "Restore \"${info.name}\" from $whenText?\n\n" +
-                        "Every library in the snapshot has its books and categories REPLACED with the saved versions. " +
-                        "Libraries created after this snapshot are left as they are. This cannot be undone — " +
-                        "choose \"Snapshot first, then restore\" to keep the current state."
+                        "Every library in the snapshot has its books and categories REPLACED with the saved versions, " +
+                        "and your saved settings are re-applied. Libraries created after this snapshot are left as they are. " +
+                        "This cannot be undone — choose \"Snapshot first, then restore\" to keep the current state."
             )
             .setPositiveButton("Restore") { _, _ -> doRestore(info, snapshotFirst = false) }
             .setNeutralButton("Snapshot first, then restore") { _, _ -> doRestore(info, snapshotFirst = true) }
@@ -110,13 +111,21 @@ class SnapshotsActivity : BaseActivity() {
             } catch (e: Exception) {
                 null
             }
-            refresh()
             val message = when {
                 result == null -> "Couldn't read this snapshot — nothing was changed"
                 result.restored == result.total -> "Restored ${result.total} librar${if (result.total == 1) "y" else "ies"}"
                 else -> "Restored ${result.restored} of ${result.total} libraries"
             }
             Toast.makeText(this@SnapshotsActivity, message, Toast.LENGTH_LONG).show()
+            if (result != null && result.restored > 0) {
+                // The active library may have changed — reopen the app on it.
+                val intent = Intent(this@SnapshotsActivity, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            } else {
+                refresh()
+            }
         }
     }
 

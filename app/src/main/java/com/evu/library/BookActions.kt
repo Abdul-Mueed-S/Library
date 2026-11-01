@@ -83,19 +83,28 @@ class BookActions(
     fun draft(book: Book): BookAction {
         val on = book.isDraft
         return BookAction(android.R.drawable.ic_menu_agenda, if (on) "Unmark as Draft" else "Mark as Draft") {
-            update(
-                book.copy(isDraft = !on),
-                if (on) "${book.title} Unmarked as Draft" else "${book.title} Marked as Draft"
-            )
+            if (on && book.seriesId != null && book.seriesNumber == null) {
+                toast("A volume number is required for books in a series — tap Edit first")
+            } else {
+                update(
+                    book.copy(isDraft = !on),
+                    if (on) "${book.title} Unmarked as Draft" else "${book.title} Marked as Draft"
+                )
+            }
         }
     }
 
     fun publish(book: Book) =
         BookAction(android.R.drawable.ic_menu_revert, "Mark as Published (remove from Drafts)") {
-            scope.launch {
-                db.bookDao().clearDraftFlag(book.id)
-                toast("${book.title} Marked as Published")
-                onChanged()
+            when {
+                book.title == BookDialogHelper.UNTITLED_TITLE -> toast("Add a title first — tap Edit")
+                book.seriesId != null && book.seriesNumber == null ->
+                    toast("A volume number is required for books in a series — tap Edit")
+                else -> scope.launch {
+                    db.bookDao().clearDraftFlag(book.id)
+                    toast("${book.title} Marked as Published")
+                    onChanged()
+                }
             }
         }
 
@@ -108,6 +117,33 @@ class BookActions(
         BookAction(android.R.drawable.ic_menu_close_clear_cancel, "Remove from Series") {
             update(book.copy(seriesId = null, seriesNumber = null), "${book.title} Removed from Series")
         }
+
+    // Pick a series, then a volume number (mandatory).
+    fun moveToSeries(book: Book) = BookAction(android.R.drawable.ic_menu_directions, "Move to Series…") {
+        scope.launch {
+            val choices = db.seriesDao().getAllSeries().filter { it.id != book.seriesId }
+            if (choices.isEmpty()) {
+                toast("No other series yet — add one under Categories → Series")
+                return@launch
+            }
+            AlertDialog.Builder(activity, R.style.AppDialogTheme)
+                .setTitle("Move \"${book.title}\" to series")
+                .setItems(choices.map { it.name }.toTypedArray()) { _, which ->
+                    val target = choices[which]
+                    SeriesDialogs.askVolume(
+                        activity, "Volume number",
+                        "A volume number is required for books in a series.",
+                        book.seriesNumber
+                    ) { number ->
+                        update(
+                            book.copy(seriesId = target.id, seriesNumber = number),
+                            "${book.title} moved to ${target.name} (#$number)"
+                        )
+                    }
+                }
+                .show()
+        }
+    }
 
     fun lend(book: Book): BookAction =
         if (book.lentTo != null) {

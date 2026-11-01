@@ -1,5 +1,6 @@
 package com.evu.library
 
+import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
@@ -8,24 +9,41 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// Builds an A4 catalogue PDF entirely on the device (no library, no internet).
+enum class CatalogueColumn(val label: String, val weight: Float) {
+    AUTHOR("Author", 2f), YEAR("Year", 0.7f), ISBN("ISBN", 1.5f), COPIES("Qty", 0.55f),
+    CATEGORY("Category", 1.4f), SERIES("Series", 1.8f), STATUS("Status", 1.4f)
+}
+
+data class CatalogueOptions(
+    val libraryIds: Set<String>,
+    val categoryFilter: String?,   // null = all, FILTER_NONE = uncategorised, else a category name
+    val seriesFilter: String?,     // null = all, FILTER_NONE = not in a series, else a series name
+    val includeDrafts: Boolean,
+    val includeDuplicates: Boolean,
+    val onlyFavourites: Boolean,
+    val onlyLent: Boolean,
+    val groupBy: Int,              // 0 none, 1 category, 2 series
+    val sortBy: Int,               // 0 title, 1 author, 2 newest first
+    val columns: Set<CatalogueColumn>,
+    val pagePerLibrary: Boolean
+)
+
+class CatalogueLibrary(
+    val name: String,
+    val books: List<Book>,
+    val categoryNames: Map<Int, String>,
+    val series: Map<Int, Series>
+)
+
+// Builds an A4 PDF on the device from the chosen libraries, filters, grouping and columns.
 object CatalogueGenerator {
-    private const val PAGE_W = 595
-    private const val PAGE_H = 842
-    private const val MARGIN = 36f
-    private const val ROW_H = 15f
+    const val FILTER_NONE = "::none::"
+    private const val W = 595
+    private const val H = 842
+    private const val M = 36f
+    private const val ROW = 15f
 
-    private class Column(val title: String, val x: Float, val width: Float)
-
-    private val columns = listOf(
-        Column("#", 36f, 22f),
-        Column("Title", 60f, 165f),
-        Column("Author", 229f, 105f),
-        Column("Ed. / Year", 338f, 55f),
-        Column("ISBN", 397f, 62f),
-        Column("Qty", 463f, 22f),
-        Column("Category / Status", 489f, 70f)
-    )
+    private class Col(val title: String, val x: Float, val width: Float, val column: CatalogueColumn?)
 
     private fun fit(text: String, paint: Paint, width: Float): String {
         if (paint.measureText(text) <= width) return text
@@ -34,58 +52,184 @@ object CatalogueGenerator {
         return text.substring(0, end) + "…"
     }
 
-    fun write(out: OutputStream, libraryName: String, books: List<Book>, categoryNames: Map<Int, String>) {
+    private fun matches(book: Book, lib: CatalogueLibrary, o: CatalogueOptions): Boolean {
+        if (!o.includeDrafts && book.isDraft) return false
+        if (!o.includeDuplicates && book.flaggedDuplicate) return false
+        if (o.onlyFavourites && !book.isFavorite) return false
+        if (o.onlyLent && book.lentTo == null) return false
+        o.categoryFilter?.let { f ->
+            val name = book.categoryId?.let { lib.categoryNames[it] }
+            if (f == FILTER_NONE) { if (book.categoryId != null) return false }
+            else if (name == null || !name.equals(f, ignoreCase = true)) return false
+        }
+        o.seriesFilter?.let { f ->
+            val name = book.seriesId?.let { lib.series[it]?.name }
+            if (f == FILTER_NONE) { if (book.seriesId != null) return false }
+            else if (name == null || !name.equals(f, ignoreCase = true)) return false
+        }
+        return true
+    }
+
+    private fun sorted(books: List<Book>, sortBy: Int): List<Book> = when (sortBy) {
+        1 -> books.sortedBy { (it.author ?: "~").lowercase() }
+        2 -> books.sortedByDescending { it.id }
+        else -> books.sortedBy { it.title.lowercase() }
+    }
+
+    private fun cell(col: CatalogueColumn, b: Book, lib: CatalogueLibrary): String = when (col) {
+        CatalogueColumn.AUTHOR -> b.author ?: ""
+        CatalogueColumn.YEAR -> b.year ?: ""
+        CatalogueColumn.ISBN -> b.isbn ?: ""
+        CatalogueColumn.COPIES -> b.copies.toString()
+        CatalogueColumn.CATEGORY -> b.categoryId?.let { lib.categoryNames[it] } ?: ""
+        CatalogueColumn.SERIES -> b.seriesId?.let { id ->
+            lib.series[id]?.let { s -> s.name + (b.seriesNumber?.let { " #$it" } ?: "") }
+        } ?: ""
+        CatalogueColumn.STATUS -> when {
+            b.lentTo != null -> "Lent: ${b.lentTo}"
+            b.isDraft -> "Draft"
+            b.flaggedDuplicate -> "Duplicate"
+            else -> ""
+        }
+    }
+
+    private fun summary(o: CatalogueOptions): String {
+        val parts = mutableListOf<String>()
+        o.categoryFilter?.let { parts.add("Category: " + if (it == FILTER_NONE) "none" else it) }
+        o.seriesFilter?.let { parts.add("Series: " + if (it == FILTER_NONE) "none" else it) }
+        if (o.onlyFavourites) parts.add("Favourites only")
+        if (o.onlyLent) parts.add("Lent out only")
+        if (o.includeDrafts) parts.add("incl. drafts")
+        if (o.includeDuplicates) parts.add("incl. duplicates")
+        return parts.joinToString("  •  ")
+    }
+
+    fun write(out: OutputStream, libraries: List<CatalogueLibrary>, o: CatalogueOptions) {
         val titlePaint = Paint().apply { textSize = 18f; typeface = Typeface.DEFAULT_BOLD; isAntiAlias = true }
         val subPaint = Paint().apply { textSize = 10f; color = 0xFF555555.toInt(); isAntiAlias = true }
         val headPaint = Paint().apply { textSize = 9f; typeface = Typeface.DEFAULT_BOLD; isAntiAlias = true }
         val bodyPaint = Paint().apply { textSize = 9f; isAntiAlias = true }
+        val libPaint = Paint().apply { textSize = 12f; typeface = Typeface.DEFAULT_BOLD; isAntiAlias = true }
+        val groupPaint = Paint().apply { textSize = 10f; typeface = Typeface.DEFAULT_BOLD; color = 0xFF333333.toInt(); isAntiAlias = true }
         val linePaint = Paint().apply { color = 0xFF999999.toInt(); strokeWidth = 0.6f }
 
-        val rows = books.sortedBy { it.title.lowercase() }
-        val doc = PdfDocument()
-        var pageNumber = 0
-        var index = 0
+        // ---- columns ----
+        val chosen = CatalogueColumn.values().filter { it in o.columns }
+        val numW = 24f
+        val gap = 4f
+        val avail = (W - 2 * M) - numW - gap * (chosen.size + 2)
+        val totalWeight = 3f + chosen.sumOf { it.weight.toDouble() }.toFloat()
+        val layout = mutableListOf<Col>()
+        var x = M
+        layout.add(Col("#", x, numW, null)); x += numW + gap
+        val titleW = avail * 3f / totalWeight
+        layout.add(Col("Title", x, titleW, null)); x += titleW + gap
+        for (c in chosen) {
+            val w = avail * c.weight / totalWeight
+            layout.add(Col(c.label, x, w, c)); x += w + gap
+        }
+
+        // ---- select + order the books of every library ----
+        val selected = libraries.map { lib -> lib to lib.books.filter { matches(it, lib, o) } }
+        val totalBooks = selected.sumOf { it.second.size }
         val dateText = SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).format(Date())
+        val showLibraryHeading = libraries.size > 1 || o.pagePerLibrary
 
-        do {
-            pageNumber++
-            val page = doc.startPage(PdfDocument.PageInfo.Builder(PAGE_W, PAGE_H, pageNumber).create())
-            val canvas = page.canvas
-            var y = MARGIN + 12f
+        // ---- paging helpers ----
+        val doc = PdfDocument()
+        var page: PdfDocument.Page? = null
+        var canvas: Canvas? = null
+        var y = 0f
+        var pageNo = 0
 
-            if (pageNumber == 1) {
-                canvas.drawText("Library catalogue", MARGIN, y, titlePaint)
-                y += 16f
-                canvas.drawText("$libraryName  •  ${books.size} entries  •  $dateText", MARGIN, y, subPaint)
-                y += 22f
-            }
-
-            columns.forEach { canvas.drawText(it.title, it.x, y, headPaint) }
+        fun drawColumnHeader() {
+            val c = canvas!!
+            layout.forEach { c.drawText(it.title, it.x, y, headPaint) }
             y += 4f
-            canvas.drawLine(MARGIN, y, PAGE_W - MARGIN, y, linePaint)
-            y += ROW_H - 3f
+            c.drawLine(M, y, W - M, y, linePaint)
+            y += ROW - 3f
+        }
 
-            while (index < rows.size && y < PAGE_H - MARGIN - 14f) {
-                val book = rows[index]
-                val status = book.lentTo?.let { "Lent: $it" } ?: (book.categoryId?.let { categoryNames[it] } ?: "")
-                val cells = listOf(
-                    (index + 1).toString(),
-                    book.title,
-                    book.author ?: "",
-                    listOfNotNull(book.edition, book.year).joinToString(" / "),
-                    book.isbn ?: "",
-                    book.copies.toString(),
-                    status
-                )
-                columns.forEachIndexed { i, col -> canvas.drawText(fit(cells[i], bodyPaint, col.width), col.x, y, bodyPaint) }
-                y += ROW_H
-                index++
+        fun closePage() {
+            page?.let {
+                canvas!!.drawText("Page $pageNo", W / 2f - 18f, H - M / 2f, subPaint)
+                doc.finishPage(it)
+            }
+        }
+
+        fun newPage() {
+            closePage()
+            pageNo++
+            page = doc.startPage(PdfDocument.PageInfo.Builder(W, H, pageNo).create())
+            canvas = page!!.canvas
+            y = M + 12f
+            if (pageNo == 1) {
+                canvas!!.drawText("Library catalogue", M, y, titlePaint)
+                y += 16f
+                canvas!!.drawText("${libraries.joinToString(", ") { it.name }}  •  $totalBooks entries  •  $dateText", M, y, subPaint)
+                y += 14f
+                val filters = summary(o)
+                if (filters.isNotEmpty()) {
+                    canvas!!.drawText(filters, M, y, subPaint)
+                    y += 14f
+                }
+                y += 8f
+            }
+            drawColumnHeader()
+        }
+
+        fun ensure(height: Float) {
+            if (y + height > H - M - 14f) newPage()
+        }
+
+        newPage()
+
+        selected.forEachIndexed { index, (lib, books) ->
+            if (showLibraryHeading) {
+                if (o.pagePerLibrary && index > 0) newPage()
+                ensure(ROW * 3)
+                canvas!!.drawText("Library: ${lib.name}  (${books.size} entries)", M, y, libPaint)
+                y += ROW + 2f
+            }
+            if (books.isEmpty()) {
+                ensure(ROW)
+                canvas!!.drawText("No matching entries.", M, y, bodyPaint)
+                y += ROW
+                return@forEachIndexed
             }
 
-            canvas.drawText("Page $pageNumber", PAGE_W / 2f - 18f, PAGE_H - MARGIN / 2f, subPaint)
-            doc.finishPage(page)
-        } while (index < rows.size)
+            val groups: List<Pair<String?, List<Book>>> = when (o.groupBy) {
+                1 -> books.groupBy { b -> b.categoryId?.let { lib.categoryNames[it] } ?: "No category" }
+                    .toSortedMap(String.CASE_INSENSITIVE_ORDER).map { it.key to sorted(it.value, o.sortBy) }
+                2 -> books.groupBy { b -> b.seriesId?.let { lib.series[it]?.name } ?: "Not in a series" }
+                    .toSortedMap(String.CASE_INSENSITIVE_ORDER).map { (name, list) ->
+                        name to list.sortedWith(compareBy({ it.seriesNumber ?: Int.MAX_VALUE }, { it.title.lowercase() }))
+                    }
+                else -> listOf(null to sorted(books, o.sortBy))
+            }
 
+            var number = 0
+            for ((groupName, groupBooks) in groups) {
+                if (groupName != null) {
+                    ensure(ROW * 2)
+                    val label = if (o.groupBy == 1) "Category" else "Series"
+                    canvas!!.drawText("$label: $groupName  (${groupBooks.size})", M, y, groupPaint)
+                    y += ROW
+                }
+                for (book in groupBooks) {
+                    ensure(ROW)
+                    number++
+                    val texts = listOf(number.toString(), book.title) + chosen.map { cell(it, book, lib) }
+                    layout.forEachIndexed { i, col ->
+                        canvas!!.drawText(fit(texts[i], bodyPaint, col.width), col.x, y, bodyPaint)
+                    }
+                    y += ROW
+                }
+            }
+            y += 6f
+        }
+
+        closePage()
         doc.writeTo(out)
         doc.close()
     }

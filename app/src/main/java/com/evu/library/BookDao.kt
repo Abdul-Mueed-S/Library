@@ -64,8 +64,14 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE isFavorite = 1 AND deletedAt IS NULL")
     suspend fun getFavoriteBooks(): List<Book>
 
+    @Query("SELECT COUNT(*) FROM books WHERE isFavorite = 1 AND isDraft = 0 AND flaggedDuplicate = 0 AND deletedAt IS NULL")
+    suspend fun getFavoriteCount(): Int
+
     @Query("SELECT * FROM books WHERE flaggedDuplicate = 1 AND deletedAt IS NULL")
     suspend fun getFlaggedDuplicates(): List<Book>
+
+    @Query("SELECT COUNT(*) FROM books WHERE flaggedDuplicate = 1 AND deletedAt IS NULL")
+    suspend fun getDuplicateCount(): Int
 
     @Query("UPDATE books SET flaggedDuplicate = 0 WHERE id = :id")
     suspend fun clearDuplicateFlag(id: Int)

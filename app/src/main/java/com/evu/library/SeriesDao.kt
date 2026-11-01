@@ -21,6 +21,9 @@ interface SeriesDao {
     @Query("SELECT * FROM series ORDER BY name COLLATE NOCASE ASC")
     suspend fun getAllSeries(): List<Series>
 
+    @Query("SELECT COUNT(*) FROM series")
+    suspend fun getSeriesCount(): Int
+
     @Query("SELECT * FROM series WHERE name = :name COLLATE NOCASE LIMIT 1")
     suspend fun findByName(name: String): Series?
 

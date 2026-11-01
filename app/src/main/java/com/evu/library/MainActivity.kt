@@ -1,7 +1,6 @@
 package com.evu.library
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,7 +11,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
@@ -20,12 +18,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.evu.library.databinding.ActivityMainBinding
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class MainActivity : BaseActivity() {
 
@@ -51,11 +44,10 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private val createCatalogueLauncher = registerForActivityResult(
-        ActivityResultContracts.CreateDocument("application/pdf")
-    ) { uri: Uri? ->
-        if (uri != null) writeCatalogue(uri)
-    }
+    private fun optionsFor(book: Book) = listOf(
+        actions.edit(book), actions.delete(book), actions.favourite(book),
+        actions.moveToSeries(book), actions.draft(book), actions.lend(book)
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,14 +63,9 @@ class MainActivity : BaseActivity() {
             )
         }
 
-        adapter = BookAdapter(emptyList()) { book ->
-            actions.show(
-                book.title,
-                listOf(
-                    actions.edit(book), actions.delete(book), actions.favourite(book),
-                    actions.draft(book), actions.lend(book)
-                )
-            )
+        adapter = BookAdapter(emptyList()) { book -> actions.show(book.title, optionsFor(book)) }
+        adapter.onOpen = { book ->
+            BookDetailSheet.show(this, db, book, actions) { actions.show(book.title, optionsFor(book)) }
         }
         binding.bookRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.bookRecyclerView.adapter = adapter
@@ -134,8 +121,7 @@ class MainActivity : BaseActivity() {
                     R.id.nav_home -> { }
                     R.id.nav_categories -> startActivity(Intent(this, CategoriesActivity::class.java))
                     R.id.nav_ownership -> startActivity(Intent(this, OwnershipCheckActivity::class.java))
-                    R.id.nav_snapshots -> startActivity(Intent(this, SnapshotsActivity::class.java))
-                    R.id.nav_catalogue -> createCatalogueLauncher.launch(catalogueFileName())
+                    R.id.nav_catalogue -> startActivity(Intent(this, CatalogueActivity::class.java))
                     R.id.nav_check_location -> checkLocationSuggestion(silent = false)
                     R.id.nav_settings -> startActivity(Intent(this, SettingsActivity::class.java))
                     else -> Toast.makeText(this, "Coming soon", Toast.LENGTH_SHORT).show()
@@ -180,35 +166,6 @@ class MainActivity : BaseActivity() {
     override fun onPause() {
         super.onPause()
         locationCheckHandler.removeCallbacks(locationCheckRunnable)
-    }
-
-    private fun catalogueFileName(): String {
-        val vaultName = BackupFiles.safeVaultName(VaultManager.getActiveVault(this).name)
-        val date = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
-        return "Library_catalogue_${vaultName}_$date.pdf"
-    }
-
-    private fun writeCatalogue(uri: Uri) {
-        lifecycleScope.launch {
-            val books = db.bookDao().getAllBooks().filter { !it.isDraft }
-            val categoryNames = db.categoryDao().getAllCategories().associate { it.id to it.name }
-            val vaultName = VaultManager.getActiveVault(this@MainActivity).name
-            val ok = withContext(Dispatchers.IO) {
-                try {
-                    contentResolver.openOutputStream(uri)?.use {
-                        CatalogueGenerator.write(it, vaultName, books, categoryNames)
-                        true
-                    } ?: false
-                } catch (e: Exception) {
-                    false
-                }
-            }
-            Toast.makeText(
-                this@MainActivity,
-                if (ok) "Catalogue saved (${books.size} entries)" else "Couldn't create the catalogue",
-                Toast.LENGTH_LONG
-            ).show()
-        }
     }
 
     private fun checkLocationSuggestion(silent: Boolean = true) {
