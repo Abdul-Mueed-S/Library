@@ -114,7 +114,8 @@ class ImportExportActivity : BaseActivity() {
         lifecycleScope.launch {
             val books = db.bookDao().getAllBooks()
             val categories = db.categoryDao().getAllCategories()
-            pendingFullBackupContent = ExportImportUtils.fullBackupToJson(categories, books)
+            val series = db.seriesDao().getAllSeries()
+            pendingFullBackupContent = ExportImportUtils.fullBackupToJson(categories, books, series)
             createFullBackupLauncher.launch("library_full_backup_${books.size}_books.json")
         }
     }

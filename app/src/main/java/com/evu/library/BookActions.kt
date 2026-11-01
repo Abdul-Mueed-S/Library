@@ -44,8 +44,8 @@ class BookActions(
         }
     }
 
-    fun addBook(defaultCategoryId: Int?) {
-        BookDialogHelper.showAddOrEditBookDialog(activity, db, scope, null, defaultCategoryId) { p, s ->
+    fun addBook(defaultCategoryId: Int?, defaultSeriesId: Int? = null) {
+        BookDialogHelper.showAddOrEditBookDialog(activity, db, scope, null, defaultCategoryId, defaultSeriesId) { p, s ->
             sequenced(p, s)
             onChanged()
         }
@@ -102,6 +102,11 @@ class BookActions(
     fun removeFromCategory(book: Book) =
         BookAction(android.R.drawable.ic_menu_close_clear_cancel, "Remove from Category") {
             update(book.copy(categoryId = null), "${book.title} Removed from Category")
+        }
+
+    fun removeFromSeries(book: Book) =
+        BookAction(android.R.drawable.ic_menu_close_clear_cancel, "Remove from Series") {
+            update(book.copy(seriesId = null, seriesNumber = null), "${book.title} Removed from Series")
         }
 
     fun lend(book: Book): BookAction =

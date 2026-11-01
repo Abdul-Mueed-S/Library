@@ -16,10 +16,16 @@
         android:clickable="true"
         android:focusable="true">
 
+        <View
+            android:layout_width="4dp"
+            android:layout_height="20dp"
+            android:background="?attr/appColorPrimary" />
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="12dp"
             android:orientation="vertical">
 
             <TextView
@@ -47,6 +53,21 @@
                 android:visibility="gone" />
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/seriesCountBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/badge_bg"
+            android:textColor="?attr/appColorOnBadge"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
 
         <TextView
             android:layout_width="wrap_content"

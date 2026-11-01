@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/badge_bg"
-            android:textColor="?attr/appColorOnPrimary"
+            android:textColor="?attr/appColorOnBadge"
             android:textSize="12sp"
             android:textStyle="bold"
             android:paddingStart="8dp"

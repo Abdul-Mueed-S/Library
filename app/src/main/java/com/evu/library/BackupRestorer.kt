@@ -10,11 +10,13 @@ object BackupRestorer {
         db.withTransaction {
             db.bookDao().deleteAllBooks()
             db.categoryDao().deleteAllCategories()
+            db.seriesDao().deleteAllSeries()
             for (cat in data.categories) {
-                db.categoryDao().insertCategoryWithId(
-                    Category(id = cat.id, name = cat.name, sortOrder = cat.sortOrder)
-                )
+                db.categoryDao().insertCategoryWithId(Category(id = cat.id, name = cat.name, sortOrder = cat.sortOrder))
             }
+            db.seriesDao().insertAllSeriesWithId(
+                data.series.map { Series(id = it.id, name = it.name, totalVolumes = it.totalVolumes) }
+            )
             db.bookDao().insertBooksWithId(
                 data.books.map { b ->
                     Book(
@@ -23,8 +25,7 @@ object BackupRestorer {
                         categoryId = b.categoryId, flaggedDuplicate = b.flaggedDuplicate,
                         isDraft = b.isDraft, copies = b.copies, lentTo = b.lentTo,
                         lentAt = b.lentAt, dueAt = b.dueAt, deletedAt = b.deletedAt,
-                        seriesName = b.seriesName, seriesNumber = b.seriesNumber,
-                        seriesTotal = b.seriesTotal
+                        seriesId = b.seriesId, seriesNumber = b.seriesNumber
                     )
                 }
             )

@@ -19,75 +19,78 @@
 
 ### ✨ Why you'll like it
 - 🔒 **100% offline & private** — the app has no internet permission at all.
-- 📖 **Multiple libraries** — separate shelves for home, office, college…
-- 🧠 **Smart duplicate check** — know before you buy a second copy.
-- ✍️ **Never lose work** — unsaved entries become drafts automatically, and deletes can be undone.
-- ☁️ **Automatic backups** — to a folder you choose (e.g. Google Drive).
-- 🎨 **10 themes** — light and dark.
+- 📖 **Many libraries** — separate shelves for home, office, college…
+- 🧠 **Smart duplicate check** — know before you buy a second copy, or ask **"Do I own this?"** across every library.
+- ✍️ **Never lose work** — unsaved entries become drafts, deletes go to Trash, and you can undo.
+- 📸 **Snapshots & backups** — go back in time, or let the app back up to a folder for you.
+- 🎨 **Make it yours** — 10 themes, plus separate colours for buttons, badges, cards, text and more.
 
 ### 🧰 What it does
 | Feature | What you get |
 |---|---|
-| 📖 **Books** | Title, author, edition, year, ISBN (auto-formatted), category. Tap ▾ on any card for details. |
-| 🗂️ **Organise** | Categories you can drag into your own order, plus Favourites, Drafts and Duplicates. |
-| 🔎 **Find** | Search by title, author or ISBN and sort four ways — on every list. |
+| 📖 **Books** | Title, author, edition, year, ISBN, category, **number of copies** (badge shows ×3). Tap ▾ for details. |
+| 🗂️ **Organise** | Drag-to-sort categories with **count badges**; Favourites, Drafts, Duplicates, Lent Out, Series, Trash. |
+| 📚 **Series** | Pick a series from a dropdown (or add one), set a volume number and total — see what you **own and what's missing**. |
+| 🔎 **Find** | Search by title, author or ISBN, four ways to sort — on every list. |
 | ✅ **Bulk actions** | Long-press, pick several, then Favourite / Draft / Move / Delete. |
-| 🏠 **Many libraries** | Separate shelves with separate data. Optionally pin each one to a real-world place. |
-| 📍 **Location nudge** | Walk into another saved place and the app offers to switch library (only while it's open). |
-| 🔁 **Export & import** | JSON or CSV — you choose what's included. Imports get a preview and duplicate check. |
-| ☁️ **Backups** | Manual or automatic, into a folder you pick (Google Drive works). Keep the last N, then browse and restore from inside the app. |
-| 🎨 **Looks** | 10 themes, optional numbered lists, light animations. |
+| 🤝 **Lending** | Lend to someone with an optional due date; **Lent / Overdue** badges; mark returned. |
+| 🗑️ **Trash & undo** | Deleted books wait 30 days in Trash; **Undo** for 6 seconds. |
+| 🏠 **Libraries** | Separate data per library; optionally pin each to a real place and get a switch suggestion (while the app is open). |
+| 🔁 **Export & import** | JSON or CSV with a preview and duplicate check. |
+| ☁️ **Backups** | Manual or automatic into a folder you pick (Google Drive works); keep the last N; browse & restore inside the app. |
+| 📸 **Snapshots** | Point-in-time copies of **all libraries**, kept on the phone **and** in your backup folder. |
+| 🖨️ **PDF catalogue** | A printable A4 list of your library, made on your phone. |
+| 🎨 **Themes** | 10 base themes + per-element colours, corner style, text size, compact cards, animations switch, auto light/dark. |
 
 ### 💡 Quick tips
-- **Details / options / select:** ▾ opens a card, ⋮ shows options, long-press starts selecting.
-- **Drafts save themselves:** leave the add dialog without saving and your work becomes a draft. Press **Discard** if you really want it gone.
-- **Duplicate warning:** *Save Anyway* parks the book under **Duplicates** (in the **Categories** screen) until you edit it into something unique.
-- **Reorder categories:** drag the chips on the home screen (All and Favourites stay put).
-- **Oops-proof deletes:** tap **Undo** within 6 seconds.
+- **▾** opens a card, **⋮** shows options, **long-press** starts selecting.
+- **Drafts save themselves:** leave the add dialog without saving and it becomes a draft. Press **Discard** to really drop it.
+- **Series:** in the add/edit dialog choose a series (or **+ New Series**) and a **Volume #**. Manage series from **Categories → Series**.
+- **Do I own this?** is in the menu — and on the app icon (long-press).
+- **Themes:** open **Settings → Themes**. Each element (buttons, badges, background, cards, text…) has its own colour list; **Theme default** puts it back.
 
 ### 🔐 Permissions
 | Permission | Needed? | Why |
 |---|---|---|
-| Location (precise & approximate) | Optional | Only to save a library's location and suggest switching. It never leaves your phone. Say no and everything else still works. |
-| A backup folder (Android's folder picker) | Optional | Lets the app write backups into **one folder you choose**. No storage permission needed. |
+| Location (precise & approximate) | Optional | Only to save a library's location and suggest switching. It never leaves your phone. |
+| A backup folder (Android's folder picker) | Optional | Lets the app write backups and snapshot copies into **one folder you choose**. |
 | Internet | ❌ Not requested | The app can't go online. |
 | Camera, contacts, microphone, storage | ❌ Not requested | — |
 
-*Android may list a few standard background-work entries for the backup scheduler; none of them give internet access.*
-
 ### 📱 What your phone needs
-- Android 8.0 (Oreo) or newer
-- Tiny footprint — text only, no images
-- Google Drive app signed in (only for Drive backups; any storage provider that offers folders works)
-- Location switched on (only for the location features)
+- Android 8.0 (Oreo) or newer · tiny footprint (text only, no images)
+- Google Drive app signed in — only for Drive backups
+- Location on — only for the location features
 - To install an APK: allow "Install unknown apps" for your browser or file manager
-- For on-time automatic backups: phone Settings > Apps > Library > Battery > **Unrestricted**
+- For on-time automatic backups: Settings → Apps → Library → Battery → **Unrestricted**
 
 ### ⚠️ Good to know
-1. **Your data lives only on your phone.** There is no sync, and uninstalling the app deletes it. Back up first, and move data between phones with Export/Import or Backup/Restore.
-2. **Automatic backups are "roughly on time".** Android may delay them (battery saver; some brands are strict). Unrestricted battery helps.
-3. **Old backups are deleted automatically** (default: keep the last 10), but only files this app created and only after a successful backup. Pick **Keep all backups** to turn it off.
-4. **Backups are plain JSON.** Anyone with access to that folder can read them, so choose a private folder.
-5. **Restore replaces the current library entirely** (with a confirmation, and all-or-nothing). Restoring "names & locations" does not bring back books.
-6. **Drafts and duplicates are hidden from the main list on purpose.** Find them in the **Categories** screen (Drafts shows a count badge). Duplicate rule: same title (case and extra spaces ignored) and same edition, or one edition left blank.
-7. **Auto-draft protects new entries and existing drafts only.** Editing a published book and backing out changes nothing.
-8. **Location works only while the app is open** (checked about every 45 seconds, default radius 150 m). Accuracy depends on your phone's GPS.
-9. **Deleting a whole library erases its books for good** (no undo). The interface is English-only for now.
+1. **Your data lives only on your phone.** Uninstalling deletes it, and there is no sync. Back up first.
+2. **Automatic backups are "roughly on time"** — Android may delay them. Unrestricted battery helps.
+3. **Old backups are deleted automatically** (default: keep the last 10) — only files this app created, only after a successful backup. Choose **Keep all backups** to switch it off.
+4. **Backups and snapshots are plain JSON.** Anyone with access to that folder can read them — pick a private folder.
+5. **Restore replaces the library** (all-or-nothing per library). Snapshots are manual: take one first if you may want to go back.
+6. **Trash** keeps deleted books 30 days, then removes them for good. Backups skip Trash; snapshots keep it.
+7. **Drafts and duplicates are hidden from the main list on purpose** — find them under **Categories**.
+8. **Export/Import (JSON/CSV) doesn't carry copies, series or lending.** Use Full Backup or Snapshots for everything.
+9. **Colour choices are curated palettes**, not a free colour wheel. Pick a background and a text colour that contrast well.
+10. **Location works only while the app is open** (checked about every 45 seconds, default radius 150 m).
+11. **Deleting a whole library erases its books for good.** The interface is English-only for now.
 
 ### 🚀 Get it
 - Download the latest APK from [Releases](https://github.com/Abdul-Mueed-S/Library/releases), open it and allow the install.
-- Or build it yourself: open the project in Android Studio, sync, run.
+- Or build it: open the project in Android Studio, sync, run.
 
 <details>
 <summary><b>For developers</b></summary>
 
-- Package `com.evu.library` · minSdk 26 · targetSdk 34 · compileSdk 35
-- Kotlin 1.9.24 · KSP 1.9.24-1.0.20 · Room 2.6.1 (DB version 5) · WorkManager 2.9.1 · Material Components · View Binding
-- One Room database file per library; library names and locations live in SharedPreferences.
-- Open the project with **JDK 21** (Gradle 8.9 does not support JDK 25).
-- Versions are pinned together — don't bump AGP, Kotlin, KSP or Room casually.
-- Every schema change needs a Room `Migration` and a committed `schemas/` file. Update the full-backup JSON in the same change.
-- Backup files: `library_backup_<library>_<yyyy-MM-dd_HHmm>.json` and `library_vaults_metadata_<yyyy-MM-dd_HHmm>.json`.
+- Package `com.evu.library` · minSdk 26 · targetSdk 34
+- Kotlin 1.9.24 · KSP 1.9.24-1.0.20 · Room 2.6.1 (**DB version 7**: `books`, `categories`, `series`) · WorkManager 2.9.1 · Material Components · View Binding
+- One Room database per library; library names and locations live in SharedPreferences.
+- Open the project with **JDK 21**. Versions are pinned together — don't bump AGP, Kotlin, KSP or Room casually.
+- Every schema change needs a Room `Migration` and a committed `schemas/` file; update the full-backup JSON in the same change.
+- Theming: base themes in `themes.xml`; per-element colour overlays in `theme_overlays.xml` (`Ovr.<Role>.<Colour>`), applied by `AppPrefs.applyTheme()` from `BaseActivity`. A palette needs both an XML overlay and a `ThemePalettes.kt` entry.
+- Backup files: `library_backup_<library>_<date>.json`, `library_vaults_metadata_<date>.json`, `library_snapshot_<date>_<id>_<name>.json`.
 
 </details>
 
@@ -103,64 +106,67 @@
 
 ### ✨ خاص باتیں
 - 🔒 **100٪ آف لائن اور نجی** — ایپ کے پاس انٹرنیٹ کی اجازت ہی نہیں۔
-- 📖 **ایک سے زیادہ لائبریریاں** — گھر، دفتر، کالج، سب کے لیے الگ الگ شیلف۔
-- 🧠 **ذہین ڈپلیکیٹ جانچ** — دوسری کاپی خریدنے سے پہلے ہی پتا چل جائے۔
-- ✍️ **کام ضائع نہیں ہوتا** — ادھورا اندراج خود بخود ڈرافٹ بن جاتا ہے، اور حذف کیا ہوا واپس لایا جا سکتا ہے۔
-- ☁️ **خودکار بیک اپ** — آپ کی چنی ہوئی فولڈر میں (مثلاً Google Drive)۔
-- 🎨 **10 تھیمز** — ہلکے بھی، گہرے بھی۔
+- 📖 **کئی لائبریریاں** — گھر، دفتر، کالج، سب کے لیے الگ شیلف۔
+- 🧠 **ذہین ڈپلیکیٹ جانچ** — اور **"Do I own this?"** سے ہر لائبریری میں فوراً پتا کریں۔
+- ✍️ **کام ضائع نہیں ہوتا** — ادھورا اندراج ڈرافٹ بن جاتا ہے، حذف کیا ہوا Trash میں جاتا ہے، اور Undo بھی ہے۔
+- 📸 **اسنیپ شاٹس اور بیک اپ** — پچھلی حالت پر واپس جائیں، یا ایپ سے خودکار بیک اپ لیں۔
+- 🎨 **اپنی پسند کا انداز** — 10 تھیمز، اور بٹن، بیج، کارڈ، متن وغیرہ کے الگ الگ رنگ۔
 
 ### 🧰 کیا کچھ کر سکتی ہے
 | خصوصیت | کیا ملتا ہے |
 |---|---|
-| 📖 **کتابیں** | عنوان، مصنف، ایڈیشن، سال، ISBN (خود بخود فارمیٹ)، زمرہ۔ کسی بھی کارڈ پر ▾ دبا کر تفصیل دیکھیں۔ |
-| 🗂️ **ترتیب** | اپنی مرضی کی ترتیب میں ڈریگ ہونے والے زمرے، اور Favourites، Drafts، Duplicates۔ |
+| 📖 **کتابیں** | عنوان، مصنف، ایڈیشن، سال، ISBN، زمرہ، **کاپیوں کی تعداد** (بیج پر ×3)۔ تفصیل کے لیے ▾ دبائیں۔ |
+| 🗂️ **ترتیب** | ڈریگ ہونے والے زمرے **گنتی کے بیج** کے ساتھ؛ Favourites، Drafts، Duplicates، Lent Out، Series، Trash۔ |
+| 📚 **سیریز** | ڈراپ ڈاؤن سے سیریز چنیں (یا نئی بنائیں)، والیوم نمبر اور کل والیومز لکھیں — دیکھیں **کیا ہے اور کیا باقی ہے**۔ |
 | 🔎 **تلاش** | عنوان، مصنف یا ISBN سے تلاش، اور چار طرح کی ترتیب — ہر فہرست میں۔ |
 | ✅ **اجتماعی کام** | دیر تک دبائیں، کئی کتابیں چنیں، پھر Favourite / Draft / Move / Delete۔ |
-| 🏠 **کئی لائبریریاں** | الگ شیلف، الگ ڈیٹا۔ چاہیں تو ہر ایک کو حقیقی مقام سے جوڑ دیں۔ |
-| 📍 **مقام کا مشورہ** | کسی اور محفوظ مقام پر پہنچیں تو ایپ لائبریری بدلنے کی پیشکش کرتی ہے (صرف ایپ کھلی ہو تب)۔ |
-| 🔁 **ایکسپورٹ اور امپورٹ** | JSON یا CSV — کیا شامل ہو، آپ طے کریں۔ امپورٹ سے پہلے پیش منظر اور ڈپلیکیٹ جانچ۔ |
-| ☁️ **بیک اپ** | دستی یا خودکار، آپ کی چنی ہوئی فولڈر میں (Google Drive بھی چلتا ہے)۔ آخری N بیک اپ رکھیں، پھر ایپ کے اندر سے دیکھیں اور ریسٹور کریں۔ |
-| 🎨 **انداز** | 10 تھیمز، نمبر والی فہرست کا آپشن، ہلکی اینیمیشنز۔ |
+| 🤝 **ادھار** | کسی کو ادھار دیں (واپسی کی تاریخ اختیاری)؛ **Lent / Overdue** بیج؛ واپسی کا نشان۔ |
+| 🗑️ **ٹریش اور Undo** | حذف شدہ کتابیں 30 دن ٹریش میں رہتی ہیں؛ 6 سیکنڈ تک **Undo**۔ |
+| 🏠 **لائبریریاں** | ہر لائبریری کا الگ ڈیٹا؛ چاہیں تو حقیقی مقام سے جوڑیں اور (ایپ کھلی ہو تو) بدلنے کا مشورہ پائیں۔ |
+| 🔁 **ایکسپورٹ اور امپورٹ** | JSON یا CSV، پیش منظر اور ڈپلیکیٹ جانچ کے ساتھ۔ |
+| ☁️ **بیک اپ** | دستی یا خودکار، آپ کی چنی ہوئی فولڈر میں (Google Drive بھی چلتا ہے)؛ آخری N رکھیں؛ ایپ کے اندر سے دیکھیں اور ریسٹور کریں۔ |
+| 📸 **اسنیپ شاٹس** | **تمام لائبریریوں** کی ایک وقت کی نقل، فون میں **اور** بیک اپ فولڈر میں۔ |
+| 🖨️ **PDF کیٹلاگ** | آپ کی لائبریری کی قابلِ پرنٹ A4 فہرست، فون ہی پر تیار۔ |
+| 🎨 **تھیمز** | 10 بنیادی تھیمز + ہر عنصر کا الگ رنگ، کونوں کا انداز، متن کا سائز، کمپیکٹ کارڈ، اینیمیشن کا سوئچ، خودکار لائٹ/ڈارک۔ |
 
 ### 💡 فوری مشورے
-- **تفصیل / آپشنز / انتخاب:** ▾ سے کارڈ کھلتا ہے، ⋮ سے آپشنز، اور دیر تک دبانے سے انتخاب شروع ہوتا ہے۔
-- **ڈرافٹ خود محفوظ ہو جاتے ہیں:** اندراج کا ڈائیلاگ بغیر محفوظ کیے چھوڑ دیں تو کام ڈرافٹ بن جاتا ہے۔ مٹانا ہو تو **Discard** دبائیں۔
-- **ڈپلیکیٹ کی وارننگ:** *Save Anyway* دبانے پر کتاب **Categories** اسکرین کے **Duplicates** میں رکھی جاتی ہے، جب تک آپ اسے منفرد نہ بنا دیں۔
-- **زمروں کی ترتیب بدلیں:** ہوم اسکرین پر چپس کو ڈریگ کریں (All اور Favourites اپنی جگہ رہتے ہیں)۔
-- **حذف کرنے میں بھی احتیاط:** 6 سیکنڈ کے اندر **Undo** دبائیں۔
+- **▾** سے کارڈ کھلتا ہے، **⋮** سے آپشنز، اور **دیر تک دبانے** سے انتخاب شروع ہوتا ہے۔
+- **ڈرافٹ خود محفوظ ہوتے ہیں:** ڈائیلاگ بغیر محفوظ کیے چھوڑ دیں تو کام ڈرافٹ بن جاتا ہے۔ مٹانا ہو تو **Discard** دبائیں۔
+- **سیریز:** اندراج کے ڈائیلاگ میں سیریز (یا **+ New Series**) اور **Volume #** چنیں۔ سیریز کا انتظام **Categories ← Series** میں ہے۔
+- **Do I own this?** مینو میں ہے — اور ایپ کے آئیکن کو دیر تک دبانے پر بھی۔
+- **تھیمز:** **Settings ← Themes**۔ ہر عنصر (بٹن، بیج، پس منظر، کارڈ، متن…) کی اپنی رنگ فہرست ہے؛ **Theme default** سے اصل رنگ واپس۔
 
 ### 🔐 اجازتیں
 | اجازت | ضروری؟ | کس لیے |
 |---|---|---|
-| مقام (درست اور تقریبی) | اختیاری | صرف لائبریری کا مقام محفوظ کرنے اور لائبریری بدلنے کا مشورہ دینے کے لیے۔ یہ آپ کے فون سے باہر نہیں جاتا۔ نہ دیں تو باقی سب کچھ چلتا رہتا ہے۔ |
-| بیک اپ فولڈر (اینڈرائیڈ کے فولڈر پکر سے) | اختیاری | ایپ کو **صرف آپ کی چنی ہوئی ایک فولڈر** میں بیک اپ لکھنے دیتی ہے۔ اسٹوریج کی اجازت درکار نہیں۔ |
+| مقام (درست اور تقریبی) | اختیاری | صرف لائبریری کا مقام محفوظ کرنے اور بدلنے کا مشورہ دینے کے لیے۔ یہ فون سے باہر نہیں جاتا۔ |
+| بیک اپ فولڈر (اینڈرائیڈ کے فولڈر پکر سے) | اختیاری | ایپ کو **صرف آپ کی چنی ہوئی ایک فولڈر** میں بیک اپ اور اسنیپ شاٹ کی نقل لکھنے دیتی ہے۔ |
 | انٹرنیٹ | ❌ نہیں مانگی جاتی | ایپ خود آن لائن جا ہی نہیں سکتی۔ |
 | کیمرا، رابطے، مائیکروفون، اسٹوریج | ❌ نہیں مانگی جاتی | — |
 
-*اینڈرائیڈ بیک اپ شیڈولر کے لیے کچھ معیاری بیک گراؤنڈ اندراجات دکھا سکتا ہے؛ ان میں سے کوئی بھی انٹرنیٹ تک رسائی نہیں دیتی۔*
-
 ### 📱 آپ کے فون کو کیا چاہیے
-- Android 8.0 (Oreo) یا اس سے نیا ورژن
-- بہت ہلکی ایپ — صرف متن، کوئی تصویر نہیں
-- Google Drive ایپ میں سائن اِن (صرف Drive بیک اپ کے لیے؛ فولڈر دینے والا کوئی بھی اسٹوریج پرووائیڈر چلے گا)
-- لوکیشن آن (صرف مقام والی خصوصیات کے لیے)
+- Android 8.0 (Oreo) یا نیا · بہت ہلکی ایپ (صرف متن، تصویریں نہیں)
+- Google Drive ایپ میں سائن اِن — صرف Drive بیک اپ کے لیے
+- لوکیشن آن — صرف مقام والی خصوصیات کے لیے
 - APK انسٹال کرنے کے لیے براؤزر یا فائل مینیجر کو **Install unknown apps** کی اجازت دیں
-- وقت پر خودکار بیک اپ کے لیے: فون کی Settings میں Apps > Library > Battery کو **Unrestricted** پر رکھیں
+- وقت پر خودکار بیک اپ کے لیے: Settings ← Apps ← Library ← Battery ← **Unrestricted**
 
 ### ⚠️ جاننے کی باتیں
-1. **آپ کا ڈیٹا صرف آپ کے فون میں ہے۔** سنک نہیں ہوتا، اور ایپ ان انسٹال کرنے سے ڈیٹا مٹ جاتا ہے۔ پہلے بیک اپ لیں، اور ایک فون سے دوسرے میں منتقلی Export/Import یا Backup/Restore سے کریں۔
-2. **خودکار بیک اپ "تقریباً" وقت پر ہوتے ہیں۔** اینڈرائیڈ انہیں دیر سے چلا سکتا ہے (بیٹری سیور، کچھ برانڈز زیادہ سختی کرتے ہیں)۔ بیٹری کو Unrestricted رکھنے سے مدد ملتی ہے۔
-3. **پرانے بیک اپ خود حذف ہوتے ہیں** (ڈیفالٹ: آخری 10 رکھے جاتے ہیں) — صرف وہ فائلیں جو اسی ایپ نے بنائیں، اور صرف کامیاب بیک اپ کے بعد۔ بند کرنے کے لیے **Keep all backups** چنیں۔
-4. **بیک اپ سادہ JSON فائلیں ہیں۔** اس فولڈر تک رسائی رکھنے والا کوئی بھی انہیں پڑھ سکتا ہے، اس لیے نجی فولڈر چنیں۔
-5. **ریسٹور موجودہ لائبریری کو مکمل بدل دیتا ہے** (تصدیق کے بعد، اور یا سب کچھ ہوتا ہے یا کچھ نہیں)۔ "Names & Locations" ریسٹور کرنے سے کتابیں واپس نہیں آتیں۔
-6. **ڈرافٹ اور ڈپلیکیٹ مرکزی فہرست سے جان بوجھ کر چھپائے جاتے ہیں۔** انہیں **Categories** اسکرین میں دیکھیں (Drafts پر گنتی کا بیج ہوتا ہے)۔ ڈپلیکیٹ کا اصول: ایک ہی عنوان (بڑے/چھوٹے حروف اور اضافی خالی جگہ نظر انداز) اور ایک ہی ایڈیشن — یا کسی ایک کا ایڈیشن خالی۔
-7. **خودکار ڈرافٹ صرف نئے اندراج اور پہلے سے موجود ڈرافٹ کو بچاتا ہے۔** شائع شدہ کتاب میں ترمیم کر کے بغیر محفوظ کیے نکل جائیں تو کچھ نہیں بدلتا۔
-8. **مقام صرف ایپ کھلی ہو تب کام کرتا ہے** (تقریباً ہر 45 سیکنڈ میں جانچ، ڈیفالٹ رداس 150 میٹر)۔ درستگی آپ کے فون کے GPS پر منحصر ہے۔
-9. **پوری لائبریری حذف کرنے سے اس کی کتابیں ہمیشہ کے لیے مٹ جاتی ہیں** (Undo نہیں)۔ ایپ فی الحال صرف انگریزی انٹرفیس میں ہے۔
+1. **آپ کا ڈیٹا صرف آپ کے فون میں ہے۔** ان انسٹال کرنے سے مٹ جاتا ہے، اور سنک نہیں ہوتا۔ پہلے بیک اپ لیں۔
+2. **خودکار بیک اپ "تقریباً" وقت پر ہوتے ہیں** — اینڈرائیڈ انہیں دیر سے چلا سکتا ہے۔ بیٹری Unrestricted رکھیں۔
+3. **پرانے بیک اپ خود حذف ہوتے ہیں** (ڈیفالٹ: آخری 10) — صرف اسی ایپ کی بنائی ہوئی فائلیں، اور صرف کامیاب بیک اپ کے بعد۔ بند کرنے کے لیے **Keep all backups** چنیں۔
+4. **بیک اپ اور اسنیپ شاٹ سادہ JSON فائلیں ہیں۔** اس فولڈر تک رسائی والا انہیں پڑھ سکتا ہے — نجی فولڈر چنیں۔
+5. **ریسٹور لائبریری کو بدل دیتا ہے** (ہر لائبریری کے لیے یا سب کچھ یا کچھ نہیں)۔ اسنیپ شاٹ دستی ہیں: واپسی کا امکان ہو تو پہلے ایک بنا لیں۔
+6. **ٹریش** حذف شدہ کتابیں 30 دن رکھتا ہے، پھر ہمیشہ کے لیے ہٹا دیتا ہے۔ بیک اپ ٹریش چھوڑ دیتے ہیں؛ اسنیپ شاٹ اسے رکھتے ہیں۔
+7. **ڈرافٹ اور ڈپلیکیٹ مرکزی فہرست سے جان بوجھ کر چھپائے جاتے ہیں** — انہیں **Categories** میں دیکھیں۔
+8. **ایکسپورٹ/امپورٹ (JSON/CSV) میں کاپیاں، سیریز اور ادھار شامل نہیں۔** سب کچھ کے لیے Full Backup یا اسنیپ شاٹ استعمال کریں۔
+9. **رنگوں کا انتخاب چنی ہوئی فہرستوں سے ہوتا ہے**، آزاد کلر وہیل سے نہیں۔ ایسا پس منظر اور متن چنیں جو آپس میں واضح نظر آئیں۔
+10. **مقام صرف ایپ کھلی ہو تب کام کرتا ہے** (تقریباً ہر 45 سیکنڈ میں جانچ، ڈیفالٹ رداس 150 میٹر)۔
+11. **پوری لائبریری حذف کرنے سے اس کی کتابیں ہمیشہ کے لیے مٹ جاتی ہیں۔** ایپ فی الحال صرف انگریزی انٹرفیس میں ہے۔
 
 ### 🚀 حاصل کریں
 - [Releases](https://github.com/Abdul-Mueed-S/Library/releases) سے تازہ APK ڈاؤن لوڈ کریں، کھولیں اور انسٹال کی اجازت دیں۔
-- یا خود بنائیں: Android Studio میں پروجیکٹ کھولیں، Sync کریں، اور چلائیں۔
+- یا خود بنائیں: Android Studio میں پروجیکٹ کھولیں، Sync کریں، چلائیں۔
 
 *(ڈویلپرز کے لیے تفصیل انگریزی سیکشن میں ہے۔)*
 
@@ -176,60 +182,63 @@
 
 ### ✨ Kyun pasand aayegi
 - 🔒 **100% offline aur private** — app ke paas internet permission hi nahi hai.
-- 📖 **Ek se zyada libraries** — ghar, office, college, sabke liye alag shelf.
-- 🧠 **Smart duplicate check** — doosri copy kharidne se pehle hi pata chal jaaye.
-- ✍️ **Kaam waste nahi hota** — adhura entry khud draft ban jaati hai, aur delete kiya hua wapas aa sakta hai.
-- ☁️ **Automatic backup** — aapke chune hue folder mein (jaise Google Drive).
-- 🎨 **10 themes** — light bhi, dark bhi.
+- 📖 **Kai libraries** — ghar, office, college, sabke liye alag shelf.
+- 🧠 **Smart duplicate check** — aur **"Do I own this?"** se har library mein turant check karo.
+- ✍️ **Kaam waste nahi hota** — adhura entry draft ban jaati hai, delete kiya hua Trash mein jaata hai, aur Undo bhi hai.
+- 📸 **Snapshots aur backup** — purani halat par wapas jao, ya app se automatic backup lo.
+- 🎨 **Apna style** — 10 themes, aur buttons, badges, cards, text ke alag-alag colours.
 
 ### 🧰 Kya-kya karti hai
 | Feature | Kya milta hai |
 |---|---|
-| 📖 **Kitabein** | Title, author, edition, saal, ISBN (auto-format), category. Kisi bhi card par ▾ dabao, poori detail dikhegi. |
-| 🗂️ **Organise** | Categories ko drag karke apne order mein lagao, plus Favourites, Drafts aur Duplicates. |
+| 📖 **Kitabein** | Title, author, edition, saal, ISBN, category, **copies ki ginti** (badge par ×3). Detail ke liye ▾ dabao. |
+| 🗂️ **Organise** | Drag hone wali categories **count badge** ke saath; Favourites, Drafts, Duplicates, Lent Out, Series, Trash. |
+| 📚 **Series** | Dropdown se series chuno (ya nayi banao), volume number aur total likho — dekho **kya hai aur kya missing hai**. |
 | 🔎 **Dhundo** | Title, author ya ISBN se search, aur 4 tarah ki sorting — har list mein. |
 | ✅ **Bulk actions** | Long-press karo, kai kitabein chuno, phir Favourite / Draft / Move / Delete. |
-| 🏠 **Kai libraries** | Alag shelf, alag data. Chaho to har ek ko asli jagah se jod do. |
-| 📍 **Location nudge** | Kisi doosri saved jagah pahuncho to app library badalne ko poochti hai (sirf jab app khuli ho). |
-| 🔁 **Export & import** | JSON ya CSV — kya shamil ho, aap chuno. Import se pehle preview aur duplicate check. |
-| ☁️ **Backups** | Manual ya automatic, aapke chune hue folder mein (Google Drive chalta hai). Last N backups rakho, phir app ke andar se dekho aur restore karo. |
-| 🎨 **Look** | 10 themes, numbered list ka option, halki animations. |
+| 🤝 **Udhaar (Lending)** | Kisi ko udhaar do (due date optional); **Lent / Overdue** badge; wapas aane par mark karo. |
+| 🗑️ **Trash aur Undo** | Delete ki hui kitabein 30 din Trash mein rehti hain; 6 second tak **Undo**. |
+| 🏠 **Libraries** | Har library ka alag data; chaho to asli jagah se jodo aur (app khuli ho tab) switch ka suggestion pao. |
+| 🔁 **Export & import** | JSON ya CSV, preview aur duplicate check ke saath. |
+| ☁️ **Backups** | Manual ya automatic, aapke chune hue folder mein (Google Drive chalta hai); last N rakho; app ke andar se dekho aur restore karo. |
+| 📸 **Snapshots** | **Saari libraries** ki ek waqt ki copy, phone mein **aur** backup folder mein. |
+| 🖨️ **PDF catalogue** | Aapki library ki printable A4 list, phone par hi ban jaati hai. |
+| 🎨 **Themes** | 10 base themes + har element ka alag colour, corner style, text size, compact cards, animations switch, auto light/dark. |
 
 ### 💡 Quick tips
-- **Details / options / select:** ▾ se card khulta hai, ⋮ se options, aur long-press se selection shuru hota hai.
+- **▾** se card khulta hai, **⋮** se options, aur **long-press** se selection shuru hota hai.
 - **Drafts khud save hote hain:** add dialog bina save kiye chhod do to kaam draft ban jaata hai. Sach mein hatana ho to **Discard** dabao.
-- **Duplicate warning:** *Save Anyway* dabane par kitab **Categories** screen ke **Duplicates** mein rehti hai, jab tak aap use unique na bana do.
-- **Categories ka order badlo:** home screen par chips ko drag karo (All aur Favourites apni jagah rehte hain).
-- **Delete bhi safe:** 6 second ke andar **Undo** dabao.
+- **Series:** add/edit dialog mein series (ya **+ New Series**) aur **Volume #** chuno. Series ka management **Categories → Series** mein hai.
+- **Do I own this?** menu mein hai — aur app icon ko long-press karne par bhi.
+- **Themes:** **Settings → Themes**. Har element (buttons, badges, background, cards, text…) ki apni colour list hai; **Theme default** se original wapas.
 
 ### 🔐 Permissions
 | Permission | Zaroori? | Kyun |
 |---|---|---|
-| Location (precise & approximate) | Optional | Sirf library ki location save karne aur library badalne ka suggestion dene ke liye. Phone se bahar nahi jaati. Mana kar do to baaki sab chalta rahega. |
-| Backup folder (Android ke folder picker se) | Optional | App ko **sirf aapke chune hue ek folder** mein backup likhne deta hai. Storage permission ki zaroorat nahi. |
+| Location (precise & approximate) | Optional | Sirf library ki location save karne aur switch suggest karne ke liye. Phone se bahar nahi jaati. |
+| Backup folder (Android ke folder picker se) | Optional | App ko **sirf aapke chune hue ek folder** mein backup aur snapshot ki copy likhne deta hai. |
 | Internet | ❌ Nahi maangi jaati | App khud online ja hi nahi sakti. |
 | Camera, contacts, microphone, storage | ❌ Nahi maangi jaati | — |
 
-*Android backup scheduler ke liye kuch standard background-work entries dikha sakta hai; unme se koi bhi internet access nahi deti.*
-
 ### 📱 Phone ko kya chahiye
-- Android 8.0 (Oreo) ya usse naya
-- Bahut halki app — sirf text, koi images nahi
-- Google Drive app mein sign-in (sirf Drive backup ke liye; folder dene wala koi bhi storage provider chalega)
-- Location on (sirf location wale features ke liye)
+- Android 8.0 (Oreo) ya naya · bahut halki app (sirf text, koi images nahi)
+- Google Drive app mein sign-in — sirf Drive backup ke liye
+- Location on — sirf location wale features ke liye
 - APK install karne ke liye browser ya file manager ko **Install unknown apps** ki permission do
-- Time par automatic backup ke liye: phone Settings > Apps > Library > Battery > **Unrestricted**
+- Time par automatic backup ke liye: Settings → Apps → Library → Battery → **Unrestricted**
 
 ### ⚠️ Dhyaan rakhne wali baatein
-1. **Aapka data sirf aapke phone mein hai.** Sync nahi hota, aur app uninstall karne par data mit jaata hai. Pehle backup lo, aur ek phone se doosre mein data Export/Import ya Backup/Restore se le jao.
-2. **Automatic backups "lagbhag" time par hote hain.** Android unhe late chala sakta hai (battery saver; kuch brands zyada strict hain). Battery Unrestricted rakhne se madad milti hai.
-3. **Purane backups khud delete hote hain** (default: last 10 rakhe jaate hain) — sirf wahi files jo isi app ne banayi, aur sirf successful backup ke baad. Band karne ke liye **Keep all backups** chuno.
-4. **Backups plain JSON files hain.** Us folder tak access wala koi bhi unhe padh sakta hai, isliye private folder chuno.
-5. **Restore current library ko poori tarah replace karta hai** (confirmation ke baad, aur ya sab kuch hota hai ya kuch nahi). "Names & Locations" restore karne se kitabein wapas nahi aati.
-6. **Drafts aur duplicates main list se jaan-boojhkar chhupaye jaate hain.** Unhe **Categories** screen mein dekho (Drafts par count badge dikhta hai). Duplicate ka rule: same title (capital/small aur extra space ignore) aur same edition — ya kisi ek ka edition khaali.
-7. **Auto-draft sirf naye entries aur pehle se maujood drafts ko bachata hai.** Published kitab edit karke bina save kiye nikal jao to kuch nahi badalta.
-8. **Location sirf tab kaam karti hai jab app khuli ho** (lagbhag har 45 second mein check, default radius 150 m). Accuracy aapke phone ke GPS par depend karti hai.
-9. **Poori library delete karne se uski kitabein hamesha ke liye mit jaati hain** (Undo nahi). App abhi sirf English interface mein hai.
+1. **Aapka data sirf aapke phone mein hai.** Uninstall karne par mit jaata hai, aur sync nahi hota. Pehle backup lo.
+2. **Automatic backups "lagbhag" time par hote hain** — Android unhe late chala sakta hai. Battery Unrestricted rakho.
+3. **Purane backups khud delete hote hain** (default: last 10) — sirf isi app ki banayi files, aur sirf successful backup ke baad. Band karne ke liye **Keep all backups** chuno.
+4. **Backups aur snapshots plain JSON files hain.** Us folder tak access wala koi bhi unhe padh sakta hai — private folder chuno.
+5. **Restore library ko replace kar deta hai** (har library ke liye ya sab kuch ya kuch nahi). Snapshots manual hain: wapas jaane ka mann ho to pehle ek bana lo.
+6. **Trash** delete ki hui kitabein 30 din rakhta hai, phir hamesha ke liye hata deta hai. Backups Trash skip karte hain; snapshots rakhte hain.
+7. **Drafts aur duplicates main list se jaan-boojhkar chhupaye jaate hain** — unhe **Categories** mein dekho.
+8. **Export/Import (JSON/CSV) mein copies, series aur lending nahi jaate.** Sab kuch ke liye Full Backup ya Snapshots use karo.
+9. **Colour choices curated palettes se hote hain**, free colour wheel se nahi. Aisa background aur text chuno jo saaf dikhe.
+10. **Location sirf tab kaam karti hai jab app khuli ho** (lagbhag har 45 second mein check, default radius 150 m).
+11. **Poori library delete karne se uski kitabein hamesha ke liye mit jaati hain.** App abhi sirf English interface mein hai.
 
 ### 🚀 Kaise lein
 - [Releases](https://github.com/Abdul-Mueed-S/Library/releases) se latest APK download karo, kholo aur install ki permission do.

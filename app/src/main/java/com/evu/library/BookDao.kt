@@ -8,6 +8,7 @@ import androidx.room.Query
 import androidx.room.Update
 
 data class CategoryCount(val categoryId: Int, val bookCount: Int)
+data class SeriesCount(val seriesId: Int, val bookCount: Int)
 
 @Dao
 interface BookDao {
@@ -30,7 +31,6 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE deletedAt IS NULL")
     suspend fun getAllBooks(): List<Book>
 
-    // Everything including trash — used by snapshots.
     @Query("SELECT * FROM books")
     suspend fun getEveryBook(): List<Book>
 
@@ -39,6 +39,9 @@ interface BookDao {
 
     @Query("SELECT * FROM books WHERE categoryId = :categoryId AND deletedAt IS NULL")
     suspend fun getBooksByCategory(categoryId: Int): List<Book>
+
+    @Query("SELECT * FROM books WHERE seriesId = :seriesId AND deletedAt IS NULL")
+    suspend fun getBooksBySeries(seriesId: Int): List<Book>
 
     @Query("SELECT * FROM books WHERE (title LIKE '%' || :query || '%' OR author LIKE '%' || :query || '%' OR isbn LIKE '%' || :query || '%') AND deletedAt IS NULL")
     suspend fun searchAny(query: String): List<Book>
@@ -54,6 +57,9 @@ interface BookDao {
 
     @Query("UPDATE books SET categoryId = NULL WHERE categoryId = :categoryId")
     suspend fun clearCategoryFromBooks(categoryId: Int)
+
+    @Query("UPDATE books SET seriesId = NULL, seriesNumber = NULL WHERE seriesId = :seriesId")
+    suspend fun clearSeriesFromBooks(seriesId: Int)
 
     @Query("SELECT * FROM books WHERE isFavorite = 1 AND deletedAt IS NULL")
     suspend fun getFavoriteBooks(): List<Book>
@@ -85,7 +91,9 @@ interface BookDao {
     @Query("SELECT categoryId, COUNT(*) AS bookCount FROM books WHERE categoryId IS NOT NULL AND isDraft = 0 AND flaggedDuplicate = 0 AND deletedAt IS NULL GROUP BY categoryId")
     suspend fun getCategoryCounts(): List<CategoryCount>
 
-    // ---- Trash ----
+    @Query("SELECT seriesId, COUNT(*) AS bookCount FROM books WHERE seriesId IS NOT NULL AND isDraft = 0 AND flaggedDuplicate = 0 AND deletedAt IS NULL GROUP BY seriesId")
+    suspend fun getSeriesCounts(): List<SeriesCount>
+
     @Query("UPDATE books SET deletedAt = :now WHERE id IN (:ids)")
     suspend fun trashBooks(ids: List<Int>, now: Long)
 

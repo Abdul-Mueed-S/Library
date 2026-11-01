@@ -17,7 +17,7 @@ data class SnapshotInfo(
     val key: String,
     val name: String,
     val createdAt: Long,
-    val libraryCount: Int, // -1 = unknown (copies that exist only in the backup folder)
+    val libraryCount: Int,
     val bookCount: Int,
     val localId: String?,
     val folderUri: String?
@@ -29,8 +29,6 @@ data class SnapshotInfo(
 data class SnapshotCreateResult(val info: SnapshotInfo, val folderConfigured: Boolean, val savedToFolder: Boolean)
 data class SnapshotRestoreResult(val restored: Int, val total: Int)
 
-// A snapshot is a manual, point-in-time copy of EVERY library (books incl. trash, categories,
-// names and locations). Kept on the phone and, when a backup folder is set, also copied there.
 object SnapshotManager {
     private const val PREFS_NAME = "snapshot_prefs"
     private const val KEY_INDEX = "index_all"
@@ -52,7 +50,6 @@ object SnapshotManager {
     )
 
     private fun dir(context: Context) = File(context.filesDir, "snapshots")
-
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     private fun readLocalIndex(context: Context): List<SnapshotInfo> {
@@ -125,7 +122,6 @@ object SnapshotManager {
         return result
     }
 
-    // Phone copies merged with whatever is in the backup folder (newest first).
     suspend fun listAll(context: Context): List<SnapshotInfo> = withContext(Dispatchers.IO) {
         val local = readLocalIndex(context)
         val folderEntries = listFolderEntries(context)
@@ -155,8 +151,9 @@ object SnapshotManager {
         var totalBooks = 0
         for (vault in vaults) {
             val db = AppDatabase.getDatabaseForVault(context, vault)
-            val books = db.bookDao().getEveryBook() // includes Trash, so a restore is exact
+            val books = db.bookDao().getEveryBook()
             val categories = db.categoryDao().getAllCategories()
+            val series = db.seriesDao().getAllSeries()
             totalBooks += books.size
             libraries.put(
                 JSONObject()
@@ -167,7 +164,7 @@ object SnapshotManager {
                     .put("longitude", vault.longitude ?: JSONObject.NULL)
                     .put("radiusMeters", vault.radiusMeters ?: JSONObject.NULL)
                     .put("isManualLocation", vault.isManualLocation)
-                    .put("data", JSONObject(ExportImportUtils.fullBackupToJson(categories, books)))
+                    .put("data", JSONObject(ExportImportUtils.fullBackupToJson(categories, books, series)))
             )
         }
 
@@ -182,12 +179,10 @@ object SnapshotManager {
             .put("libraries", libraries)
             .toString()
 
-        // 1) Phone copy
         val snapshotsDir = dir(context)
         snapshotsDir.mkdirs()
         File(snapshotsDir, "$id.json").writeText(text)
 
-        // 2) Backup-folder copy (best effort)
         val folderConfigured = BackupPrefs.getDestinationUri(context) != null
         var folderUri: String? = null
         if (folderConfigured) {
@@ -251,10 +246,9 @@ object SnapshotManager {
         }
     }
 
-    // Returns null when the file can't be read or isn't a valid snapshot (nothing is changed).
     suspend fun restore(context: Context, info: SnapshotInfo): SnapshotRestoreResult? = withContext(Dispatchers.IO) {
         val text = readText(context, info) ?: return@withContext null
-        val libraries = parse(text) ?: return@withContext null // validate everything BEFORE touching any library
+        val libraries = parse(text) ?: return@withContext null
 
         var restored = 0
         for (lib in libraries) {
@@ -274,13 +268,12 @@ object SnapshotManager {
                 BackupRestorer.restoreIntoDatabase(AppDatabase.getDatabaseForVault(context, vault), lib.data)
                 restored++
             } catch (e: Exception) {
-                // This library failed (its own transaction rolled back); carry on with the rest.
+                // This library's transaction rolled back; carry on with the rest.
             }
         }
         SnapshotRestoreResult(restored, libraries.size)
     }
 
-    // Removes the phone copy and the backup-folder copy.
     suspend fun delete(context: Context, info: SnapshotInfo) {
         withContext(Dispatchers.IO) {
             info.localId?.let { id ->

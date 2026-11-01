@@ -1,209 +1,51 @@
 package com.evu.library
 
-import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 
-class CategoryDetailActivity : BaseActivity() {
+class CategoryDetailActivity : BookListActivity() {
+    override val layoutRes = R.layout.activity_category_detail
+    override val recyclerViewId = R.id.categoryBookRecyclerView
 
-    private lateinit var db: AppDatabase
-    private lateinit var adapter: BookAdapter
-    private lateinit var recyclerView: RecyclerView
-    private var categoryId: Int = -1
-    private var categoryName: String = ""
-    private var fullList: List<Book> = emptyList()
+    private val categoryId by lazy { intent.getIntExtra("categoryId", -1) }
+    private val categoryName by lazy { intent.getStringExtra("categoryName") ?: "" }
 
-    private var isSearchExpanded = false
-    private var searchFilterIndex = 0
-    private var sortFilterIndex = 0
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_category_detail)
-        findViewById<android.widget.ImageButton>(R.id.backButton).setOnClickListener { finish() }
-
-        categoryId = intent.getIntExtra("categoryId", -1)
-        categoryName = intent.getStringExtra("categoryName") ?: ""
-        findViewById<android.widget.TextView>(R.id.categoryTitleText).text = "Category: $categoryName"
-
-        db = AppDatabase.getDatabase(this)
-        adapter = BookAdapter(emptyList()) { book -> showBookOptionsDialog(book) }
-        recyclerView = findViewById(R.id.categoryBookRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
-        BookSelectionController(this, db, adapter, recyclerView) { loadBooks() }
-
-        setupSpinners()
-
-        findViewById<android.widget.ImageButton>(R.id.searchButton).setOnClickListener { toggleSearch() }
-        findViewById<android.widget.ImageButton>(R.id.dropdownButton).setOnClickListener {
-            val filterRow = findViewById<android.widget.LinearLayout>(R.id.filterRow)
-            filterRow.visibility = if (filterRow.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-        }
-
-        findViewById<EditText>(R.id.searchBar).addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) { applyFilterAndSort() }
-            override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
-            override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
-        })
-
-        findViewById<android.widget.Button>(R.id.addNewBookButton).setOnClickListener {
-            BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, null, categoryId) { primary, secondary ->
-                Toast.makeText(this, primary, Toast.LENGTH_SHORT).show()
-                if (secondary != null) {
-                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                        Toast.makeText(this, secondary, Toast.LENGTH_SHORT).show()
-                    }, 1000)
-                }
-                loadBooks()
-            }
-        }
-
-        findViewById<android.widget.Button>(R.id.addExistingBookButton).setOnClickListener {
-            showAddExistingBookDialog()
-        }
-
-        loadBooks()
+    override fun onSetup() {
+        findViewById<TextView>(R.id.categoryTitleText).text = "Category: $categoryName"
+        findViewById<Button>(R.id.addNewBookButton).setOnClickListener { actions.addBook(categoryId) }
+        findViewById<Button>(R.id.addExistingBookButton).setOnClickListener { showAddExistingBookDialog() }
     }
 
-    private fun setupSpinners() {
-        val searchSpinner = findViewById<android.widget.Spinner>(R.id.searchFilterSpinner)
-        searchSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayOf("Title", "ISBN", "Author"))
-        searchSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: android.view.View?, pos: Int, id: Long) {
-                searchFilterIndex = pos
-                applyFilterAndSort()
-            }
-            override fun onNothingSelected(p: AdapterView<*>?) {}
-        }
+    override suspend fun loadBooks() =
+        db.bookDao().getBooksByCategory(categoryId).filter { !it.isDraft && !it.flaggedDuplicate }
 
-        val sortSpinner = findViewById<android.widget.Spinner>(R.id.sortFilterSpinner)
-        sortSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayOf("Newest", "Oldest", "Title A-Z", "Title Z-A"))
-        sortSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(p: AdapterView<*>?, v: android.view.View?, pos: Int, id: Long) {
-                sortFilterIndex = pos
-                applyFilterAndSort()
-            }
-            override fun onNothingSelected(p: AdapterView<*>?) {}
-        }
-    }
-
-    private fun toggleSearch() {
-        isSearchExpanded = !isSearchExpanded
-        val searchBar = findViewById<EditText>(R.id.searchBar)
-        val dropdownButton = findViewById<android.widget.ImageButton>(R.id.dropdownButton)
-        searchBar.visibility = if (isSearchExpanded) View.VISIBLE else View.INVISIBLE
-        dropdownButton.visibility = if (isSearchExpanded) View.VISIBLE else View.GONE
-        if (!isSearchExpanded) {
-            searchBar.setText("")
-            findViewById<android.widget.LinearLayout>(R.id.filterRow).visibility = View.GONE
-            applyFilterAndSort()
-        }
-    }
-
-    private fun loadBooks() {
-        lifecycleScope.launch {
-            fullList = db.bookDao().getBooksByCategory(categoryId).filter { !it.isDraft && !it.flaggedDuplicate }
-            applyFilterAndSort()
-        }
-    }
-
-    private fun applyFilterAndSort() {
-        val query = findViewById<EditText>(R.id.searchBar).text.toString()
-        val filtered = if (query.isBlank()) fullList else fullList.filter {
-            when (searchFilterIndex) {
-                1 -> it.isbn?.contains(query, ignoreCase = true) == true
-                2 -> it.author?.contains(query, ignoreCase = true) == true
-                else -> it.title.contains(query, ignoreCase = true)
-            }
-        }
-        val sorted = when (sortFilterIndex) {
-            1 -> filtered.sortedBy { it.id }
-            2 -> filtered.sortedBy { it.title.lowercase() }
-            3 -> filtered.sortedByDescending { it.title.lowercase() }
-            else -> filtered.sortedByDescending { it.id }
-        }
-        adapter.updateList(sorted)
-        recyclerView.scheduleLayoutAnimation()
-    }
+    override fun buildActions(book: Book) = listOf(
+        actions.edit(book), actions.removeFromCategory(book), actions.delete(book),
+        actions.favourite(book), actions.draft(book), actions.lend(book)
+    )
 
     private fun showAddExistingBookDialog() {
         lifecycleScope.launch {
-            val allBooks = db.bookDao().getAllBooks().filter { it.categoryId != categoryId }
-            val titles = allBooks.map { it.title }.toTypedArray()
-            if (titles.isEmpty()) {
+            val others = db.bookDao().getAllBooks().filter { it.categoryId != categoryId }
+            if (others.isEmpty()) {
                 Toast.makeText(this@CategoryDetailActivity, "No other books available", Toast.LENGTH_SHORT).show()
                 return@launch
             }
             AlertDialog.Builder(this@CategoryDetailActivity, R.style.AppDialogTheme)
                 .setTitle("Add Existing Book")
-                .setItems(titles) { _, which ->
-                    val selected = allBooks[which]
+                .setItems(others.map { it.title }.toTypedArray()) { _, which ->
+                    val selected = others[which]
                     lifecycleScope.launch {
                         db.bookDao().updateBook(selected.copy(categoryId = categoryId))
                         Toast.makeText(this@CategoryDetailActivity, "${selected.title} Added to $categoryName", Toast.LENGTH_SHORT).show()
-                        loadBooks()
+                        reload()
                     }
                 }
                 .show()
-        }
-    }
-
-    private fun showBookOptionsDialog(book: Book) {
-        val favIcon = if (book.isFavorite) android.R.drawable.btn_star_big_off else android.R.drawable.btn_star_big_on
-        val favLabel = if (book.isFavorite) "Remove from Favourites" else "Add to Favourites"
-        val draftLabel = if (book.isDraft) "Unmark as Draft" else "Mark as Draft"
-
-        val options = listOf(
-            DialogOption(android.R.drawable.ic_menu_edit, "Edit"),
-            DialogOption(android.R.drawable.ic_menu_close_clear_cancel, "Remove from Category"),
-            DialogOption(android.R.drawable.ic_menu_delete, "Delete"),
-            DialogOption(favIcon, favLabel),
-            DialogOption(android.R.drawable.ic_menu_agenda, draftLabel)
-        )
-
-        OptionsDialogHelper.show(this, book.title, options) { which ->
-            when (which) {
-                0 -> BookDialogHelper.showAddOrEditBookDialog(this, db, lifecycleScope, book, book.categoryId) { primary, secondary ->
-                    Toast.makeText(this, primary, Toast.LENGTH_SHORT).show()
-                    if (secondary != null) {
-                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                            Toast.makeText(this, secondary, Toast.LENGTH_SHORT).show()
-                        }, 1000)
-                    }
-                    loadBooks()
-                }
-                1 -> lifecycleScope.launch {
-                    db.bookDao().updateBook(book.copy(categoryId = null))
-                    Toast.makeText(this@CategoryDetailActivity, "${book.title} Removed from Category", Toast.LENGTH_SHORT).show()
-                    loadBooks()
-                }
-                2 -> UndoDeleteHelper.deleteWithUndo(this, db, lifecycleScope, listOf(book)) { loadBooks() }
-                3 -> lifecycleScope.launch {
-                    val newState = !book.isFavorite
-                    db.bookDao().updateBook(book.copy(isFavorite = newState))
-                    val msg = if (newState) "${book.title} Added to Favourites" else "${book.title} Removed from Favourites"
-                    Toast.makeText(this@CategoryDetailActivity, msg, Toast.LENGTH_SHORT).show()
-                    loadBooks()
-                }
-                4 -> lifecycleScope.launch {
-                    val newState = !book.isDraft
-                    db.bookDao().updateBook(book.copy(isDraft = newState))
-                    val msg = if (newState) "${book.title} Marked as Draft" else "${book.title} Unmarked as Draft"
-                    Toast.makeText(this@CategoryDetailActivity, msg, Toast.LENGTH_SHORT).show()
-                    loadBooks()
-                }
-            }
         }
     }
 }

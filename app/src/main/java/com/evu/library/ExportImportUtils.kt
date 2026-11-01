@@ -166,19 +166,21 @@ object ExportImportUtils {
         }
     }
 
-    fun fullBackupToJson(categories: List<Category>, books: List<Book>): String {
+    fun fullBackupToJson(categories: List<Category>, books: List<Book>, series: List<Series>): String {
         val root = JSONObject()
-        root.put("formatVersion", 2)
+        root.put("formatVersion", 3)
 
         val catArray = JSONArray()
         for (cat in categories) {
-            val obj = JSONObject()
-            obj.put("id", cat.id)
-            obj.put("name", cat.name)
-            obj.put("sortOrder", cat.sortOrder)
-            catArray.put(obj)
+            catArray.put(JSONObject().put("id", cat.id).put("name", cat.name).put("sortOrder", cat.sortOrder))
         }
         root.put("categories", catArray)
+
+        val seriesArray = JSONArray()
+        for (s in series) {
+            seriesArray.put(JSONObject().put("id", s.id).put("name", s.name).put("totalVolumes", s.totalVolumes ?: JSONObject.NULL))
+        }
+        root.put("series", seriesArray)
 
         val bookArray = JSONArray()
         for (book in books) {
@@ -199,9 +201,8 @@ object ExportImportUtils {
             obj.put("lentAt", book.lentAt ?: JSONObject.NULL)
             obj.put("dueAt", book.dueAt ?: JSONObject.NULL)
             obj.put("deletedAt", book.deletedAt ?: JSONObject.NULL)
-            obj.put("seriesName", book.seriesName ?: JSONObject.NULL)
+            obj.put("seriesId", book.seriesId ?: JSONObject.NULL)
             obj.put("seriesNumber", book.seriesNumber ?: JSONObject.NULL)
-            obj.put("seriesTotal", book.seriesTotal ?: JSONObject.NULL)
             bookArray.put(obj)
         }
         root.put("books", bookArray)
@@ -216,19 +217,39 @@ object ExportImportUtils {
             val categories = mutableListOf<FullBackupCategory>()
             for (i in 0 until catArray.length()) {
                 val obj = catArray.getJSONObject(i)
-                categories.add(
-                    FullBackupCategory(
-                        id = obj.getInt("id"),
-                        name = obj.getString("name"),
-                        sortOrder = obj.optInt("sortOrder", 0)
+                categories.add(FullBackupCategory(obj.getInt("id"), obj.getString("name"), obj.optInt("sortOrder", 0)))
+            }
+
+            val seriesList = mutableListOf<FullBackupSeries>()
+            val seriesArray = root.optJSONArray("series") ?: JSONArray()
+            for (i in 0 until seriesArray.length()) {
+                val obj = seriesArray.getJSONObject(i)
+                seriesList.add(
+                    FullBackupSeries(
+                        obj.getInt("id"), obj.getString("name"),
+                        if (obj.isNull("totalVolumes")) null else obj.getInt("totalVolumes")
                     )
                 )
             }
+
+            // Backups made before series became their own table stored a name on each book; convert them.
+            val legacyIds = mutableMapOf<String, Int>()
+            var nextSeriesId = (seriesList.maxOfOrNull { it.id } ?: 0) + 1
 
             val bookArray = root.optJSONArray("books") ?: JSONArray()
             val books = mutableListOf<FullBackupBook>()
             for (i in 0 until bookArray.length()) {
                 val obj = bookArray.getJSONObject(i)
+                var seriesId: Int? = if (obj.isNull("seriesId")) null else obj.getInt("seriesId")
+                val legacyName = obj.optString("seriesName", null)?.trim()?.takeIf { it.isNotEmpty() && it != "null" }
+                if (seriesId == null && legacyName != null) {
+                    val total = if (obj.isNull("seriesTotal")) null else obj.getInt("seriesTotal")
+                    seriesId = legacyIds.getOrPut(legacyName.lowercase()) {
+                        val id = nextSeriesId++
+                        seriesList.add(FullBackupSeries(id, legacyName, total))
+                        id
+                    }
+                }
                 books.add(
                     FullBackupBook(
                         id = obj.getInt("id"),
@@ -247,13 +268,12 @@ object ExportImportUtils {
                         lentAt = if (obj.isNull("lentAt")) null else obj.getLong("lentAt"),
                         dueAt = if (obj.isNull("dueAt")) null else obj.getLong("dueAt"),
                         deletedAt = if (obj.isNull("deletedAt")) null else obj.getLong("deletedAt"),
-                        seriesName = obj.optString("seriesName", null).takeIf { it != "null" },
-                        seriesNumber = if (obj.isNull("seriesNumber")) null else obj.getInt("seriesNumber"),
-                        seriesTotal = if (obj.isNull("seriesTotal")) null else obj.getInt("seriesTotal")
+                        seriesId = seriesId,
+                        seriesNumber = if (obj.isNull("seriesNumber")) null else obj.getInt("seriesNumber")
                     )
                 )
             }
-            FullBackupData(categories, books)
+            FullBackupData(categories, books, seriesList)
         } catch (e: Exception) {
             null
         }

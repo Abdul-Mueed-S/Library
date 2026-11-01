@@ -57,6 +57,15 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/listSubtitleText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:textSize="13sp"
+        android:alpha="0.75"
+        android:visibility="gone" />
+
     <LinearLayout
         android:id="@+id/filterRow"
         android:layout_width="match_parent"

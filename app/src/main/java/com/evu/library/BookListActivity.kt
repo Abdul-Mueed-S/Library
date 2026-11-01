@@ -18,6 +18,8 @@ abstract class BookListActivity : BaseActivity() {
     protected abstract val recyclerViewId: Int
     protected open val showDuplicateTag: Boolean = true
     protected open val selectionEnabled: Boolean = true
+    protected open val primarySortLabel: String = "Newest"
+    protected open val keepLoadOrder: Boolean = false
 
     protected abstract suspend fun loadBooks(): List<Book>
     protected abstract fun buildActions(book: Book): List<BookAction>
@@ -47,6 +49,7 @@ abstract class BookListActivity : BaseActivity() {
         recyclerView = findViewById(recyclerViewId)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+        if (!AppPrefs.isAnimationsEnabled(this)) recyclerView.layoutAnimation = null
         if (selectionEnabled) BookSelectionController(this, db, adapter, recyclerView) { reload() }
 
         setupSpinners()
@@ -73,6 +76,7 @@ abstract class BookListActivity : BaseActivity() {
 
     protected fun reload() {
         lifecycleScope.launch {
+            adapter.seriesById = db.seriesDao().getAllSeries().associateBy { it.id }
             fullList = loadBooks()
             applyFilterAndSort()
         }
@@ -90,7 +94,7 @@ abstract class BookListActivity : BaseActivity() {
         }
 
         val sortSpinner = findViewById<android.widget.Spinner>(R.id.sortFilterSpinner)
-        sortSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayOf("Newest", "Oldest", "Title A-Z", "Title Z-A"))
+        sortSpinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayOf(primarySortLabel, "Oldest", "Title A-Z", "Title Z-A"))
         sortSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p: AdapterView<*>?, v: View?, pos: Int, id: Long) {
                 sortFilterIndex = pos
@@ -125,9 +129,9 @@ abstract class BookListActivity : BaseActivity() {
             1 -> filtered.sortedBy { it.id }
             2 -> filtered.sortedBy { it.title.lowercase() }
             3 -> filtered.sortedByDescending { it.title.lowercase() }
-            else -> filtered.sortedByDescending { it.id }
+            else -> if (keepLoadOrder) filtered else filtered.sortedByDescending { it.id }
         }
         adapter.updateList(sorted)
-        recyclerView.scheduleLayoutAnimation()
+        if (AppPrefs.isAnimationsEnabled(this)) recyclerView.scheduleLayoutAnimation()
     }
 }

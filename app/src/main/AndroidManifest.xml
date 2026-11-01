@@ -74,6 +74,9 @@
         <activity android:name=".SeriesActivity"
             android:exported="false"
             android:theme="@style/Theme.Library.Default" />
+        <activity android:name=".SeriesDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Library.Default" />
         <activity android:name=".OwnershipCheckActivity"
             android:exported="false"
             android:theme="@style/Theme.Library.Default" />

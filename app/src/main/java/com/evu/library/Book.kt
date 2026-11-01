@@ -21,7 +21,6 @@ data class Book(
     val lentAt: Long? = null,
     val dueAt: Long? = null,
     val deletedAt: Long? = null,
-    val seriesName: String? = null,
-    val seriesNumber: Int? = null,
-    val seriesTotal: Int? = null
+    val seriesId: Int? = null,
+    val seriesNumber: Int? = null
 )

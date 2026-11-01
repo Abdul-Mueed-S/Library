@@ -6,4 +6,10 @@
     <attr name="appColorSurface" format="color" />
     <attr name="appColorDuplicateTagBg" format="color" />
     <attr name="appColorDuplicateTagText" format="color" />
+    <attr name="appColorButton" format="color" />
+    <attr name="appColorOnButton" format="color" />
+    <attr name="appColorBadge" format="color" />
+    <attr name="appColorOnBadge" format="color" />
+    <attr name="appColorBackground" format="color" />
+    <attr name="appCornerRadius" format="dimension" />
 </resources>

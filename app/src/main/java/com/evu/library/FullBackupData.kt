@@ -2,6 +2,8 @@ package com.evu.library
 
 data class FullBackupCategory(val id: Int, val name: String, val sortOrder: Int = 0)
 
+data class FullBackupSeries(val id: Int, val name: String, val totalVolumes: Int? = null)
+
 data class FullBackupBook(
     val id: Int,
     val title: String,
@@ -19,12 +21,12 @@ data class FullBackupBook(
     val lentAt: Long? = null,
     val dueAt: Long? = null,
     val deletedAt: Long? = null,
-    val seriesName: String? = null,
-    val seriesNumber: Int? = null,
-    val seriesTotal: Int? = null
+    val seriesId: Int? = null,
+    val seriesNumber: Int? = null
 )
 
 data class FullBackupData(
     val categories: List<FullBackupCategory>,
-    val books: List<FullBackupBook>
+    val books: List<FullBackupBook>,
+    val series: List<FullBackupSeries> = emptyList()
 )

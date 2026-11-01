@@ -22,6 +22,7 @@ class BookAdapter(
     private val expandedIds = mutableSetOf<Int>()
     private val selectedIds = mutableSetOf<Int>()
 
+    var seriesById: Map<Int, Series> = emptyMap()
     var onSelectionChanged: ((Int) -> Unit)? = null
 
     class BookViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -61,6 +62,9 @@ class BookAdapter(
         val selecting = selectedIds.isNotEmpty()
         val isSelected = selectedIds.contains(book.id)
 
+        val pad = ((if (AppPrefs.isCompact(context)) 8 else 14) * context.resources.displayMetrics.density).toInt()
+        holder.card.setPadding(pad, pad, pad, pad)
+
         holder.numberText.visibility = if (AppPrefs.isShowNumbers(context)) View.VISIBLE else View.GONE
         holder.numberText.text = "${position + 1}."
 
@@ -68,11 +72,9 @@ class BookAdapter(
         val titleSuffix = if (book.isDraft) " (Draft)" else ""
         holder.titleText.text = "$titlePrefix${book.title}$titleSuffix"
 
-        // Copies badge — only when you own more than one.
         holder.copiesBadge.visibility = if (book.copies > 1) View.VISIBLE else View.GONE
         holder.copiesBadge.text = "×${book.copies}"
 
-        // Lending badge + line.
         if (book.lentTo != null) {
             val overdue = book.dueAt != null && book.dueAt < System.currentTimeMillis()
             holder.lentBadge.text = if (overdue) "Overdue" else "Lent"
@@ -102,12 +104,13 @@ class BookAdapter(
             holder.subtitleText.visibility = View.GONE
         }
 
-        if (!book.seriesName.isNullOrBlank()) {
+        val series = book.seriesId?.let { seriesById[it] }
+        if (series != null) {
             holder.seriesText.text = buildString {
-                append("Series: ${book.seriesName}")
+                append("Series: ${series.name}")
                 book.seriesNumber?.let {
                     append(" · #$it")
-                    book.seriesTotal?.let { total -> append(" of $total") }
+                    series.totalVolumes?.let { total -> append(" of $total") }
                 }
             }
             holder.seriesText.visibility = View.VISIBLE
@@ -130,7 +133,9 @@ class BookAdapter(
         holder.expandButton.text = if (isExpanded) "▴" else "▾"
 
         holder.expandButton.setOnClickListener {
-            TransitionManager.beginDelayedTransition(holder.root, AutoTransition().apply { duration = 180 })
+            if (AppPrefs.isAnimationsEnabled(context)) {
+                TransitionManager.beginDelayedTransition(holder.root, AutoTransition().apply { duration = 180 })
+            }
             if (expandedIds.contains(book.id)) {
                 expandedIds.remove(book.id)
                 holder.detailsContainer.visibility = View.GONE

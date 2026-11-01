@@ -1,27 +1,17 @@
 package com.evu.library
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
-
-data class SeriesSummary(
-    val name: String,
-    val books: List<Book>,
-    val ownedNumbers: Set<Int>,
-    val total: Int
-) {
-    private val upper get() = maxOf(total, ownedNumbers.maxOrNull() ?: 0)
-    val missing: List<Int> get() = (1..upper).filter { it !in ownedNumbers }
-    val upperBound: Int get() = upper
-}
 
 class SeriesActivity : BaseActivity() {
 
@@ -36,90 +26,99 @@ class SeriesActivity : BaseActivity() {
         statusText = findViewById(R.id.statusText)
         db = AppDatabase.getDatabase(this)
 
-        adapter = SeriesAdapter(emptyList()) { showDetails(it) }
+        adapter = SeriesAdapter(
+            emptyList(),
+            onClick = { row ->
+                val intent = Intent(this, SeriesDetailActivity::class.java)
+                intent.putExtra("seriesId", row.series.id)
+                intent.putExtra("seriesName", row.series.name)
+                startActivity(intent)
+            },
+            onLongClick = { row -> showOptions(row.series) }
+        )
         val recycler = findViewById<RecyclerView>(R.id.seriesRecyclerView)
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = adapter
+
+        findViewById<Button>(R.id.addSeriesButton).setOnClickListener {
+            SeriesDialogs.showEditor(this, null) { name, total -> createSeries(name, total) }
+        }
     }
 
     override fun onResume() {
         super.onResume()
+        load()
+    }
+
+    private fun load() {
         lifecycleScope.launch {
-            val summaries = db.bookDao().getAllBooks()
-                .filter { !it.isDraft && !it.seriesName.isNullOrBlank() }
-                .groupBy { it.seriesName!!.trim().lowercase() }
-                .map { (_, books) ->
-                    val owned = books.mapNotNull { it.seriesNumber }.toSet()
-                    SeriesSummary(
-                        name = books.first().seriesName!!.trim(),
-                        books = books,
-                        ownedNumbers = owned,
-                        total = books.mapNotNull { it.seriesTotal }.maxOrNull() ?: 0
-                    )
+            val allSeries = db.seriesDao().getAllSeries()
+            val booksBySeries = db.bookDao().getAllBooks()
+                .filter { !it.isDraft && !it.flaggedDuplicate && it.seriesId != null }
+                .groupBy { it.seriesId!! }
+            adapter.update(
+                allSeries.map { s ->
+                    val books = booksBySeries[s.id].orEmpty()
+                    SeriesRow(s, books.size, books.mapNotNull { it.seriesNumber }.toSet())
                 }
-                .sortedBy { it.name.lowercase() }
-            adapter.update(summaries)
-            statusText.text = "No series yet. Add a series name (and volume number) when adding or editing a book."
-            statusText.visibility = if (summaries.isEmpty()) View.VISIBLE else View.GONE
-        }
-    }
-
-    private fun showDetails(series: SeriesSummary) {
-        val byNumber = series.books.filter { it.seriesNumber != null }.associateBy { it.seriesNumber!! }
-        val lines = mutableListOf<String>()
-        for (n in 1..series.upperBound) {
-            val book = byNumber[n]
-            lines.add(
-                if (book != null) "#$n  ${book.title}" + (if (book.copies > 1) "  (×${book.copies})" else "")
-                else "#$n  — missing"
             )
+            statusText.text = "No series yet. Tap + to add one, or choose \"+ New Series\" while adding a book."
+            statusText.visibility = if (allSeries.isEmpty()) View.VISIBLE else View.GONE
         }
-        series.books.filter { it.seriesNumber == null }.forEach { lines.add("Unnumbered  ${it.title}") }
+    }
+
+    private fun createSeries(name: String, total: Int?) {
+        lifecycleScope.launch {
+            if (db.seriesDao().findByName(name) != null) {
+                Toast.makeText(this@SeriesActivity, "Series \"$name\" already exists", Toast.LENGTH_SHORT).show()
+            } else {
+                db.seriesDao().insertSeries(Series(name = name, totalVolumes = total))
+                Toast.makeText(this@SeriesActivity, "Series: $name Created", Toast.LENGTH_SHORT).show()
+                load()
+            }
+        }
+    }
+
+    private fun showOptions(series: Series) {
+        OptionsDialogHelper.show(
+            this, series.name,
+            listOf(
+                DialogOption(android.R.drawable.ic_menu_edit, "Edit"),
+                DialogOption(android.R.drawable.ic_menu_delete, "Delete series")
+            )
+        ) { which ->
+            if (which == 0) editSeries(series) else confirmDelete(series)
+        }
+    }
+
+    private fun editSeries(series: Series) {
+        SeriesDialogs.showEditor(this, series) { name, total ->
+            lifecycleScope.launch {
+                val existing = db.seriesDao().findByName(name)
+                if (existing != null && existing.id != series.id) {
+                    Toast.makeText(this@SeriesActivity, "Series \"$name\" already exists", Toast.LENGTH_SHORT).show()
+                } else {
+                    db.seriesDao().updateSeries(series.copy(name = name, totalVolumes = total))
+                    Toast.makeText(this@SeriesActivity, "Series: $name Updated", Toast.LENGTH_SHORT).show()
+                    load()
+                }
+            }
+        }
+    }
+
+    private fun confirmDelete(series: Series) {
         AlertDialog.Builder(this, R.style.AppDialogTheme)
-            .setTitle(series.name)
-            .setMessage(lines.joinToString("\n"))
-            .setPositiveButton("OK", null)
+            .setTitle("Delete Series")
+            .setMessage("Delete \"${series.name}\"? Its books stay in your library; they just leave the series.")
+            .setPositiveButton("Delete") { _, _ ->
+                lifecycleScope.launch {
+                    db.bookDao().clearSeriesFromBooks(series.id)
+                    db.seriesDao().deleteSeries(series)
+                    Toast.makeText(this@SeriesActivity, "Series: ${series.name} Deleted", Toast.LENGTH_SHORT).show()
+                    load()
+                }
+            }
+            .setNegativeButton("Cancel", null)
             .show()
-    }
-}
-
-class SeriesAdapter(
-    private var items: List<SeriesSummary>,
-    private val onClick: (SeriesSummary) -> Unit
-) : RecyclerView.Adapter<SeriesAdapter.Holder>() {
-
-    class Holder(view: View) : RecyclerView.ViewHolder(view) {
-        val row: View = view.findViewById(R.id.seriesCardRow)
-        val name: TextView = view.findViewById(R.id.seriesNameText)
-        val summary: TextView = view.findViewById(R.id.seriesSummaryText)
-        val missing: TextView = view.findViewById(R.id.seriesMissingText)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        Holder(LayoutInflater.from(parent.context).inflate(R.layout.item_series, parent, false))
-
-    override fun onBindViewHolder(holder: Holder, position: Int) {
-        val series = items[position]
-        holder.name.text = series.name
-        val owned = series.ownedNumbers.size
-        holder.summary.text = when {
-            series.total > 0 && series.missing.isEmpty() -> "Complete — all ${series.total} volumes"
-            series.total > 0 -> "Own $owned of ${series.total}"
-            else -> "Own $owned (total unknown)"
-        }
-        if (series.missing.isNotEmpty()) {
-            holder.missing.text = "Missing: " + series.missing.joinToString(", ") { "#$it" }
-            holder.missing.visibility = View.VISIBLE
-        } else {
-            holder.missing.visibility = View.GONE
-        }
-        holder.row.setOnClickListener { onClick(series) }
-    }
-
-    override fun getItemCount() = items.size
-
-    fun update(newItems: List<SeriesSummary>) {
-        items = newItems
-        notifyDataSetChanged()
     }
 }

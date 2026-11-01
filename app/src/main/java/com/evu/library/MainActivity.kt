@@ -65,7 +65,6 @@ class MainActivity : BaseActivity() {
         db = AppDatabase.getDatabase(this)
         actions = BookActions(this, db) { refreshCurrentView() }
 
-        // Quietly drop anything that has been in Trash longer than the retention period.
         lifecycleScope.launch {
             db.bookDao().purgeTrashedBefore(
                 System.currentTimeMillis() - TrashPurgeWorker.RETENTION_DAYS * TrashPurgeWorker.DAY_MS
@@ -83,6 +82,7 @@ class MainActivity : BaseActivity() {
         }
         binding.bookRecyclerView.layoutManager = LinearLayoutManager(this)
         binding.bookRecyclerView.adapter = adapter
+        if (!AppPrefs.isAnimationsEnabled(this)) binding.bookRecyclerView.layoutAnimation = null
         BookSelectionController(this, db, adapter, binding.bookRecyclerView) { refreshCurrentView() }
 
         chipAdapter = ChipAdapter(
@@ -314,21 +314,25 @@ class MainActivity : BaseActivity() {
             .show()
     }
 
+    private fun showList(list: List<Book>) {
+        adapter.updateList(applySort(list))
+        if (AppPrefs.isAnimationsEnabled(this)) binding.bookRecyclerView.scheduleLayoutAnimation()
+    }
+
     private fun refreshCurrentView() {
         if (binding.searchBar.text.toString().isNotBlank()) {
             loadSearchResults(binding.searchBar.text.toString())
             return
         }
         lifecycleScope.launch {
+            adapter.seriesById = db.seriesDao().getAllSeries().associateBy { it.id }
             val chip = chips.getOrNull(selectedChipIndex)
             val results = when (chip) {
                 is ChipItem.Favourites -> db.bookDao().getFavoriteBooks()
                 is ChipItem.CategoryChip -> db.bookDao().getBooksByCategory(chip.category.id)
                 else -> db.bookDao().getAllBooks()
             }
-            val filtered = results.filter { !it.isDraft && !it.flaggedDuplicate }
-            adapter.updateList(applySort(filtered))
-            binding.bookRecyclerView.scheduleLayoutAnimation()
+            showList(results.filter { !it.isDraft && !it.flaggedDuplicate })
         }
     }
 
@@ -384,6 +388,7 @@ class MainActivity : BaseActivity() {
             return
         }
         lifecycleScope.launch {
+            adapter.seriesById = db.seriesDao().getAllSeries().associateBy { it.id }
             val baseResults = when (searchFilterIndex) {
                 1 -> db.bookDao().searchByIsbn(query)
                 2 -> db.bookDao().searchByAuthor(query)
@@ -395,9 +400,7 @@ class MainActivity : BaseActivity() {
                 is ChipItem.CategoryChip -> baseResults.filter { it.categoryId == chip.category.id }
                 else -> baseResults
             }
-            val filtered = scoped.filter { !it.isDraft && !it.flaggedDuplicate }
-            adapter.updateList(applySort(filtered))
-            binding.bookRecyclerView.scheduleLayoutAnimation()
+            showList(scoped.filter { !it.isDraft && !it.flaggedDuplicate })
         }
     }
 

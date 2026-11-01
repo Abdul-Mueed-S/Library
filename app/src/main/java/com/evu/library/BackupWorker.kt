@@ -27,7 +27,6 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
         val timestamp = BackupFiles.newTimestamp()
         var allSucceeded = true
 
-        // Vault registry (names + locations) — one file per run.
         try {
             val metadataJson = VaultManager.exportVaultMetadataJson(context)
             val metaFile = destFolder.createFile("application/json", BackupFiles.metadataFileName(timestamp))
@@ -41,13 +40,13 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             allSucceeded = false
         }
 
-        // Per-vault book/category data.
         for (vault in VaultManager.getAllVaults(context)) {
             try {
                 val db = AppDatabase.getDatabaseForVault(context, vault)
                 val json = ExportImportUtils.fullBackupToJson(
                     db.categoryDao().getAllCategories(),
-                    db.bookDao().getAllBooks()
+                    db.bookDao().getAllBooks(),
+                    db.seriesDao().getAllSeries()
                 )
                 val newFile = destFolder.createFile("application/json", BackupFiles.dataFileName(vault.name, timestamp))
                 if (newFile == null) {
@@ -61,7 +60,6 @@ class BackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker
             }
         }
 
-        // Only prune after a fully successful run, so a failed backup never costs you old ones.
         if (allSucceeded) {
             try {
                 BackupFiles.pruneOldBackups(destFolder, BackupPrefs.getRetentionCount(context))

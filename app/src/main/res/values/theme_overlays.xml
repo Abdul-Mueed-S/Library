@@ -1,0 +1,90 @@
+<resources>
+
+    <!-- ACCENT: stripes, links, status bar, chips -->
+    <style name="Ovr.Accent.Purple" parent=""><item name="appColorPrimary">#B085F5</item><item name="appColorOnPrimary">#000000</item></style>
+    <style name="Ovr.Accent.Indigo" parent=""><item name="appColorPrimary">#7C4DFF</item><item name="appColorOnPrimary">#FFFFFF</item></style>
+    <style name="Ovr.Accent.Sky" parent=""><item name="appColorPrimary">#4FC3F7</item><item name="appColorOnPrimary">#000000</item></style>
+    <style name="Ovr.Accent.Blue" parent=""><item name="appColorPrimary">#1E88E5</item><item name="appColorOnPrimary">#FFFFFF</item></style>
+    <style name="Ovr.Accent.Cyan" parent=""><item name="appColorPrimary">#00E5FF</item><item name="appColorOnPrimary">#000000</item></style>
+    <style name="Ovr.Accent.Teal" parent=""><item name="appColorPrimary">#26A69A</item><item name="appColorOnPrimary">#000000</item></style>
+    <style name="Ovr.Accent.Green" parent=""><item name="appColorPrimary">#81C784</item><item name="appColorOnPrimary">#000000</item></style>
+    <style name="Ovr.Accent.Lime" parent=""><item name="appColorPrimary">#C0CA33</item><item name="appColorOnPrimary">#000000</item></style>
+    <style name="Ovr.Accent.Amber" parent=""><item name="appColorPrimary">#FFB74D</item><item name="appColorOnPrimary">#000000</item></style>
+    <style name="Ovr.Accent.Orange" parent=""><item name="appColorPrimary">#F57C00</item><item name="appColorOnPrimary">#FFFFFF</item></style>
+    <style name="Ovr.Accent.Red" parent=""><item name="appColorPrimary">#E53935</item><item name="appColorOnPrimary">#FFFFFF</item></style>
+    <style name="Ovr.Accent.Pink" parent=""><item name="appColorPrimary">#F06292</item><item name="appColorOnPrimary">#000000</item></style>
+
+    <!-- BUTTONS -->
+    <style name="Ovr.Button.Purple" parent=""><item name="appColorButton">#B085F5</item><item name="appColorOnButton">#000000</item></style>
+    <style name="Ovr.Button.Indigo" parent=""><item name="appColorButton">#7C4DFF</item><item name="appColorOnButton">#FFFFFF</item></style>
+    <style name="Ovr.Button.Sky" parent=""><item name="appColorButton">#4FC3F7</item><item name="appColorOnButton">#000000</item></style>
+    <style name="Ovr.Button.Blue" parent=""><item name="appColorButton">#1E88E5</item><item name="appColorOnButton">#FFFFFF</item></style>
+    <style name="Ovr.Button.Cyan" parent=""><item name="appColorButton">#00E5FF</item><item name="appColorOnButton">#000000</item></style>
+    <style name="Ovr.Button.Teal" parent=""><item name="appColorButton">#26A69A</item><item name="appColorOnButton">#000000</item></style>
+    <style name="Ovr.Button.Green" parent=""><item name="appColorButton">#81C784</item><item name="appColorOnButton">#000000</item></style>
+    <style name="Ovr.Button.Lime" parent=""><item name="appColorButton">#C0CA33</item><item name="appColorOnButton">#000000</item></style>
+    <style name="Ovr.Button.Amber" parent=""><item name="appColorButton">#FFB74D</item><item name="appColorOnButton">#000000</item></style>
+    <style name="Ovr.Button.Orange" parent=""><item name="appColorButton">#F57C00</item><item name="appColorOnButton">#FFFFFF</item></style>
+    <style name="Ovr.Button.Red" parent=""><item name="appColorButton">#E53935</item><item name="appColorOnButton">#FFFFFF</item></style>
+    <style name="Ovr.Button.Pink" parent=""><item name="appColorButton">#F06292</item><item name="appColorOnButton">#000000</item></style>
+
+    <!-- BADGES (count badges, copies badge) -->
+    <style name="Ovr.Badge.Purple" parent=""><item name="appColorBadge">#B085F5</item><item name="appColorOnBadge">#000000</item></style>
+    <style name="Ovr.Badge.Indigo" parent=""><item name="appColorBadge">#7C4DFF</item><item name="appColorOnBadge">#FFFFFF</item></style>
+    <style name="Ovr.Badge.Sky" parent=""><item name="appColorBadge">#4FC3F7</item><item name="appColorOnBadge">#000000</item></style>
+    <style name="Ovr.Badge.Blue" parent=""><item name="appColorBadge">#1E88E5</item><item name="appColorOnBadge">#FFFFFF</item></style>
+    <style name="Ovr.Badge.Cyan" parent=""><item name="appColorBadge">#00E5FF</item><item name="appColorOnBadge">#000000</item></style>
+    <style name="Ovr.Badge.Teal" parent=""><item name="appColorBadge">#26A69A</item><item name="appColorOnBadge">#000000</item></style>
+    <style name="Ovr.Badge.Green" parent=""><item name="appColorBadge">#81C784</item><item name="appColorOnBadge">#000000</item></style>
+    <style name="Ovr.Badge.Lime" parent=""><item name="appColorBadge">#C0CA33</item><item name="appColorOnBadge">#000000</item></style>
+    <style name="Ovr.Badge.Amber" parent=""><item name="appColorBadge">#FFB74D</item><item name="appColorOnBadge">#000000</item></style>
+    <style name="Ovr.Badge.Orange" parent=""><item name="appColorBadge">#F57C00</item><item name="appColorOnBadge">#FFFFFF</item></style>
+    <style name="Ovr.Badge.Red" parent=""><item name="appColorBadge">#E53935</item><item name="appColorOnBadge">#FFFFFF</item></style>
+    <style name="Ovr.Badge.Pink" parent=""><item name="appColorBadge">#F06292</item><item name="appColorOnBadge">#000000</item></style>
+
+    <!-- DELETE / WARNING -->
+    <style name="Ovr.Delete.Red" parent=""><item name="appColorDelete">#E53935</item></style>
+    <style name="Ovr.Delete.Rose" parent=""><item name="appColorDelete">#E57373</item></style>
+    <style name="Ovr.Delete.Coral" parent=""><item name="appColorDelete">#FF7043</item></style>
+    <style name="Ovr.Delete.Magenta" parent=""><item name="appColorDelete">#D81B60</item></style>
+    <style name="Ovr.Delete.Orange" parent=""><item name="appColorDelete">#FB8C00</item></style>
+    <style name="Ovr.Delete.Grey" parent=""><item name="appColorDelete">#9E9E9E</item></style>
+
+    <!-- SCREEN BACKGROUND (also sets matching text colours so it stays readable) -->
+    <style name="Ovr.Background.Black" parent=""><item name="appColorBackground">#000000</item><item name="appColorOnSurface">#F2F2F2</item><item name="android:textColorPrimary">#F2F2F2</item><item name="android:textColorSecondary">#B3F2F2F2</item></style>
+    <style name="Ovr.Background.Ink" parent=""><item name="appColorBackground">#0D0D0D</item><item name="appColorOnSurface">#F2F2F2</item><item name="android:textColorPrimary">#F2F2F2</item><item name="android:textColorSecondary">#B3F2F2F2</item></style>
+    <style name="Ovr.Background.Charcoal" parent=""><item name="appColorBackground">#1C1C1C</item><item name="appColorOnSurface">#F2F2F2</item><item name="android:textColorPrimary">#F2F2F2</item><item name="android:textColorSecondary">#B3F2F2F2</item></style>
+    <style name="Ovr.Background.Navy" parent=""><item name="appColorBackground">#0F1A22</item><item name="appColorOnSurface">#F2F2F2</item><item name="android:textColorPrimary">#F2F2F2</item><item name="android:textColorSecondary">#B3F2F2F2</item></style>
+    <style name="Ovr.Background.Forest" parent=""><item name="appColorBackground">#132016</item><item name="appColorOnSurface">#F2F2F2</item><item name="android:textColorPrimary">#F2F2F2</item><item name="android:textColorSecondary">#B3F2F2F2</item></style>
+    <style name="Ovr.Background.Plum" parent=""><item name="appColorBackground">#1B1224</item><item name="appColorOnSurface">#F2F2F2</item><item name="android:textColorPrimary">#F2F2F2</item><item name="android:textColorSecondary">#B3F2F2F2</item></style>
+    <style name="Ovr.Background.Cocoa" parent=""><item name="appColorBackground">#221812</item><item name="appColorOnSurface">#F2F2F2</item><item name="android:textColorPrimary">#F2F2F2</item><item name="android:textColorSecondary">#B3F2F2F2</item></style>
+    <style name="Ovr.Background.Paper" parent=""><item name="appColorBackground">#ECE9F0</item><item name="appColorOnSurface">#212121</item><item name="android:textColorPrimary">#212121</item><item name="android:textColorSecondary">#99212121</item></style>
+    <style name="Ovr.Background.Cream" parent=""><item name="appColorBackground">#FBEFE3</item><item name="appColorOnSurface">#212121</item><item name="android:textColorPrimary">#212121</item><item name="android:textColorSecondary">#99212121</item></style>
+    <style name="Ovr.Background.White" parent=""><item name="appColorBackground">#FFFFFF</item><item name="appColorOnSurface">#212121</item><item name="android:textColorPrimary">#212121</item><item name="android:textColorSecondary">#99212121</item></style>
+
+    <!-- CARDS & DIALOGS -->
+    <style name="Ovr.Surface.Ink" parent=""><item name="appColorSurface">#141414</item></style>
+    <style name="Ovr.Surface.Graphite" parent=""><item name="appColorSurface">#2A2A2A</item></style>
+    <style name="Ovr.Surface.Slate" parent=""><item name="appColorSurface">#1E2A38</item></style>
+    <style name="Ovr.Surface.Moss" parent=""><item name="appColorSurface">#1B2A1E</item></style>
+    <style name="Ovr.Surface.Plum" parent=""><item name="appColorSurface">#2A1F33</item></style>
+    <style name="Ovr.Surface.Cocoa" parent=""><item name="appColorSurface">#2E1F14</item></style>
+    <style name="Ovr.Surface.Mist" parent=""><item name="appColorSurface">#E4E0EA</item></style>
+    <style name="Ovr.Surface.Sand" parent=""><item name="appColorSurface">#F5E1CC</item></style>
+    <style name="Ovr.Surface.Snow" parent=""><item name="appColorSurface">#FFFFFF</item></style>
+
+    <!-- TEXT -->
+    <style name="Ovr.Text.White" parent=""><item name="appColorOnSurface">#FFFFFF</item><item name="android:textColorPrimary">#FFFFFF</item><item name="android:textColorSecondary">#B3FFFFFF</item></style>
+    <style name="Ovr.Text.Soft" parent=""><item name="appColorOnSurface">#E0E0E0</item><item name="android:textColorPrimary">#E0E0E0</item><item name="android:textColorSecondary">#B3E0E0E0</item></style>
+    <style name="Ovr.Text.Warm" parent=""><item name="appColorOnSurface">#F5E9DD</item><item name="android:textColorPrimary">#F5E9DD</item><item name="android:textColorSecondary">#B3F5E9DD</item></style>
+    <style name="Ovr.Text.Mint" parent=""><item name="appColorOnSurface">#D4E8D5</item><item name="android:textColorPrimary">#D4E8D5</item><item name="android:textColorSecondary">#B3D4E8D5</item></style>
+    <style name="Ovr.Text.Ice" parent=""><item name="appColorOnSurface">#D0E6F5</item><item name="android:textColorPrimary">#D0E6F5</item><item name="android:textColorSecondary">#B3D0E6F5</item></style>
+    <style name="Ovr.Text.Black" parent=""><item name="appColorOnSurface">#000000</item><item name="android:textColorPrimary">#000000</item><item name="android:textColorSecondary">#99000000</item></style>
+    <style name="Ovr.Text.Graphite" parent=""><item name="appColorOnSurface">#212121</item><item name="android:textColorPrimary">#212121</item><item name="android:textColorSecondary">#99212121</item></style>
+    <style name="Ovr.Text.Navy" parent=""><item name="appColorOnSurface">#1A2B33</item><item name="android:textColorPrimary">#1A2B33</item><item name="android:textColorSecondary">#991A2B33</item></style>
+
+    <!-- CORNERS (Soft = 16dp is the default in the base themes) -->
+    <style name="Ovr.Corner.Sharp" parent=""><item name="appCornerRadius">4dp</item></style>
+    <style name="Ovr.Corner.Round" parent=""><item name="appCornerRadius">28dp</item></style>
+
+</resources>

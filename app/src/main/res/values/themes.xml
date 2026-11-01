@@ -1,6 +1,37 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.Library.Default" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Widget.Library.Button" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">?attr/appColorButton</item>
+        <item name="android:textColor">?attr/appColorOnButton</item>
+    </style>
+
+    <style name="Base.Library.Dark" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">?attr/appColorPrimary</item>
+        <item name="colorAccent">?attr/appColorPrimary</item>
+        <item name="android:statusBarColor">?attr/appColorPrimary</item>
+        <item name="android:windowBackground">?attr/appColorBackground</item>
+        <item name="materialButtonStyle">@style/Widget.Library.Button</item>
+        <item name="appColorButton">?attr/appColorPrimary</item>
+        <item name="appColorOnButton">?attr/appColorOnPrimary</item>
+        <item name="appColorBadge">?attr/appColorPrimary</item>
+        <item name="appColorOnBadge">?attr/appColorOnPrimary</item>
+        <item name="appCornerRadius">16dp</item>
+    </style>
+
+    <style name="Base.Library.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">?attr/appColorPrimary</item>
+        <item name="colorAccent">?attr/appColorPrimary</item>
+        <item name="android:statusBarColor">?attr/appColorPrimary</item>
+        <item name="android:windowBackground">?attr/appColorBackground</item>
+        <item name="materialButtonStyle">@style/Widget.Library.Button</item>
+        <item name="appColorButton">?attr/appColorPrimary</item>
+        <item name="appColorOnButton">?attr/appColorOnPrimary</item>
+        <item name="appColorBadge">?attr/appColorPrimary</item>
+        <item name="appColorOnBadge">?attr/appColorOnPrimary</item>
+        <item name="appCornerRadius">16dp</item>
+    </style>
+
+    <style name="Theme.Library.Default" parent="Base.Library.Dark">
         <item name="appColorPrimary">#B085F5</item>
         <item name="appColorOnPrimary">#000000</item>
         <item name="appColorOnSurface">#FFFFFF</item>
@@ -8,12 +39,10 @@
         <item name="appColorSurface">#2B2B2B</item>
         <item name="appColorDuplicateTagBg">#444444</item>
         <item name="appColorDuplicateTagText">#DDDDDD</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
+        <item name="appColorBackground">#121212</item>
     </style>
 
-    <style name="Theme.Library.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.Library.Light" parent="Base.Library.Light">
         <item name="appColorPrimary">#7C4DFF</item>
         <item name="appColorOnPrimary">#FFFFFF</item>
         <item name="appColorOnSurface">#212121</item>
@@ -21,13 +50,10 @@
         <item name="appColorSurface">#E4E0EA</item>
         <item name="appColorDuplicateTagBg">#D6D2DE</item>
         <item name="appColorDuplicateTagText">#4A4550</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
-        <item name="android:windowBackground">#ECE9F0</item>
+        <item name="appColorBackground">#ECE9F0</item>
     </style>
 
-    <style name="Theme.Library.LightOcean" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.Library.LightOcean" parent="Base.Library.Light">
         <item name="appColorPrimary">#0288D1</item>
         <item name="appColorOnPrimary">#FFFFFF</item>
         <item name="appColorOnSurface">#1A2B33</item>
@@ -35,13 +61,10 @@
         <item name="appColorSurface">#DCEAF2</item>
         <item name="appColorDuplicateTagBg">#CBE0EC</item>
         <item name="appColorDuplicateTagText">#2E4A57</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
-        <item name="android:windowBackground">#E8F1F6</item>
+        <item name="appColorBackground">#E8F1F6</item>
     </style>
 
-    <style name="Theme.Library.LightForest" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.Library.LightForest" parent="Base.Library.Light">
         <item name="appColorPrimary">#388E3C</item>
         <item name="appColorOnPrimary">#FFFFFF</item>
         <item name="appColorOnSurface">#1B2A1D</item>
@@ -49,13 +72,10 @@
         <item name="appColorSurface">#DCEBDD</item>
         <item name="appColorDuplicateTagBg">#CCE1CD</item>
         <item name="appColorDuplicateTagText">#2C452E</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
-        <item name="android:windowBackground">#E9F3EA</item>
+        <item name="appColorBackground">#E9F3EA</item>
     </style>
 
-    <style name="Theme.Library.LightSunset" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.Library.LightSunset" parent="Base.Library.Light">
         <item name="appColorPrimary">#F57C00</item>
         <item name="appColorOnPrimary">#FFFFFF</item>
         <item name="appColorOnSurface">#2E1F0F</item>
@@ -63,13 +83,10 @@
         <item name="appColorSurface">#F5E1CC</item>
         <item name="appColorDuplicateTagBg">#EDD3B4</item>
         <item name="appColorDuplicateTagText">#4A3520</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
-        <item name="android:windowBackground">#FBEFE3</item>
+        <item name="appColorBackground">#FBEFE3</item>
     </style>
 
-    <style name="Theme.Library.TrueDark" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.Library.TrueDark" parent="Base.Library.Dark">
         <item name="appColorPrimary">#00E5FF</item>
         <item name="appColorOnPrimary">#000000</item>
         <item name="appColorOnSurface">#E0E0E0</item>
@@ -77,13 +94,10 @@
         <item name="appColorSurface">#1A1A1A</item>
         <item name="appColorDuplicateTagBg">#333333</item>
         <item name="appColorDuplicateTagText">#CCCCCC</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
-        <item name="android:windowBackground">#0D0D0D</item>
+        <item name="appColorBackground">#0D0D0D</item>
     </style>
 
-    <style name="Theme.Library.Ocean" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.Library.Ocean" parent="Base.Library.Dark">
         <item name="appColorPrimary">#4FC3F7</item>
         <item name="appColorOnPrimary">#000000</item>
         <item name="appColorOnSurface">#E8F4FA</item>
@@ -91,13 +105,10 @@
         <item name="appColorSurface">#16232E</item>
         <item name="appColorDuplicateTagBg">#2C3E50</item>
         <item name="appColorDuplicateTagText">#D0E6F5</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
-        <item name="android:windowBackground">#0F1A22</item>
+        <item name="appColorBackground">#0F1A22</item>
     </style>
 
-    <style name="Theme.Library.Forest" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.Library.Forest" parent="Base.Library.Dark">
         <item name="appColorPrimary">#81C784</item>
         <item name="appColorOnPrimary">#000000</item>
         <item name="appColorOnSurface">#E4F0E5</item>
@@ -105,13 +116,10 @@
         <item name="appColorSurface">#1B2A1E</item>
         <item name="appColorDuplicateTagBg">#2E402F</item>
         <item name="appColorDuplicateTagText">#D4E8D5</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
-        <item name="android:windowBackground">#132016</item>
+        <item name="appColorBackground">#132016</item>
     </style>
 
-    <style name="Theme.Library.Sunset" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.Library.Sunset" parent="Base.Library.Dark">
         <item name="appColorPrimary">#FFB74D</item>
         <item name="appColorOnPrimary">#000000</item>
         <item name="appColorOnSurface">#F5E9DD</item>
@@ -119,13 +127,10 @@
         <item name="appColorSurface">#2E1F14</item>
         <item name="appColorDuplicateTagBg">#47311F</item>
         <item name="appColorDuplicateTagText">#F0D9BF</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
-        <item name="android:windowBackground">#221812</item>
+        <item name="appColorBackground">#221812</item>
     </style>
 
-    <style name="Theme.Library.Monochrome" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.Library.Monochrome" parent="Base.Library.Dark">
         <item name="appColorPrimary">#B0B0B0</item>
         <item name="appColorOnPrimary">#000000</item>
         <item name="appColorOnSurface">#E0E0E0</item>
@@ -133,10 +138,7 @@
         <item name="appColorSurface">#2A2A2A</item>
         <item name="appColorDuplicateTagBg">#3D3D3D</item>
         <item name="appColorDuplicateTagText">#CCCCCC</item>
-        <item name="colorPrimary">?attr/appColorPrimary</item>
-        <item name="colorAccent">?attr/appColorPrimary</item>
-        <item name="android:statusBarColor">?attr/appColorPrimary</item>
-        <item name="android:windowBackground">#1C1C1C</item>
+        <item name="appColorBackground">#1C1C1C</item>
     </style>
 
     <style name="AppDialogTheme" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">

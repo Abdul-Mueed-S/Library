@@ -22,9 +22,9 @@ import kotlinx.coroutines.withContext
 object BookDialogHelper {
 
     private const val NEW_CATEGORY_OPTION = "+ New Category"
+    private const val NEW_SERIES_OPTION = "+ New Series"
     private const val UNTITLED_TITLE = "Untitled"
 
-    // Auto-saved drafts run on their own scope so they survive the activity being torn down.
     private val draftScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private data class FormValues(
@@ -34,9 +34,8 @@ object BookDialogHelper {
         val year: String?,
         val isbn: String?,
         val copies: Int,
-        val seriesName: String?,
+        val seriesId: Int?,
         val seriesNumber: Int?,
-        val seriesTotal: Int?,
         val categoryId: Int?
     )
 
@@ -46,6 +45,7 @@ object BookDialogHelper {
         scope: CoroutineScope,
         existingBook: Book?,
         defaultCategoryId: Int?,
+        defaultSeriesId: Int? = null,
         onResult: (primaryMessage: String, secondaryMessage: String?) -> Unit
     ) {
         val dialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_add_book, null)
@@ -55,10 +55,9 @@ object BookDialogHelper {
         val yearInput = dialogView.findViewById<EditText>(R.id.yearInput)
         val isbnInput = dialogView.findViewById<EditText>(R.id.isbnInput)
         val copiesInput = dialogView.findViewById<EditText>(R.id.copiesInput)
-        val seriesNameInput = dialogView.findViewById<EditText>(R.id.seriesNameInput)
         val seriesNumberInput = dialogView.findViewById<EditText>(R.id.seriesNumberInput)
-        val seriesTotalInput = dialogView.findViewById<EditText>(R.id.seriesTotalInput)
         val categorySpinner = dialogView.findViewById<Spinner>(R.id.categorySpinner)
+        val seriesSpinner = dialogView.findViewById<Spinner>(R.id.seriesSpinner)
 
         copiesInput.setText("1")
         if (existingBook != null) {
@@ -68,9 +67,7 @@ object BookDialogHelper {
             yearInput.setText(existingBook.year ?: "")
             isbnInput.setText(existingBook.isbn ?: "")
             copiesInput.setText(existingBook.copies.toString())
-            seriesNameInput.setText(existingBook.seriesName ?: "")
             seriesNumberInput.setText(existingBook.seriesNumber?.toString() ?: "")
-            seriesTotalInput.setText(existingBook.seriesTotal?.toString() ?: "")
         }
 
         isbnInput.addTextChangedListener(object : TextWatcher {
@@ -89,6 +86,7 @@ object BookDialogHelper {
             override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
         })
 
+        // ---------- Category dropdown ----------
         var categories = listOf<Category>()
         var selectedCategoryId: Int? = defaultCategoryId
         var selectedCategoryName: String? = null
@@ -154,6 +152,55 @@ object BookDialogHelper {
             }
         }
 
+        // ---------- Series dropdown (same behaviour as Category) ----------
+        var seriesList = listOf<Series>()
+        var selectedSeriesId: Int? = existingBook?.seriesId ?: defaultSeriesId
+
+        fun refreshSeriesSpinner(selectId: Int?) {
+            scope.launch {
+                seriesList = db.seriesDao().getAllSeries()
+                val names = mutableListOf("None")
+                names.addAll(seriesList.map { it.name })
+                names.add(NEW_SERIES_OPTION)
+                seriesSpinner.adapter = ArrayAdapter(activity, android.R.layout.simple_spinner_dropdown_item, names)
+                val index = when {
+                    selectId == null -> 0
+                    else -> seriesList.indexOfFirst { it.id == selectId }.let { if (it == -1) 0 else it + 1 }
+                }
+                seriesSpinner.setSelection(index)
+            }
+        }
+        refreshSeriesSpinner(selectedSeriesId)
+
+        seriesSpinner.post {
+            seriesSpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(p: android.widget.AdapterView<*>?, v: android.view.View?, pos: Int, id: Long) {
+                    val selectedName = seriesSpinner.selectedItem as? String ?: return
+                    when (selectedName) {
+                        NEW_SERIES_OPTION -> SeriesDialogs.showEditor(
+                            activity, null,
+                            onCancel = { refreshSeriesSpinner(selectedSeriesId) }
+                        ) { name, total ->
+                            scope.launch {
+                                val existing = db.seriesDao().findByName(name)
+                                if (existing != null) {
+                                    selectedSeriesId = existing.id
+                                    refreshSeriesSpinner(existing.id)
+                                } else {
+                                    val newId = db.seriesDao().insertSeries(Series(name = name, totalVolumes = total)).toInt()
+                                    selectedSeriesId = newId
+                                    refreshSeriesSpinner(newId)
+                                }
+                            }
+                        }
+                        "None" -> selectedSeriesId = null
+                        else -> selectedSeriesId = seriesList.find { it.name == selectedName }?.id
+                    }
+                }
+                override fun onNothingSelected(p: android.widget.AdapterView<*>?) {}
+            }
+        }
+
         // ---------- Draft / auto-save state ----------
         var explicitlySaved = false
         var discarded = false
@@ -167,13 +214,11 @@ object BookDialogHelper {
             year = Utils.clean(yearInput.text.toString()).ifEmpty { null },
             isbn = Utils.clean(isbnInput.text.toString()).ifEmpty { null },
             copies = copiesInput.text.toString().trim().toIntOrNull()?.coerceIn(1, 9999) ?: 1,
-            seriesName = Utils.toTitleCase(seriesNameInput.text.toString()).ifEmpty { null },
+            seriesId = selectedSeriesId,
             seriesNumber = seriesNumberInput.text.toString().trim().toIntOrNull()?.takeIf { it > 0 },
-            seriesTotal = seriesTotalInput.text.toString().trim().toIntOrNull()?.takeIf { it > 0 },
             categoryId = selectedCategoryId
         )
 
-        // Copies the form onto the base row, so lending, favourite and other untouched fields survive an edit.
         fun compose(base: Book?, form: FormValues, title: String, isDraft: Boolean, flagged: Boolean): Book =
             (base ?: Book(title = title)).copy(
                 id = base?.id ?: 0,
@@ -184,21 +229,19 @@ object BookDialogHelper {
                 isbn = form.isbn,
                 categoryId = form.categoryId,
                 copies = form.copies,
-                seriesName = form.seriesName,
+                seriesId = form.seriesId,
                 seriesNumber = form.seriesNumber,
-                seriesTotal = form.seriesTotal,
                 flaggedDuplicate = flagged,
                 isDraft = isDraft
             )
 
         fun autoSaveDraft() {
             if (explicitlySaved || discarded) return
-            // Never silently modify a published book — only new entries and existing drafts.
             if (existingBook != null && !existingBook.isDraft) return
 
             val form = readForm()
             val hasContent = form.title.isNotEmpty() || form.author != null || form.edition != null ||
-                    form.year != null || form.isbn != null || form.seriesName != null
+                    form.year != null || form.isbn != null
             if (!hasContent) return
 
             draftScope.launch {
@@ -213,8 +256,8 @@ object BookDialogHelper {
                             baseline.title == title && baseline.author == form.author &&
                             baseline.edition == form.edition && baseline.year == form.year &&
                             baseline.isbn == form.isbn && baseline.categoryId == form.categoryId &&
-                            baseline.copies == form.copies && baseline.seriesName == form.seriesName &&
-                            baseline.seriesNumber == form.seriesNumber && baseline.seriesTotal == form.seriesTotal
+                            baseline.copies == form.copies && baseline.seriesId == form.seriesId &&
+                            baseline.seriesNumber == form.seriesNumber
                     if (unchanged) return@withLock
 
                     val rowId = baseline?.id ?: 0
