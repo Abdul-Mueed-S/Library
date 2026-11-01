@@ -12,8 +12,8 @@ android {
         applicationId = "com.evu.library"
         minSdk = 26
         targetSdk = 34
-        versionCode = 46
-        versionName = "6.26.11"
+        versionCode = 47
+        versionName = "7.2.18"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
